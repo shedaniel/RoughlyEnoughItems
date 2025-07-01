@@ -43,7 +43,7 @@ public class FavoritesPanelEmptyRow extends FavoritesPanelRow {
     }
     
     @Override
-    public void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta, float alpha) {
     }
     
     @Override

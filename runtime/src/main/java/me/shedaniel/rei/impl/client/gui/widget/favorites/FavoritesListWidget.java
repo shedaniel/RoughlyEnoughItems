@@ -55,7 +55,8 @@ import me.shedaniel.rei.impl.client.gui.widget.favorites.history.DisplayHistoryM
 import me.shedaniel.rei.impl.client.gui.widget.favorites.history.DisplayHistoryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.listeners.FavoritesRegionListener;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.listeners.FavoritesSystemRegionListener;
-import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.FavoritesPanel;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.CalculatorPanel;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.FavoritesAddPanel;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.FavoritesTogglePanelButton;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.trash.TrashWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.EntryStacksRegionWidget;
@@ -64,7 +65,6 @@ import me.shedaniel.rei.impl.client.gui.widget.region.RegionDraggableStack;
 import me.shedaniel.rei.impl.common.util.RectangleUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.ApiStatus;
@@ -85,20 +85,13 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
     private EntryStacksRegionWidget<FavoriteEntry> region = new EntryStacksRegionWidget<>(new FavoritesRegionListener(this));
     private List<FavoriteEntry> lastSystemEntries = new ArrayList<>();
     
-    public final FavoritesPanel favoritePanel = new FavoritesPanel(this);
+    public final FavoritesAddPanel favoritePanel = new FavoritesAddPanel(this);
+    public final CalculatorPanel calculatorPanel = new CalculatorPanel(this);
     public final TrashWidget trash = new TrashWidget(this);
     public final DisplayHistoryWidget displayHistory = new DisplayHistoryWidget(this);
-    public final FavoritesTogglePanelButton togglePanelButton = new FavoritesTogglePanelButton(this, 0, Component.translatable("text.rei.add_favorite_widget"),
-            favoritePanel.expendState, () -> {
-        favoritePanel.expendState.setTo(!favoritePanel.expendState.target(), ConfigObject.getInstance().isReducedMotion() ? 0 : 1500);
-        favoritePanel.resetRows();
-    });
-    public final FavoritesTogglePanelButton calculatorPanelButton = new FavoritesTogglePanelButton(this, 1, Component.translatable("text.rei.calculator_widget"),
-            favoritePanel.expendState, () -> {
-        favoritePanel.expendState.setTo(!favoritePanel.expendState.target(), ConfigObject.getInstance().isReducedMotion() ? 0 : 1500);
-        favoritePanel.resetRows();
-    });
-    private final List<Widget> children = ImmutableList.of(favoritePanel, togglePanelButton, calculatorPanelButton, systemRegion, region);
+    public final FavoritesTogglePanelButton togglePanelButton = new FavoritesTogglePanelButton.ToggleAdd(this);
+    public final FavoritesTogglePanelButton calculatorPanelButton = new FavoritesTogglePanelButton.ToggleCalculator(this);
+    private final List<Widget> children = ImmutableList.of(favoritePanel, calculatorPanel, togglePanelButton, calculatorPanelButton, systemRegion, region);
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
@@ -213,12 +206,12 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
         
         displayHistory.render(graphics, mouseX, mouseY, delta);
         
-        if (favoritePanel.getBounds().height > 20) {
-            // Opened favorites panel
-            region.getBounds().setBounds(this.favoritesBounds.x, this.favoritesBounds.y + topOffsetHeight, this.favoritesBounds.width, this.favoritesBounds.height - topOffsetHeight - (this.favoritesBounds.getMaxY() - this.favoritePanel.getBounds().y) - 4 - (Math.round(trashHeight) <= 0 ? 0 : trashHeight));
-        } else {
-            region.getBounds().setBounds(this.favoritesBounds.x, this.favoritesBounds.y + topOffsetHeight, this.favoritesBounds.width, this.favoritesBounds.height - topOffsetHeight - (Math.round(trashHeight) <= 0 ? 0 : trashHeight + 24));
-        }
+        int removeExtraHeight = 0;
+        
+        if (favoritePanel.getBounds().height > 20) removeExtraHeight += this.favoritesBounds.getMaxY() - this.favoritePanel.getBounds().y + 4;
+        if (calculatorPanel.getBounds().height > 20) removeExtraHeight += this.favoritesBounds.getMaxY() - this.calculatorPanel.getBounds().y + 4;
+        
+        region.getBounds().setBounds(this.favoritesBounds.x, this.favoritesBounds.y + topOffsetHeight, this.favoritesBounds.width, this.favoritesBounds.height - topOffsetHeight - removeExtraHeight - (Math.round(trashHeight) <= 0 ? 0 : trashHeight));
         
         systemRegion.render(graphics, mouseX, mouseY, delta);
         region.render(graphics, mouseX, mouseY, delta);
@@ -269,6 +262,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
     
     private void renderAddFavorite(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.favoritePanel.render(graphics, mouseX, mouseY, delta);
+        this.calculatorPanel.render(graphics, mouseX, mouseY, delta);
         this.togglePanelButton.render(graphics, mouseX, mouseY, delta);
         this.calculatorPanelButton.render(graphics, mouseX, mouseY, delta);
     }
@@ -321,6 +315,17 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
                     return true;
         }
         if (displayHistory.mouseReleased(mouseX, mouseY, button))
+            return true;
+        return false;
+    }
+    
+    @Override
+    public boolean charTyped(char character, int modifiers) {
+        if (containsMouse(mouse()))
+            for (Widget widget : children())
+                if (widget.charTyped(character, modifiers))
+                    return true;
+        if (displayHistory.charTyped(character, modifiers))
             return true;
         return false;
     }

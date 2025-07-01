@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.panel.rows;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingPoint;
@@ -38,7 +37,7 @@ import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
-import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.FavoritesPanel;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.FavoritesAddPanel;
 import me.shedaniel.rei.impl.client.gui.widget.region.EntryStacksRegionWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionDraggableStack;
@@ -54,15 +53,14 @@ import java.util.function.Predicate;
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.notSteppingOnExclusionZones;
 
-@SuppressWarnings("UnstableApiUsage")
 public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
-    private final FavoritesPanel panel;
+    private final FavoritesAddPanel panel;
     private final List<FavoriteEntry> entries;
     private final List<SectionFavoriteWidget> widgets;
     private int blockedCount;
     private int lastY;
     
-    public FavoritesPanelEntriesRow(FavoritesPanel panel, List<FavoriteEntry> entries) {
+    public FavoritesPanelEntriesRow(FavoritesAddPanel panel, List<FavoriteEntry> entries) {
         this.panel = panel;
         this.entries = entries;
         int entrySize = entrySize();
@@ -83,7 +81,7 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
     }
     
     @Override
-    public void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta, float alpha) {
         this.lastY = y;
         int entrySize = entrySize();
         boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();

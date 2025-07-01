@@ -428,7 +428,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
                 if (REIRuntimeImpl.getSearchField().keyReleased(keyCode, scanCode, modifiers))
                     return true;
                 for (GuiEventListener listener : widgets)
-                    if (listener != REIRuntimeImpl.getSearchField() && listener == getFocused() && listener.keyPressed(keyCode, scanCode, modifiers))
+                    if (listener != REIRuntimeImpl.getSearchField() && listener == getFocused() && listener.keyReleased(keyCode, scanCode, modifiers))
                         return true;
             }
         }

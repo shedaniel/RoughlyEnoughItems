@@ -34,17 +34,22 @@ import java.util.function.Consumer;
 @ApiStatus.Internal
 public class OverlaySearchFieldSyntaxHighlighter implements Consumer<String> {
     public byte[] highlighted;
+    private boolean autoPrefixEquals = false;
     
     public OverlaySearchFieldSyntaxHighlighter(String text) {
         this.accept(text);
+    }
+    
+    public void setAutoPrefixEquals(boolean autoPrefixEquals) {
+        this.autoPrefixEquals = autoPrefixEquals;
     }
     
     @Override
     public void accept(String text) {
         this.highlighted = new byte[text.length()];
         
-        if (!text.isEmpty() && text.charAt(0) == '=') {
-            highlighted[0] = -1;
+        if (!text.isEmpty() && (text.charAt(0) == '=' || this.autoPrefixEquals)) {
+            if (!this.autoPrefixEquals) highlighted[0] = -1;
             boolean hasError = false;
             
             for (int i = 1; i < text.length(); i++) {
@@ -59,7 +64,7 @@ public class OverlaySearchFieldSyntaxHighlighter implements Consumer<String> {
                 }
             }
             
-            if (!hasError && !TextCalculator.isValid(text)) {
+            if (!hasError && !TextCalculator.isValid(this.autoPrefixEquals ? '=' + text : text)) {
                 for (int i = 0; i < text.length(); i++) {
                     highlighted[i] = -128;
                 }

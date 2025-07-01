@@ -59,12 +59,14 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.OptionalDouble;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 @ApiStatus.Internal
 public class OverlaySearchField extends TextFieldWidget implements TextFieldWidget.TextFormatter {
@@ -75,7 +77,9 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     private static final Style ERROR_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xff5555));
     private boolean previouslyClicking = false;
     private final OverlaySearchFieldSyntaxHighlighter highlighter = new OverlaySearchFieldSyntaxHighlighter(getText());
-    private final CalculatorDisplay calculator = new CalculatorDisplay(this);
+    @Nullable
+    private final CalculatorDisplay calculator;
+    private Component suggestion = Component.translatable("text.rei.search.field.suggestion");
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
     public boolean isMain = true;
@@ -84,10 +88,27 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     private final NumberAnimator<Double> progress = ValueAnimator.ofDouble();
     
     public OverlaySearchField(int x, int y, int width, int height) {
+        this(x, y, width, height, CalculatorDisplay::new);
+    }
+    
+    public OverlaySearchField(int x, int y, int width, int height, @Nullable Function<OverlaySearchField, CalculatorDisplay> calculator) {
         super(x, y, width, height);
+        this.calculator = calculator == null ? null : calculator.apply(this);
         setMaxLength(10000);
         setFormatter(this);
-        super.setResponder(highlighter.andThen(calculator));
+        if (this.calculator != null) {
+            super.setResponder(highlighter.andThen(this.calculator));
+        } else {
+            super.setResponder(highlighter);
+        }
+    }
+    
+    public void setAutoPrefixEquals(boolean autoPrefixEquals) {
+        this.highlighter.setAutoPrefixEquals(autoPrefixEquals);
+    }
+    
+    public void setSuggestion(Component suggestion) {
+        this.suggestion = suggestion;
     }
     
     @Override
@@ -126,7 +147,11 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public void setResponder(Consumer<String> responder) {
-        super.setResponder(highlighter.andThen(calculator).andThen(responder));
+        if (this.calculator != null) {
+            super.setResponder(highlighter.andThen(this.calculator).andThen(responder));
+        } else {
+            super.setResponder(highlighter.andThen(responder));
+        }
     }
     
     @Override
@@ -357,7 +382,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public int getWidth() {
-        if (this.calculator.width() > 0) {
+        if (this.calculator != null && this.calculator.width() > 0) {
             return super.getWidth() - this.calculator.width() - 2;
         }
         
@@ -366,8 +391,11 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        setSuggestion(!isFocused() && getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
+        setSuggestion(!isFocused() && getText().isEmpty() ? this.suggestion.getString() : null);
         super.render(graphics, mouseX, mouseY, delta);
-        this.calculator.render(graphics, mouseX, mouseY, delta);
+        
+        if (this.calculator != null) {
+            this.calculator.render(graphics, mouseX, mouseY, delta);
+        }
     }
 }

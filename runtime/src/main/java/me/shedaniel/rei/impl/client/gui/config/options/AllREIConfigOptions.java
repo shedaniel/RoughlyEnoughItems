@@ -222,6 +222,8 @@ public interface AllREIConfigOptions {
             .enabledDisabled();
     CompositeOption<FavoriteAddWidgetMode> NEW_FAVORITES_BUTTON_VISIBILITY = make("favorites.new_favorites_button_visibility", i -> i.advanced.layout.favoriteAddWidgetMode, (i, v) -> i.advanced.layout.favoriteAddWidgetMode = v)
             .enumOptions();
+    CompositeOption<Boolean> CALCULATOR_MODE = make("favorites.calculator_mode", i -> i.advanced.layout.calculatorPanel, (i, v) -> i.advanced.layout.calculatorPanel = v)
+            .enabledDisabled();
     CompositeOption<String> GAME_MODE_COMMAND = make("favorites.game_mode_command", i -> i.advanced.commands.gamemodeCommand, (i, v) -> i.advanced.commands.gamemodeCommand = v)
             .string();
     CompositeOption<String> TIME_COMMAND = make("favorites.time_command", i -> i.advanced.commands.timeCommand, (i, v) -> i.advanced.commands.timeCommand = v)

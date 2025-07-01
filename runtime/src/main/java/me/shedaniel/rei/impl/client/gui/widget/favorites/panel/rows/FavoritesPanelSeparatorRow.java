@@ -37,8 +37,8 @@ public class FavoritesPanelSeparatorRow extends FavoritesPanelRow {
     }
     
     @Override
-    public void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
-        graphics.fillGradient(x, y + 2, x + rowWidth, y + 3, -571806998, -571806998);
+    public void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta, float alpha) {
+        graphics.fillGradient(x, y + 2, x + rowWidth, y + 3, 0xEAEAEA | (Math.round(0xDD * alpha) << 24), 0xEAEAEA | (Math.round(0xDD * alpha) << 24));
     }
     
     @Override

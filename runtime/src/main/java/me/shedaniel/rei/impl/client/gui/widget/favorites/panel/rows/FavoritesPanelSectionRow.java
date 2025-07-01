@@ -48,11 +48,13 @@ public class FavoritesPanelSectionRow extends FavoritesPanelRow {
     }
     
     @Override
-    public void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta, float alpha) {
         if (innerBounds.contains(mouseX, mouseY) && mouseX >= x && mouseY >= y && mouseX <= x + rowWidth && mouseY <= y + rowHeight) {
             Tooltip.create(sectionText).queue();
         }
-        graphics.drawString(Minecraft.getInstance().font, styledText, x, y + 1, 0xFFFFFFFF, false);
+        if (alpha > 0.1) {
+            graphics.drawString(Minecraft.getInstance().font, styledText, x, y + 1, 0xFFFFFF | (Math.round(0xFF * alpha) << 24), false);
+        }
     }
     
     @Override

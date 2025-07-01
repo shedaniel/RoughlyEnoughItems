@@ -27,11 +27,11 @@ import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.config.FavoriteAddWidgetMode;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -51,8 +51,9 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.bounds.setBounds(updateArea(parent.favoritesBounds));
-        boolean hovered = containsMouse(mouseX, mouseY);
-        switch (ConfigObject.getInstance().getFavoriteAddWidgetMode()) {
+        boolean hovered = containsMouse(mouseX, mouseY) & isVisible();
+        if (isOtherActive()) this.alpha.setTo(0, ConfigObject.getInstance().isReducedMotion() ? 0 : 750);
+        else switch (getFavoriteAddWidgetMode()) {
             case ALWAYS_INVISIBLE:
                 this.alpha.setAs(0);
                 break;
@@ -60,7 +61,7 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
                 this.alpha.setTo(hovered ? 1f : isAvailable(mouseX, mouseY) ? 0.5f : 0f, ConfigObject.getInstance().isReducedMotion() ? 0 : 260);
                 break;
             case ALWAYS_VISIBLE:
-                this.alpha.setAs(hovered ? 1f : 0.5f);
+                this.alpha.setTo(hovered ? 1f : 0.5f, ConfigObject.getInstance().isReducedMotion() ? 0 : 750);
                 break;
         }
         this.alpha.update(delta);
@@ -73,6 +74,10 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
             queueTooltip();
         }
     }
+    
+    protected abstract boolean isOtherActive();
+    
+    protected abstract FavoriteAddWidgetMode getFavoriteAddWidgetMode();
     
     protected abstract boolean isAvailable(int mouseX, int mouseY);
     

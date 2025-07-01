@@ -23,105 +23,39 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.panel;
 
-import me.shedaniel.clothconfig2.ClothConfigInitializer;
-import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.clothconfig2.api.animator.ProgressValueAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
-import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
-import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
-import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
-import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
-import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.rows.*;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.Mth;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class FavoritesPanel extends WidgetWithBounds {
-    private final FavoritesListWidget parent;
+public abstract class FavoritesPanel extends WidgetWithBounds {
     public final ProgressValueAnimator<Boolean> expendState = ValueAnimator.ofBoolean(0.1, false);
-    private final Rectangle bounds = new Rectangle();
-    private final Rectangle innerBounds = new Rectangle();
-    private final LazyResettable<List<FavoritesPanelRow>> rows = new LazyResettable<>(() -> {
-        List<FavoritesPanelRow> rows = new ArrayList<>();
-        for (FavoriteEntryType.Section section : FavoriteEntryType.registry().sections()) {
-            rows.add(new FavoritesPanelSectionRow(section.getText(), section.getText().copy().withStyle(style -> style.withUnderlined(true))));
-            rows.add(new FavoritesPanelEntriesRow(this, CollectionUtils.map(section.getEntries(), FavoriteEntry::copy)));
-            rows.add(new FavoritesPanelSeparatorRow());
-        }
-        if (!rows.isEmpty()) rows.remove(rows.size() - 1);
-        rows.add(new FavoritesPanelEmptyRow(4));
-        return rows;
-    });
-    private final ScrollingContainer scroller = new ScrollingContainer() {
-        @Override
-        public Rectangle getBounds() {
-            return innerBounds;
-        }
-        
-        @Override
-        public int getMaxScrollHeight() {
-            return Math.max(1, rows.get().stream().mapToInt(FavoritesPanelRow::getRowHeight).sum());
-        }
-    };
+    protected final FavoritesListWidget parent;
+    protected final Rectangle bounds = new Rectangle();
+    protected final Rectangle innerBounds = new Rectangle();
     
     public FavoritesPanel(FavoritesListWidget parent) {
         this.parent = parent;
     }
     
-    public void resetRows() {
-        this.rows.reset();
-    }
-    
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.bounds.setBounds(updatePanelArea(parent.favoritesBounds));
-        this.innerBounds.setBounds(bounds.x + 4, bounds.y + 4, bounds.width - 8, bounds.height - 20);
         this.expendState.update(delta);
-        int buttonColor = 0xFFFFFF | (Math.round(0x34 * Math.min((float) expendState.progress() * 2, 1)) << 24);
-        graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), buttonColor, buttonColor);
-        scroller.updatePosition(delta);
-        
-        if (expendState.value()) {
-            graphics.enableScissor(innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY());
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, -scroller.scrollAmount(), 0);
-            int y = innerBounds.y;
-            for (FavoritesPanelRow row : rows.get()) {
-                row.render(graphics, innerBounds, innerBounds.x, y, innerBounds.width, row.getRowHeight(), mouseX, mouseY + scroller.scrollAmountInt(), delta);
-                y += row.getRowHeight();
-            }
-            graphics.pose().popPose();
-            graphics.disableScissor();
-        }
     }
     
     private Rectangle updatePanelArea(Rectangle fullArea) {
-        int currentWidth = 16 + Math.round(Math.min((float) expendState.progress(), 1) * (fullArea.getWidth() - 16 - 8));
-        int currentHeight = 16 + Math.round((float) expendState.progress() * (fullArea.getHeight() * 0.4f - 16 - 8 + 4));
-        return new Rectangle(fullArea.x + 4, fullArea.getMaxY() - currentHeight - 4, currentWidth, currentHeight);
-    }
-    
-    @Override
-    public boolean mouseScrolled(double d, double e, double amountX, double amountY) {
-        if (innerBounds.contains(d, e) && amountY != 0) {
-            scroller.offset(ClothConfigInitializer.getScrollStep() * -amountY, true);
-            return true;
-        }
-        return super.mouseScrolled(d, e, amountX, amountY);
-    }
-    
-    @Override
-    public List<? extends GuiEventListener> children() {
-        return rows.get();
+        float progress = (float) this.expendState.progress();
+        Rectangle buttonArea = getButtonArea();
+        Rectangle targetArea = getTargetArea(fullArea);
+        int x1 = Mth.lerpInt(progress, buttonArea.x, targetArea.x);
+        int y1 = Mth.lerpInt(progress, buttonArea.y, targetArea.y);
+        int x2 = Mth.lerpInt(progress, buttonArea.getMaxX(), targetArea.getMaxX());
+        int y2 = Mth.lerpInt(progress, buttonArea.getMaxY(), targetArea.getMaxY());
+        return new Rectangle(x1, y1, x2 - x1, y2 - y1);
     }
     
     @Override
@@ -137,41 +71,7 @@ public class FavoritesPanel extends WidgetWithBounds {
         return innerBounds;
     }
     
-    public double getScrolledAmount() {
-        return scroller.scrollAmount();
-    }
+    protected abstract Rectangle getButtonArea();
     
-    public int getScrolledAmountInt() {
-        return scroller.scrollAmountInt();
-    }
-    
-    @Nullable
-    public DraggableComponent<?> getHoveredStack(double mouseX, double mouseY) {
-        for (FavoritesPanelRow row : rows.get()) {
-            if (row instanceof FavoritesPanelEntriesRow entriesRow) {
-                DraggableComponent<?> hoveredStack = entriesRow.getHoveredStack(mouseX, mouseY);
-                
-                if (hoveredStack != null) {
-                    return hoveredStack;
-                }
-            }
-        }
-        
-        return null;
-    }
-    
-    @Nullable
-    public EntryStack<?> getFocusedStack(Point mouse) {
-        for (FavoritesPanelRow row : rows.get()) {
-            if (row instanceof FavoritesPanelEntriesRow entriesRow) {
-                EntryStack<?> focusedStack = entriesRow.getFocusedStack(mouse);
-                
-                if (focusedStack != null) {
-                    return focusedStack;
-                }
-            }
-        }
-        
-        return null;
-    }
+    protected abstract Rectangle getTargetArea(Rectangle fullArea);
 }

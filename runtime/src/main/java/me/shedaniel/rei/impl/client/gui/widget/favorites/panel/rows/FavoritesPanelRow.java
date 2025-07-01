@@ -30,5 +30,5 @@ import net.minecraft.client.gui.GuiGraphics;
 public abstract class FavoritesPanelRow extends AbstractContainerEventHandler {
     public abstract int getRowHeight();
     
-    public abstract void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta);
+    public abstract void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta, float alpha);
 }

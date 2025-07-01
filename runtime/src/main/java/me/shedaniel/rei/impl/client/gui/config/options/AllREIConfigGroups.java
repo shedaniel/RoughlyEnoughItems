@@ -90,7 +90,8 @@ public interface AllREIConfigGroups {
             .add(COLLAPSIBLE_ENTRIES);
     OptionGroup FAVORITES_FAVORITES = make("favorites.favorites")
             .add(FAVORITES_MODE)
-            .add(NEW_FAVORITES_BUTTON_VISIBILITY);
+            .add(NEW_FAVORITES_BUTTON_VISIBILITY)
+            .add(CALCULATOR_MODE);
     OptionGroup FAVORITES_ADVANCED = make("favorites.advanced")
             .add(GAME_MODE_COMMAND)
             .add(TIME_COMMAND)

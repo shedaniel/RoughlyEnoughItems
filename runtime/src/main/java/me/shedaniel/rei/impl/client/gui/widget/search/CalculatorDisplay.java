@@ -33,26 +33,10 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Locale;
 import java.util.function.Consumer;
 
 public class CalculatorDisplay implements Consumer<String> {
-    private static final int MAX_LEN = 7;
-    private static final DecimalFormat DEC;
-    private static final DecimalFormat SCI;
-    static {
-        DecimalFormatSymbols sym = DecimalFormatSymbols.getInstance(Locale.ROOT);
-        DEC = new DecimalFormat("0.##########", sym);
-        DEC.setRoundingMode(RoundingMode.HALF_UP);
-        DEC.setGroupingUsed(false);
-        SCI = new DecimalFormat("0.##########E0", sym);
-        SCI.setRoundingMode(RoundingMode.HALF_UP);
-        SCI.setGroupingUsed(false);
-    }
-    
+    private final CalculatorDisplayUtils utils = new CalculatorDisplayUtils(7);
     private final OverlaySearchField searchField;
     private final NumberAnimator<Integer> width = ValueAnimator.ofDouble().asInt();
     private Component fullText = Component.empty();
@@ -94,8 +78,8 @@ public class CalculatorDisplay implements Consumer<String> {
         
         if (TextCalculator.isValid(text)) {
             double eval = new TextCalculator(text).eval();
-            this.text = Component.literal(fmt(eval)).getVisualOrderText();
-            this.fullText = Component.literal(fmtAccurate(eval));
+            this.text = Component.literal(utils.fmt(eval)).getVisualOrderText();
+            this.fullText = Component.literal(CalculatorDisplayUtils.fmtAccurate(eval));
         }
         
         this.width.setTo(Minecraft.getInstance().font.width(this.text) + 6, ConfigObject.getInstance().isReducedMotion() ? 0 : 400);
@@ -103,113 +87,5 @@ public class CalculatorDisplay implements Consumer<String> {
     
     public int width() {
         return width.value();
-    }
-    
-    public static String fmt(double x) {
-        if (Double.isNaN(x) || Double.isInfinite(x))
-            return String.valueOf(x);
-        
-        boolean neg = x < 0;
-        double a = Math.abs(x);
-        
-        // 1) SMALL <1: decimals to fill WIDTH, else sci
-        if (a > 0 && a < 1) {
-            int used = neg ? 1 : 0;
-            int avail = MAX_LEN - used;       // total chars left
-            // "0" + "."  → 2 chars, rest decimals
-            int dec = avail - 2;
-            if (dec > 0) {
-                double minShow = Math.pow(10, -dec);
-                if (a >= minShow) {
-                    String fmt = "%." + dec + "f";
-                    String s = String.format(Locale.ROOT, fmt, a)
-                            .replaceFirst("0+$", "") // drop trailing zeros
-                            .replaceFirst("\\.$", ""); // drop trailing dot
-                    // if we got something like ".123", prepend "0"
-                    if (s.startsWith(".")) s = "0" + s;
-                    return neg ? "-" + s : s;
-                }
-            }
-            // too small → scientific
-            return sciFmt(a, neg);
-        }
-        
-        // 2) exact under threshold
-        double thresh = neg ? 1_000_000 : 10_000_000;
-        if (a < thresh) {
-            String small = (a == Math.rint(a))
-                    ? String.valueOf((long) a)
-                    : String.format(Locale.ROOT, "%.2f", a)
-                    .replaceFirst("\\.?0+$", "");
-            if (small.length() + (neg ? 1 : 0) <= MAX_LEN)
-                return neg ? "-" + small : small;
-        }
-        
-        // 3) suffix m/b/t
-        char suf;
-        double v;
-        if (a >= 1e12 && a < 1e15) {
-            suf = 't';
-            v = a / 1e12;
-        } else if (a >= 1e9) {
-            suf = 'b';
-            v = a / 1e9;
-        } else if (a >= 1e6) {
-            suf = 'm';
-            v = a / 1e6;
-        } else {
-            // small ≥1 but <1e6 (or neg ≥1e6)
-            return sciFmt(a, neg);
-        }
-        {
-            int used = (neg ? 1 : 0) + 1;      // sign + suffix
-            int avail = MAX_LEN - used;
-            String intP = String.valueOf((long) v);
-            int ip = intP.length();
-            int dec = Math.max(0, avail - ip - 1); // -1 for dot
-            for (; dec >= 0; dec--) {
-                String fmt = dec > 0 ? "%." + dec + "f" : "%.0f";
-                String man = String.format(Locale.ROOT, fmt, v);
-                if (man.length() <= avail)
-                    return (neg ? "-" : "") + man + suf;
-            }
-        }
-        
-        // 4) fallback sci
-        return sciFmt(a, neg);
-    }
-    
-    private static String sciFmt(double a, boolean neg) {
-        int exp = (int) Math.floor(Math.log10(a));
-        double man = a / Math.pow(10, exp);
-        String expS = String.valueOf(exp);
-        int used = (neg ? 1 : 0) + 1 + expS.length(); // sign + 'e'+exp
-        int avail = MAX_LEN - used;
-        String intP = String.valueOf((long) man);
-        int ip = intP.length();
-        int dec = Math.max(0, avail - ip - 1);
-        for (; dec >= 0; dec--) {
-            String fmt = dec > 0 ? "%." + dec + "f" : "%.0f";
-            String mS = String.format(Locale.ROOT, fmt, man);
-            if (mS.length() <= avail)
-                return (neg ? "-" : "") + mS + "e" + expS;
-        }
-        // worst‐case: truncate integer mantissa
-        String mS = intP;
-        if (mS.length() > avail) mS = mS.substring(0, avail);
-        return (neg ? "-" : "") + mS + "e" + expS;
-    }
-    
-    public static String fmtAccurate(double x) {
-        if (Double.isNaN(x) || Double.isInfinite(x))
-            return String.valueOf(x);
-        
-        double a = Math.abs(x);
-        if (a != 0 && (a < 1e-30 || a >= 1e30)) {
-            // scientific
-            return SCI.format(x).replace("E", "e");
-        } else {
-            return DEC.format(x);
-        }
     }
 }

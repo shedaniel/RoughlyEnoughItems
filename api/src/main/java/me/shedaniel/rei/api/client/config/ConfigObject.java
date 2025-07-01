@@ -294,6 +294,9 @@ public interface ConfigObject {
     
     FavoriteAddWidgetMode getFavoriteAddWidgetMode();
     
+    @ApiStatus.Experimental
+    boolean isCalculatorPanelEnabled();
+    
     ModifierKeyCode getFavoriteKeyCode();
     
     ModifierKeyCode getRecipeKeybind();

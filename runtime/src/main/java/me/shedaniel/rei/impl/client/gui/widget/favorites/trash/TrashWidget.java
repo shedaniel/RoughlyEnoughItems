@@ -89,10 +89,10 @@ public class TrashWidget extends WidgetWithBounds {
         double trashBoundsHeight = this.height.value();
         if (Math.round(trashBoundsHeight) > 0) {
             Rectangle fullBounds = parent.favoritesBounds;
-            FavoritesPanel favoritePanel = parent.favoritePanel;
+            int favoritePanelHeight = Math.max(parent.favoritePanel.getBounds().height, parent.fullBounds.getMaxY() - parent.calculatorPanel.getBounds().y - 4);
             double heightTarget = Math.min(150D, fullBounds.height * 0.23D);
             this.lastProgress = Math.pow(Mth.clamp(trashBoundsHeight / heightTarget, 0, 1), 7);
-            int y = fullBounds.getMaxY() - 4 - favoritePanel.getBounds().height;
+            int y = fullBounds.getMaxY() - 4 - favoritePanelHeight;
             bounds.setBounds(fullBounds.x + 4, (int) Math.round(y - trashBoundsHeight), fullBounds.width - 8, (int) Math.round(trashBoundsHeight - 4));
             return true;
         } else {

@@ -329,6 +329,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public boolean isCalculatorPanelEnabled() {
+        return advanced.layout.calculatorPanel;
+    }
+    
+    @Override
     public ModifierKeyCode getFavoriteKeyCode() {
         return basics.keyBindings.favoriteKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.favoriteKeybind;
     }
@@ -693,6 +698,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Merges displays with equal contents under 1 display.")
             public boolean mergeDisplayUnderOne = true;
             public FavoriteAddWidgetMode favoriteAddWidgetMode = FavoriteAddWidgetMode.ALWAYS_VISIBLE;
+            public boolean calculatorPanel = true;
         }
         
         public static class Accessibility {
