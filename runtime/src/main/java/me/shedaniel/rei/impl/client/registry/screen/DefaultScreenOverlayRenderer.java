@@ -23,8 +23,6 @@
 
 package me.shedaniel.rei.impl.client.registry.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientGuiEvent;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
@@ -97,20 +95,15 @@ public enum DefaultScreenOverlayRenderer implements OverlayRendererProvider {
                 return;
             rendered[0] = 2;
             resetFocused(screen);
-            graphics.pose().pushMatrix();
-            graphics.pose().translate(-screen.leftPos, -screen.topPos);
-            sink.lateRender(graphics, mouseX, mouseY, delta);
-            graphics.pose().popMatrix();
-            resetFocused(screen);
         };
         this.renderPost = (screen, graphics, mouseX, mouseY, delta) -> {
-            if (shouldReturn(screen) || rendered[0] == 2)
+            if (shouldReturn(screen))
                 return;
-            if (screen instanceof AbstractContainerScreen) {
+            if (screen instanceof AbstractContainerScreen && rendered[0] < 2) {
                 InternalLogger.getInstance().warn("Screen " + screen.getClass().getName() + " did not render background and foreground! This might cause rendering issues!");
             }
             resetFocused(screen);
-            if (rendered[0] == 0 && !(screen instanceof DisplayScreen)) {
+            if (rendered[0] == 0 && !(screen instanceof DisplayScreen) && (!(screen instanceof AbstractContainerScreen) || rendered[0] < 2)) {
                 sink.render(graphics, mouseX, mouseY, delta.getRealtimeDeltaTicks());
             }
             rendered[0] = 1;
