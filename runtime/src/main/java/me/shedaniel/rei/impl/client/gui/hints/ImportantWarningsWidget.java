@@ -129,4 +129,10 @@ public class ImportantWarningsWidget extends WidgetWithBounds {
     public List<? extends GuiEventListener> children() {
         return List.of();
     }
+
+    @Override
+    public boolean containsMouse(double mouseX, double mouseY) {
+        if (!this.visible) return false;
+        return super.containsMouse(mouseX, mouseY);
+    }
 }
