@@ -46,14 +46,12 @@ import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistr
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.joml.Matrix4f;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -183,13 +181,9 @@ public class CollapsibleEntriesScreen extends Screen {
             Component debugText = Component.literal(String.format("%s fps", minecraft.fpsString.split(" ")[0]));
             int stringWidth = font.width(debugText);
             graphics.fillGradient(minecraft.screen.width - stringWidth - 2, 32, minecraft.screen.width, 32 + font.lineHeight + 2, -16777216, -16777216);
-            graphics.pose().pushPose();
-            graphics.drawSpecial(source -> {
-                Matrix4f matrix = graphics.pose().last().pose();
-                font.drawInBatch(debugText.getVisualOrderText(), minecraft.screen.width - stringWidth, 32 + 2, -1, false, matrix, source, Font.DisplayMode.NORMAL, 0, 15728880);
-            });
-            graphics.flush();
-            graphics.pose().popPose();
+            graphics.pose().pushMatrix();
+            graphics.drawString(font, debugText.getVisualOrderText(), minecraft.screen.width - stringWidth, 32 + 2, -1, false);
+            graphics.pose().popMatrix();
         }
     }
     

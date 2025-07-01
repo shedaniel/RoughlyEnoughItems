@@ -163,12 +163,9 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
     
     @Override
     public void render(GuiGraphics graphics, int i, int i1, float v) {
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 800);
         for (Widget widget : widgets) {
             widget.render(graphics, i, i1, v);
         }
-        graphics.pose().popPose();
     }
     
     @Override

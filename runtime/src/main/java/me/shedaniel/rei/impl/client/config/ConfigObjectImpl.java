@@ -109,11 +109,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    public boolean isFavoritesAnimated() {
-        return !basics.reduceMotion;
-    }
-    
-    @Override
     public boolean isReducedMotion() {
         return basics.reduceMotion;
     }
@@ -292,11 +287,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public void setDoDisplayIMEHints(boolean displayIMEHints) {
         advanced.tooltips.displayIMEHints = displayIMEHints;
-    }
-    
-    @Override
-    public boolean doesFastEntryRendering() {
-        return advanced.miscellaneous.newFastEntryRendering;
     }
     
     @Override
@@ -737,7 +727,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares whether arrows in containers should be clickable.")
             public boolean clickableRecipeArrows = true;
             public boolean registerRecipesInAnotherThread = true;
-            public boolean newFastEntryRendering = true;
             public boolean cachingFastEntryRendering = false;
             public boolean cachingDisplayLookup = true;
             public CategorySettings categorySettings = new CategorySettings();

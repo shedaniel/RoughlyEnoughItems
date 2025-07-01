@@ -38,6 +38,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.TriState;
 import org.joml.Matrix3f;
+import org.joml.Matrix3x2fStack;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -70,7 +71,7 @@ public class SpriteRenderer {
         private TextureAtlasSprite sprite;
         private VertexConsumer consumer;
         private MultiBufferSource consumers;
-        private PoseStack matrices;
+        private Matrix3x2fStack matrices;
         private Matrix4f model;
         private Matrix3f normal;
         private RenderType layer;
@@ -87,7 +88,7 @@ public class SpriteRenderer {
         
         public RenderPass setup(VertexConsumer consumer, RenderType type) {
             this.consumer = consumer;
-            this.matrices = new PoseStack();
+            this.matrices = new Matrix3x2fStack();
             this.layer = type;
             
             return this;
@@ -207,7 +208,7 @@ public class SpriteRenderer {
         }
         
         public void next(ResourceLocation texture) {
-            if (this.consumer == null) {
+            /*if (this.consumer == null) {
                 throw new RuntimeException("Invalid VertexConsumer!");
             }
             if (this.matrices == null) {
@@ -229,7 +230,7 @@ public class SpriteRenderer {
             
             TextureManager textureManager = Minecraft.getInstance().getTextureManager();
             AbstractTexture abstractTexture = textureManager.getTexture(texture);
-            abstractTexture.setFilter(TriState.FALSE, false);
+            abstractTexture.setFilter(false, false);
             RenderSystem.setShaderTexture(0, abstractTexture.getTexture());
             
             for (float y = y1; y < y2; y += Math.min(y2 - y, sY)) {
@@ -274,7 +275,7 @@ public class SpriteRenderer {
                             .setUv2(this.u, this.v)
                             .setOverlay(this.l), this.normal, this.nX, this.nY, this.nZ);
                 }
-            }
+            }*/
             
         }
     }

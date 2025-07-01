@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.screen.generic;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.client.Minecraft;
@@ -35,7 +34,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -293,12 +292,11 @@ public abstract class OptionEntriesScreen extends Screen {
         
         @Override
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             this.widget.rectangle.x = x + 3;
             this.widget.rectangle.y = y;
             this.widget.rectangle.width = entryWidth - 6;
             this.widget.rectangle.height = 24;
-            graphics.blit(RenderType::guiTextured, CONFIG_TEX, x + 3, y + 5, 24, (this.widget.rectangle.contains(mouseX, mouseY) ? 18 : 0) + (this.expanded ? 9 : 0), 9, 9, 256, 256);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, CONFIG_TEX, x + 3, y + 5, 24, (this.widget.rectangle.contains(mouseX, mouseY) ? 18 : 0) + (this.expanded ? 9 : 0), 9, 9, 256, 256);
             graphics.drawString(Minecraft.getInstance().font, this.name.get().getVisualOrderText(), x + 3 + 15, y + 6, this.widget.rectangle.contains(mouseX, mouseY) ? -1638890 : -1);
             
             for (ListEntry performanceEntry : this.rules) {

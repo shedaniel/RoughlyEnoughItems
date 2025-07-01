@@ -84,7 +84,7 @@ public class ConfigSearchWidget {
                         return new Rectangle(-1, -1, width.getAsInt() + 2, 21);
                     }
                 },
-                Widgets.withTranslate(label, 0, 0.5, 0),
+                Widgets.withTranslate(label, 0, 0.5),
                 Widgets.createTexturedWidget(ResourceLocation.parse("roughlyenoughitems:textures/gui/config/search_options.png"), new Rectangle(3, 3, 16, 16), 0, 0, 1, 1, 1, 1)
         );
     }
@@ -97,8 +97,8 @@ public class ConfigSearchWidget {
                     @Override
                     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
                         boolean hovering = containsMouse(mouseX, mouseY);
-                        graphics.pose().pushPose();
-                        graphics.pose().translate(-0.5, -0.5, 0);
+                        graphics.pose().pushMatrix();
+                        graphics.pose().translate(-0.5f, -0.5f);
                         for (Widget widget : List.of(Widgets.createFilledRectangle(new Rectangle(-1, -1, 18, 18), hovering ? 0x50FFFFFF : 0x25FFFFFF),
                                 Widgets.createFilledRectangle(new Rectangle(-3, -3, 22, 1), hovering ? 0x90FFFFFF : 0x45FFFFFF),
                                 Widgets.createFilledRectangle(new Rectangle(-3, 18, 22, 1), hovering ? 0x90FFFFFF : 0x45FFFFFF),
@@ -106,7 +106,7 @@ public class ConfigSearchWidget {
                                 Widgets.createFilledRectangle(new Rectangle(18, -2, 1, 20), hovering ? 0x90FFFFFF : 0x45FFFFFF))) {
                             widget.render(graphics, mouseX, mouseY, delta);
                         }
-                        graphics.pose().popPose();
+                        graphics.pose().popMatrix();
                     }
                     
                     @Override

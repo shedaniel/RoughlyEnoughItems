@@ -23,12 +23,9 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
-import org.joml.Matrix4f;
 
 public final class FillRectangleDrawableConsumer implements DrawableConsumer {
     private Rectangle rectangle;
@@ -41,17 +38,6 @@ public final class FillRectangleDrawableConsumer implements DrawableConsumer {
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        float a = (color >> 24 & 255) / 255.0F;
-        float r = (color >> 16 & 255) / 255.0F;
-        float g = (color >> 8 & 255) / 255.0F;
-        float b = (color & 255) / 255.0F;
-        graphics.drawSpecial(source -> {
-            Matrix4f pose = graphics.pose().last().pose();
-            VertexConsumer buffer = source.getBuffer(RenderType.gui());
-            buffer.addVertex(pose, rectangle.getMaxX(), rectangle.getMinY(), 0).setColor(r, g, b, a);
-            buffer.addVertex(pose, rectangle.getMinX(), rectangle.getMinY(), 0).setColor(r, g, b, a);
-            buffer.addVertex(pose, rectangle.getMinX(), rectangle.getMaxY(), 0).setColor(r, g, b, a);
-            buffer.addVertex(pose, rectangle.getMaxX(), rectangle.getMaxY(), 0).setColor(r, g, b, a);
-        });
+        graphics.fillGradient(rectangle.x, rectangle.y, rectangle.getMaxX(), rectangle.getMaxY(), color, color);
     }
 }

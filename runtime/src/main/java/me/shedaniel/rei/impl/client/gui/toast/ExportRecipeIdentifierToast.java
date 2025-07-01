@@ -23,13 +23,12 @@
 
 package me.shedaniel.rei.impl.client.gui.toast;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -71,8 +70,7 @@ public class ExportRecipeIdentifierToast implements Toast {
     
     @Override
     public void render(GuiGraphics graphics, Font font, long var2) {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        graphics.blit(RenderType::guiTextured, TEXTURE, 0, 0, 0, 0, 160, 32, 256, 256);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, 0, 0, 160, 32, 256, 256);
         if (this.subtitle == null) {
             graphics.drawString(font, this.title, 18, 12, 11141120, false);
         } else {

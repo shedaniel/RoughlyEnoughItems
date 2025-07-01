@@ -90,7 +90,7 @@ public class RoughlyEnoughItemsNetwork {
                 player.displayClientMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
                 return;
             }
-            ItemStack stack = buf.readJsonWithCodec(ItemStack.OPTIONAL_CODEC);
+            ItemStack stack = buf.readLenientJsonWithCodec(ItemStack.OPTIONAL_CODEC);
             if (player.getInventory().add(stack.copy())) {
                 RegistryFriendlyByteBuf newBuf = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.registryAccess());
                 newBuf.writeJsonWithCodec(ItemStack.OPTIONAL_CODEC, stack.copy());
@@ -108,7 +108,7 @@ public class RoughlyEnoughItemsNetwork {
             }
             
             AbstractContainerMenu menu = player.containerMenu;
-            ItemStack itemStack = buf.readJsonWithCodec(ItemStack.OPTIONAL_CODEC);
+            ItemStack itemStack = buf.readLenientJsonWithCodec(ItemStack.OPTIONAL_CODEC);
             ItemStack stack = itemStack.copy();
             if (!menu.getCarried().isEmpty() && ItemStack.isSameItemSameComponents(menu.getCarried(), stack)) {
                 stack.setCount(Mth.clamp(stack.getCount() + menu.getCarried().getCount(), 1, stack.getMaxStackSize()));
@@ -128,7 +128,7 @@ public class RoughlyEnoughItemsNetwork {
                 player.displayClientMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
                 return;
             }
-            ItemStack stack = buf.readJsonWithCodec(ItemStack.OPTIONAL_CODEC);
+            ItemStack stack = buf.readLenientJsonWithCodec(ItemStack.OPTIONAL_CODEC);
             int hotbarSlotId = buf.readVarInt();
             if (hotbarSlotId >= 0 && hotbarSlotId < 9) {
                 AbstractContainerMenu menu = player.containerMenu;

@@ -40,7 +40,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
@@ -140,16 +140,16 @@ public class TimeFavoriteEntry extends FavoriteEntry {
             public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 int color = bounds.contains(mouseX, mouseY) ? 0xFFEEEEEE : 0xFFAAAAAA;
                 if (bounds.width > 4 && bounds.height > 4) {
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY(), 0);
-                    graphics.pose().scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f, 1);
+                    graphics.pose().pushMatrix();
+                    graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY());
+                    graphics.pose().scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f);
                     renderTimeIcon(graphics, time, 0, 0, color);
-                    graphics.pose().popPose();
+                    graphics.pose().popMatrix();
                 }
             }
             
             private void renderTimeIcon(GuiGraphics graphics, Time time, int centerX, int centerY, int color) {
-                graphics.blit(RenderType::guiTextured, CHEST_GUI_TEXTURE, centerX - 7, centerY - 7, time.ordinal() * 14 + 42, 14, 14, 14, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, CHEST_GUI_TEXTURE, centerX - 7, centerY - 7, time.ordinal() * 14 + 42, 14, 14, 14, 256, 256);
             }
             
             @Override

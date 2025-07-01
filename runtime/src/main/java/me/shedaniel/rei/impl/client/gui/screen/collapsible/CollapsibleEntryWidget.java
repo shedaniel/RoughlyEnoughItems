@@ -23,8 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.screen.collapsible;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.animator.ProgressValueAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -42,19 +40,17 @@ import me.shedaniel.rei.impl.client.config.collapsible.CollapsibleConfigManager;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
-import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
+import me.shedaniel.rei.impl.client.gui.widget.EntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -122,10 +118,7 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
                 @Override
                 protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
                     super.renderWidget(graphics, mouseX, mouseY, delta);
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(0, 0, 1);
-                    graphics.blit(RenderType::guiTextured, InternalTextures.CHEST_GUI_TEXTURE, getX() + 3, getY() + 3, 0, 0, 14, 14, 256, 256);
-                    graphics.pose().popPose();
+                    graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, getX() + 3, getY() + 3, 0, 0, 14, 14, 256, 256);
                 }
             };
         } else {
@@ -173,38 +166,37 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
             Rectangle lineBounds = new Rectangle(bounds.x + 4, y, bounds.width - 8, 9);
             idDrawer.setTo(lineBounds.contains(mouseX, mouseY), ConfigObject.getInstance().isReducedMotion() ? 0 : 400);
             try (CloseableScissors scissors = scissor(graphics, lineBounds)) {
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, -idDrawer.progress() * 10, 0);
+                graphics.pose().pushMatrix();
+                graphics.pose().translate(0, (float) (-idDrawer.progress() * 10));
                 graphics.drawString(font, Component.translatable("text.rei.collapsible.entries.count", this.stacks.size() + ""), bounds.x + 4, y, 0xFFAAAAAA);
                 boolean enabled = !this.configObject.disabledGroups.contains(this.id);
                 Component sideText = Component.translatable("text.rei.collapsible.entries.enabled." + enabled);
                 graphics.drawString(font, sideText, bounds.getMaxX() - 4 - font.width(sideText), y, enabled ? 0xDD55FF55 : 0xDDFF5555);
                 renderTextScrolling(graphics, Component.literal(this.id.toString()), bounds.x + 4, y + 10, bounds.width - 8, 0xFF777777);
-                graphics.pose().popPose();
+                graphics.pose().popMatrix();
             }
         }
         y += 10;
         if (y + 9 >= 30 && y < minecraft.screen.height) {
             Rectangle lineBounds = new Rectangle(bounds.x + 4, y, bounds.width - 8, 9);
             modIdDrawer.setTo(lineBounds.contains(mouseX, mouseY), ConfigObject.getInstance().isReducedMotion() ? 0 : 400);
-            int xo = graphics.drawString(font, Component.translatable("text.rei.collapsible.entries.source").append(" "), bounds.x + 4, y, 0xFFAAAAAA);
+            graphics.drawString(font, Component.translatable("text.rei.collapsible.entries.source").append(" "), bounds.x + 4, y, 0xFFAAAAAA);
+            int xo = bounds.x + 4 + font.width(Component.translatable("text.rei.collapsible.entries.source").append(" "));
             try (CloseableScissors scissors = scissor(graphics, lineBounds)) {
-                graphics.pose().pushPose();
+                graphics.pose().pushMatrix();
                 if (this.custom) {
                     renderTextScrolling(graphics, TextTransformations.applyRainbow(Component.translatable("text.rei.collapsible.entries.source.custom").getVisualOrderText(), xo - 1, y), xo - 1, y, bounds.getWidth() - 8, 0xFFAAAAAA);
                 } else {
-                    graphics.pose().translate(0, -modIdDrawer.progress() * 10, 0);
+                    graphics.pose().translate(0, (float) (-modIdDrawer.progress() * 10));
                     renderTextScrolling(graphics, Component.literal(ClientHelper.getInstance().getModFromModId(this.id.getNamespace())), xo - 1, y, bounds.getMaxX() - 4 - (xo - 1), 0xFF777777);
                     renderTextScrolling(graphics, Component.literal(this.id.getNamespace().toString()), xo - 1, y + 10, bounds.getMaxX() - 4 - (xo - 1), 0xFF777777);
                 }
-                graphics.pose().popPose();
+                graphics.pose().popMatrix();
             }
         }
         renderStacks(graphics, mouseX, mouseY, delta, bounds, y);
         bounds.y = this.y;
         
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 400);
         this.toggleButton.setX(bounds.getMaxX() - 4 - toggleButton.getWidth());
         this.toggleButton.setY(bounds.getMaxY() - 4 - toggleButton.getHeight());
         this.toggleButton.render(graphics, mouseX, mouseY, delta);
@@ -225,17 +217,14 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
                 ScreenOverlayImpl.getInstance().clearTooltips();
             }
         }
-        graphics.pose().popPose();
     }
     
     private void renderStacks(GuiGraphics graphics, int mouseX, int mouseY, float delta, Rectangle bounds, int y) {
-        graphics.pose().pushPose();
         try (CloseableScissors outerScissors = scissor(graphics, new Rectangle(bounds.x, y, bounds.width, bounds.getMaxY() - 3 - y))) {
             y = bounds.y + 37 - this.scroller.scrollAmountInt();
             int x = bounds.getCenterX() - 8 * rowSize;
             int xIndex = 0;
-            graphics.pose().translate(0, 0, 100);
-            BatchedEntryRendererManager<EntryWidget> manager = new BatchedEntryRendererManager<>();
+            EntryRendererManager<EntryWidget> manager = new EntryRendererManager<>();
             for (Slot stack : this.stacks) {
                 if (y + 16 >= 30 && y + 16 >= bounds.y + 37) {
                     stack.getBounds().setBounds(x + 16 * xIndex - 1, y - 1, 18, 18);
@@ -253,20 +242,11 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
             try (CloseableScissors scissors = scissor(graphics, new Rectangle(x, bounds.y + 37, 16 * rowSize, bounds.getMaxY() - 4 - (bounds.y + 37)))) {
                 manager.render(graphics, mouseX, mouseY, delta);
             }
-            graphics.pose().translate(0, 0, 300);
             
             if (this.stacks.size() > rowSize * 3) {
-                graphics.drawSpecial(source -> {
-                    VertexConsumer buffer = source.getBuffer(RenderType.gui());
-                    Matrix4f matrix = graphics.pose().last().pose();
-                    buffer.addVertex(matrix, this.x + 1, this.y + this.height - 1, 0.0F).setColor(0xFF000000);
-                    buffer.addVertex(matrix, this.x + this.width - 1, this.y + this.height - 1, 0.0F).setColor(0xFF000000);
-                    buffer.addVertex(matrix, this.x + this.width - 1, this.y + this.height - 40, 0.0F).setColor(0x00000000);
-                    buffer.addVertex(matrix, this.x + 1, this.y + this.height - 40, 0.0F).setColor(0x00000000);
-                });
+                graphics.fillGradient(this.x + 1, this.y + this.height - 40, this.x + this.width - 1, this.y + this.height - 1, 0x00000000, 0xFF000000);
             }
         }
-        graphics.pose().popPose();
     }
     
     private void renderTextScrolling(GuiGraphics graphics, Component text, int x, int y, int width, int color) {
@@ -277,12 +257,12 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
         try (CloseableScissors scissors = scissor(graphics, new Rectangle(x, y, width, y + 9))) {
             int textWidth = this.font.width(text);
             if (textWidth > width) {
-                graphics.pose().pushPose();
+                graphics.pose().pushMatrix();
                 float textX = (System.currentTimeMillis() % ((textWidth + 10) * textWidth / 3)) / (float) textWidth * 3;
-                graphics.pose().translate(-textX, 0, 0);
+                graphics.pose().translate(-textX, 0);
                 graphics.drawString(font, text, x + width - textWidth - 10, y, color);
                 graphics.drawString(font, text, x + width, y, color);
-                graphics.pose().popPose();
+                graphics.pose().popMatrix();
             } else {
                 graphics.drawString(font, text, x, y, color);
             }

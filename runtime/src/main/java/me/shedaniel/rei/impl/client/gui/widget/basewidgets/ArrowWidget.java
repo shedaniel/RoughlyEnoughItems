@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Arrow;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
@@ -85,10 +85,10 @@ public final class ArrowWidget extends Arrow {
         ResourceLocation texture = REIRuntime.getInstance().getDefaultDisplayTexture(dark);
         if (getAnimationDuration() > 0) {
             int width = Mth.ceil((System.currentTimeMillis() / (animationDuration / 24) % 24d));
-            graphics.blit(RenderType::guiTextured, texture, getX() + width, getY(), 106 + width, 91, 24 - width, 17, 256, 256, 0xFFFFFF | (int) (alpha * 255) << 24);
-            graphics.blit(RenderType::guiTextured, texture, getX(), getY(), 82, 91, width, 17, 256, 256, 0xFFFFFF | (int) (alpha * 255) << 24);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, texture, getX() + width, getY(), 106 + width, 91, 24 - width, 17, 256, 256, 0xFFFFFF | (int) (alpha * 255) << 24);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, texture, getX(), getY(), 82, 91, width, 17, 256, 256, 0xFFFFFF | (int) (alpha * 255) << 24);
         } else {
-            graphics.blit(RenderType::guiTextured, texture, getX(), getY(), 106, 91, 24, 17, 256, 256, 0xFFFFFF | (int) (alpha * 255) << 24);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, texture, getX(), getY(), 106, 91, 24, 17, 256, 256, 0xFFFFFF | (int) (alpha * 255) << 24);
         }
     }
     

@@ -97,10 +97,10 @@ public enum DefaultScreenOverlayRenderer implements OverlayRendererProvider {
                 return;
             rendered[0] = 2;
             resetFocused(screen);
-            graphics.pose().pushPose();
-            graphics.pose().translate(-screen.leftPos, -screen.topPos, 0.0);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(-screen.leftPos, -screen.topPos);
             sink.lateRender(graphics, mouseX, mouseY, delta);
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
             resetFocused(screen);
         };
         this.renderPost = (screen, graphics, mouseX, mouseY, delta) -> {

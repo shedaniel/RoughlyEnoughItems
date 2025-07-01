@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.panel.rows;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingPoint;
@@ -86,7 +85,6 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
     public void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
         this.lastY = y;
         int entrySize = entrySize();
-        boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
         updateEntriesPosition(entry -> !ConfigObject.getInstance().isReducedMotion());
         for (SectionFavoriteWidget widget : widgets) {
             widget.update(delta);

@@ -25,18 +25,18 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 public class PaddedCenterWidget extends DelegateWidgetWithTranslate {
     private final Rectangle bounds;
     
     public PaddedCenterWidget(Rectangle bounds, WidgetWithBounds widget) {
-        super(widget, Matrix4f::new);
+        super(widget, Matrix3x2f::new);
         this.bounds = bounds;
     }
     
     @Override
-    protected Matrix4f translate() {
+    protected Matrix3x2f translate() {
         Rectangle widgetBounds = ((WidgetWithBounds) delegate()).getBounds();
         float xTranslate = 0, yTranslate = 0;
         if (widgetBounds.width < bounds.width) {
@@ -45,7 +45,7 @@ public class PaddedCenterWidget extends DelegateWidgetWithTranslate {
         if (widgetBounds.height < bounds.height) {
             yTranslate = (bounds.height - widgetBounds.height) / 2f;
         }
-        return new Matrix4f().translate(xTranslate, yTranslate, 0);
+        return new Matrix3x2f().translate(xTranslate, yTranslate);
     }
     
     @Override

@@ -89,7 +89,7 @@ public class ConfigOptionValueWidget {
                 .color(0xFFE0E0E0)
                 .hoveredColor(0xFFE0E0E0)
                 .onRender((poses, l) -> {
-                    if (MatrixUtils.transform(poses.pose().last().pose(), l.getBounds()).contains(PointHelper.ofMouse())) {
+                    if (MatrixUtils.transform(poses.pose(), l.getBounds()).contains(PointHelper.ofMouse())) {
                         l.setMessage(text[0].copy().withStyle(ChatFormatting.UNDERLINE));
                     } else {
                         l.setMessage(text[0]);
@@ -112,7 +112,7 @@ public class ConfigOptionValueWidget {
         return Widgets.concatWithBounds(() -> new Rectangle(-label.getBounds().width, 0, label.getBounds().width + 8, 14),
                 label,
                 Widgets.withTranslate(Widgets.createTexturedWidget(ResourceLocation.parse("roughlyenoughitems:textures/gui/config/selector.png"),
-                        new Rectangle(1, 1, 4, 6), 0, 0, 1, 1, 1, 1), 0, 0.5, 0)
+                        new Rectangle(1, 1, 4, 6), 0, 0, 1, 1, 1, 1), 0, 0.5)
         );
     }
     
@@ -121,7 +121,7 @@ public class ConfigOptionValueWidget {
         BiConsumer<GuiGraphics, Label> render = label.getOnRender();
         label.onRender((poses, $) -> {
             render.accept(poses, $);
-            bounds.setBounds(MatrixUtils.transform(poses.pose().last().pose(), label.getBounds()));
+            bounds.setBounds(MatrixUtils.transform(poses.pose(), label.getBounds()));
         });
         int noOfOptions = selection.getOptions().size();
         if (noOfOptions == 2) {

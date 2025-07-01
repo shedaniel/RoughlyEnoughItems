@@ -97,8 +97,8 @@ public class CollapsedEntriesBorderRenderer {
         }
         edgeSet.removeAll(toRemove);
     
-        graphics.pose().pushPose();
-        graphics.pose().translate(-100, -100, 0);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(-100, -100);
         
         iterator = edgeSet.iterator();
         while (iterator.hasNext()) {
@@ -143,7 +143,7 @@ public class CollapsedEntriesBorderRenderer {
             }
         }
     
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     }
     
     private static long getPackedLong(int x, int y, int collapsedStackIndices, int direction, boolean occupied) {

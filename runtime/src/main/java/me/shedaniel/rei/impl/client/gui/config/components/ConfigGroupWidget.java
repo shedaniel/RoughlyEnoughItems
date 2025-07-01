@@ -41,7 +41,7 @@ import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import java.util.*;
 import java.util.function.IntConsumer;
@@ -80,7 +80,7 @@ public class ConfigGroupWidget {
             if (location == PreviewLocation.RIGHT) {
                 WidgetWithBounds original = _create(access, entry, halfWidth);
                 Widget background = createBackgroundSlot(() -> new Rectangle(halfWidth + 2, 0, width - halfWidth - 4, original.getBounds().height));
-                Widget right = Widgets.withTranslate(pair.getRight().create(access, entry, width - halfWidth - 4, () -> original.getBounds().height), halfWidth + 2, 0, 0);
+                Widget right = Widgets.withTranslate(pair.getRight().create(access, entry, width - halfWidth - 4, () -> original.getBounds().height), halfWidth + 2, 0);
                 contents = Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, original.getBounds().height), original, background, right);
             } else {
                 WidgetWithBounds original = _create(access, entry, width);
@@ -89,11 +89,11 @@ public class ConfigGroupWidget {
                 Widget background = createBackgroundSlot(widget::getBounds);
                 
                 if (location == PreviewLocation.TOP) {
-                    WidgetWithBounds translatedOriginal = Widgets.withTranslate(original, () -> new Matrix4f().translate(0, widget.getBounds().height + 4, 0));
+                    WidgetWithBounds translatedOriginal = Widgets.withTranslate(original, () -> new Matrix3x2f().translate(0, widget.getBounds().height + 4));
                     contents = Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, widget.getBounds().height + 4 + translatedOriginal.getBounds().height), translatedOriginal, background, widget);
                 } else {
                     contents = Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, original.getBounds().getMaxY() + 2 + widget.getBounds().height), original,
-                            Widgets.withTranslate(Widgets.concat(background, widget), () -> new Matrix4f().translate(0, original.getBounds().getMaxY() + 4, 0)));
+                            Widgets.withTranslate(Widgets.concat(background, widget), () -> new Matrix3x2f().translate(0, original.getBounds().getMaxY() + 4)));
                 }
             }
         } else {
@@ -103,7 +103,7 @@ public class ConfigGroupWidget {
         return Widgets.concatWithBounds(
                 () -> new Rectangle(0, 0, width, groupTitle.getBounds().getMaxY() + contents.getBounds().height),
                 groupTitle,
-                Widgets.withTranslate(contents, () -> new Matrix4f().translate(0, groupTitle.getBounds().getMaxY(), 0))
+                Widgets.withTranslate(contents, () -> new Matrix3x2f().translate(0, groupTitle.getBounds().getMaxY()))
         );
     }
     
@@ -145,23 +145,23 @@ public class ConfigGroupWidget {
     private record WidgetComposite(
             Widget widget,
             Supplier<Rectangle> bounds,
-            Matrix4f translation
+            Matrix3x2f translation
     ) {
         public static WidgetComposite of(WidgetWithBounds widget) {
-            Matrix4f translation = new Matrix4f();
+            Matrix3x2f translation = new Matrix3x2f();
             return new WidgetComposite(Widgets.withTranslate(widget, translation),
                     () -> MatrixUtils.transform(translation, widget.getBounds()), translation);
         }
         
         public static WidgetComposite ofNonAccounting(Widget widget) {
-            return new WidgetComposite(widget, Rectangle::new, new Matrix4f());
+            return new WidgetComposite(widget, Rectangle::new, new Matrix3x2f());
         }
     }
     
     private static void recalculateHeight(List<WidgetComposite> widgets, IntConsumer setHeight) {
         int height = 0;
         for (WidgetComposite widget : widgets) {
-            widget.translation().set(new Matrix4f().translate(0, height, 0));
+            widget.translation().set(new Matrix3x2f().translate(0, height));
             height = Math.max(height, widget.bounds().get().getMaxY());
         }
         setHeight.accept(height);

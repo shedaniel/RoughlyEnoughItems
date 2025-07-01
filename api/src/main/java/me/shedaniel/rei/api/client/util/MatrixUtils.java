@@ -23,26 +23,53 @@
 
 package me.shedaniel.rei.api.client.util;
 
-import com.mojang.math.Transformation;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Matrix4f;
-import org.joml.Vector4f;
+import org.joml.Matrix3x2f;
+import org.joml.Vector3f;
 
 @ApiStatus.Experimental
 public class MatrixUtils {
-    public static Matrix4f inverse(Matrix4f matrix) {
-        Transformation transformation = new Transformation(matrix);
-        Transformation inverse = transformation.inverse();
-        if (inverse != null) inverse.getScale(); // This has a side effect
-        return inverse == null ? Transformation.identity().getMatrixCopy() : inverse.getMatrixCopy();
+    public static Matrix3x2f inverse(Matrix3x2f matrix) {
+        float m00 = matrix.m00;
+        float m01 = matrix.m01;
+        float m10 = matrix.m10;
+        float m11 = matrix.m11;
+        float m20 = matrix.m20; // Translation X
+        float m21 = matrix.m21; // Translation Y
+        
+        // Calculate determinant of the 2x2 rotation/scale part
+        float det = m00 * m11 - m10 * m01;
+        
+        if (Math.abs(det) < 0.00001f) { // Check for singularity (e.g., zero scale)
+            System.err.println("Warning: Matrix is singular (determinant near zero), cannot be accurately inverted.");
+            return null;
+        }
+        
+        float invDet = 1.0f / det;
+        float invM00 = m11 * invDet;
+        float invM01 = -m01 * invDet;
+        float invM10 = -m10 * invDet;
+        float invM11 = m00 * invDet;
+        
+        // Apply inverse 2x2 part to translation
+        // T_inv = -M_inv * T
+        float invM20 = -(invM00 * m20 + invM10 * m21);
+        float invM21 = -(invM01 * m20 + invM11 * m21);
+        
+        // Create the inverse matrix
+        return new Matrix3x2f(
+                invM00, invM01, // First column (x-axis transformation)
+                invM10, invM11, // Second column (y-axis transformation)
+                invM20, invM21  // Third column (translation)
+        );
     }
     
-    public static Rectangle transform(Matrix4f matrix, Rectangle rectangle) {
-        Vector4f vec1 = new Vector4f((float) rectangle.x, (float) rectangle.y, 0, 1);
+    public static Rectangle transform(Matrix3x2f matrix, Rectangle rectangle) {
+        Vector3f vec1 = new Vector3f((float) rectangle.x, (float) rectangle.y, 0);
         matrix.transform(vec1);
-        Vector4f vec2 = new Vector4f((float) rectangle.getMaxX(), (float) rectangle.getMaxY(), 0, 1);
+        Vector3f vec2 = new Vector3f((float) rectangle.getMaxX(), (float) rectangle.getMaxY(), 0);
         matrix.transform(vec2);
         int x1 = Math.round(vec1.x());
         int x2 = Math.round(vec2.x());
@@ -51,8 +78,8 @@ public class MatrixUtils {
         return new Rectangle(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
     }
     
-    public static Point transform(Matrix4f matrix, Point point) {
-        Vector4f mouse = new Vector4f((float) point.x, (float) point.y, 0, 1);
+    public static Point transform(Matrix3x2f matrix, Point point) {
+        Vector3f mouse = new Vector3f((float) point.x, (float) point.y, 0);
         matrix.transform(mouse);
         return new Point(mouse.x(), mouse.y());
     }

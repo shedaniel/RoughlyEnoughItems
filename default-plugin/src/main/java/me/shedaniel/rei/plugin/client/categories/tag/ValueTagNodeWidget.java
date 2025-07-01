@@ -34,7 +34,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,7 +71,7 @@ public class ValueTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
             i++;
         }
         this.widget = Widgets.withTranslate(Widgets.concat(this.widgets),
-                $ -> new Matrix4f().translate(getBounds().x, getBounds().y, 0));
+                $ -> new Matrix3x2f().translate(getBounds().x, getBounds().y));
         this.children = Collections.singletonList(this.widget);
     }
     
@@ -83,17 +83,17 @@ public class ValueTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         Rectangle bounds = getBounds();
-        if (this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose().last().pose(), bounds))) {
-            graphics.pose().pushPose();
-            graphics.pose().translate(bounds.x, bounds.y, 0);
+        if (this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose(), bounds))) {
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(bounds.x, bounds.y);
             Point mouse = new Point(mouseX - bounds.x, mouseY - bounds.y);
             for (Widget widget : this.widgets) {
                 if (!(widget instanceof WidgetWithBounds withBounds) ||
-                        this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose().last().pose(), withBounds.getBounds()))) {
+                        this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose(), withBounds.getBounds()))) {
                     widget.render(graphics, mouse.x, mouse.y, delta);
                 }
             }
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }
     }
     

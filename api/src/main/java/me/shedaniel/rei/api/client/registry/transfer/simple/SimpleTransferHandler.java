@@ -174,11 +174,8 @@ public interface SimpleTransferHandler extends TransferHandler, TransferHandlerM
         for (Widget widget : widgets) {
             if (widget instanceof Slot && ((Slot) widget).getNoticeMark() == Slot.INPUT) {
                 if (missingIndices.contains(i++)) {
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(0, 0, 50);
                     Rectangle innerBounds = ((Slot) widget).getInnerBounds();
                     graphics.fill(innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), 0x40ff0000);
-                    graphics.pose().popPose();
                 }
             }
         }

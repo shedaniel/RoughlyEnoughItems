@@ -23,76 +23,75 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.math.Transformation;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
 import net.minecraft.client.gui.GuiGraphics;
-import org.joml.Matrix4f;
-import org.joml.Vector4f;
+import org.joml.Matrix3x2f;
+import org.joml.Vector3f;
 
 import java.util.function.Supplier;
 
 public class DelegateWidgetWithTranslate extends DelegateWidget {
-    private final Supplier<Matrix4f> translate;
+    private final Supplier<Matrix3x2f> translate;
     
-    public DelegateWidgetWithTranslate(WidgetWithBounds widget, Supplier<Matrix4f> translate) {
+    public DelegateWidgetWithTranslate(WidgetWithBounds widget, Supplier<Matrix3x2f> translate) {
         super(widget);
         this.translate = translate;
     }
     
-    protected Matrix4f translate() {
+    protected Matrix3x2f translate() {
         return translate.get();
     }
     
-    protected final Matrix4f inverseTranslate() {
+    protected final Matrix3x2f inverseTranslate() {
         return MatrixUtils.inverse(translate());
     }
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        graphics.pose().pushPose();
-        graphics.pose().last().pose().mul(translate());
-        Vector4f mouse = transformMouse(mouseX, mouseY);
+        graphics.pose().pushMatrix();
+        graphics.pose().mul(translate());
+        Vector3f mouse = transformMouse(mouseX, mouseY);
         super.render(graphics, (int) mouse.x(), (int) mouse.y(), delta);
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     }
     
-    private Vector4f transformMouse(double mouseX, double mouseY) {
-        Vector4f mouse = new Vector4f((float) mouseX, (float) mouseY, 0, 1);
+    private Vector3f transformMouse(double mouseX, double mouseY) {
+        Vector3f mouse = new Vector3f((float) mouseX, (float) mouseY, 0);
         inverseTranslate().transform(mouse);
         return mouse;
     }
     
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
-        Vector4f mouse = transformMouse(mouseX, mouseY);
+        Vector3f mouse = transformMouse(mouseX, mouseY);
         return super.containsMouse(mouse.x(), mouse.y());
     }
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        Vector4f mouse = transformMouse(mouseX, mouseY);
+        Vector3f mouse = transformMouse(mouseX, mouseY);
         return super.mouseClicked(mouse.x(), mouse.y(), button);
     }
     
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        Vector4f mouse = transformMouse(mouseX, mouseY);
+        Vector3f mouse = transformMouse(mouseX, mouseY);
         return super.mouseReleased(mouse.x(), mouse.y(), button);
     }
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        Vector4f mouse = transformMouse(mouseX, mouseY);
+        Vector3f mouse = transformMouse(mouseX, mouseY);
         return super.mouseDragged(mouse.x(), mouse.y(), button, deltaX, deltaY);
     }
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
-        Vector4f mouse = transformMouse(mouseX, mouseY);
+        Vector3f mouse = transformMouse(mouseX, mouseY);
         return super.mouseScrolled(mouse.x(), mouse.y(), amountX, amountY);
     }
     
@@ -124,12 +123,6 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
         } finally {
             Widget.popMouse();
         }
-    }
-    
-    @Override
-    public double getZRenderingPriority() {
-        Transformation transformation = new Transformation(translate());
-        return transformation.getTranslation().z() + super.getZRenderingPriority();
     }
     
     @Override

@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.hints;
 
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
@@ -90,28 +89,27 @@ public class ImportantWarningsWidget extends WidgetWithBounds {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (!visible)
             return;
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 900);
+        graphics.pose().pushMatrix();
         graphics.fill(bounds.x - 5, bounds.y - 5, bounds.getMaxX() + 5, bounds.getMaxY() + 5, 0x90111111);
         int y = bounds.y;
         for (Component text : texts) {
-            graphics.pose().pushPose();
-            graphics.pose().translate(bounds.x, y, 0);
-            graphics.pose().scale(0.5f, 0.5f, 1);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(bounds.x, y);
+            graphics.pose().scale(0.5f, 0.5f);
             graphics.drawWordWrap(Minecraft.getInstance().font, text, 0, 0, bounds.width * 2, -1);
             y += Minecraft.getInstance().font.wordWrapHeight(text, bounds.width * 2) / 2 + 5;
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }
         
         MutableComponent okayText = Component.translatable("text.rei.recipes.not.full.button.okay");
-        graphics.pose().pushPose();
-        graphics.pose().translate(bounds.x + bounds.width / 2 - Minecraft.getInstance().font.width(okayText) * 0.75 / 2, bounds.getMaxY() - 9, 0);
-        graphics.pose().scale(0.75f, 0.75f, 1);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(bounds.x + bounds.width / 2 - Minecraft.getInstance().font.width(okayText) * 0.75f / 2, bounds.getMaxY() - 9);
+        graphics.pose().scale(0.75f, 0.75f);
         this.buttonBounds.setBounds(bounds.x, bounds.getMaxY() - 20, bounds.width, 20);
         graphics.drawString(Minecraft.getInstance().font, okayText, 0, 0,
                 buttonBounds.contains(mouseX, mouseY) ? 0xfffff8de : 0xAAFFFFFF);
-        graphics.pose().popPose();
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
+        graphics.pose().popMatrix();
     }
     
     @Override

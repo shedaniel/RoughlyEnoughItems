@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.tag.DefaultTagDisplay;
@@ -49,7 +48,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +116,7 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
         
         WidgetWithBounds[] delegate = new WidgetWithBounds[]{Widgets.noOp()};
         TagNode<?>[] tagNode = new TagNode[]{null};
-        widgets.add(Widgets.withTranslate(Widgets.delegateWithBounds(() -> delegate[0]), 0, 0, 20));
+        widgets.add(Widgets.delegateWithBounds(() -> delegate[0]));
         
         TagNodes.create(display.getKey(), dataResult -> {
             if (dataResult.error().isPresent()) {
@@ -140,10 +138,10 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                                 Font font = instance.font;
                                 String text = "?";
                                 int width = font.width(text);
-                                graphics.pose().pushPose();
-                                graphics.pose().translate(bounds.getCenterX() - width / 2f + 0.2f, bounds.getCenterY() - font.lineHeight / 2f + 1f, 0);
+                                graphics.pose().pushMatrix();
+                                graphics.pose().translate(bounds.getCenterX() - width / 2f + 0.2f, bounds.getCenterY() - font.lineHeight / 2f + 1f);
                                 graphics.drawString(font, text, 0, 0, REIRuntime.getInstance().isDarkThemeEnabled() ? -4473925 : -12566464, false);
-                                graphics.pose().popPose();
+                                graphics.pose().popMatrix();
                             }
                             
                             @Override
@@ -179,7 +177,7 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                     }
                 })
                 .tooltipLine(Component.translatable("text.rei.tag.copy.clipboard")));
-        widgets.add(Widgets.withTranslate(new DelegateWidget(Widgets.noOp()) {
+        widgets.add(new DelegateWidget(Widgets.noOp()) {
             @Override
             protected Widget delegate() {
                 ResourceLocation expandTexture = !expanded[0] ? ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/expand.png")
@@ -191,12 +189,8 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                                 new Rectangle(recipeBounds.x + 5 + 2, recipeBounds.getMaxY() - 6 - 13 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9)
                 );
             }
-        }, 0, 0, 10));
+        });
         
-        Matrix4f translateMatrix = new Matrix4f().translate(0, 0, 200);
-        Matrix4f identity = new Matrix4f();
-        identity.identity();
-        return CollectionUtils.map(widgets, widget -> Widgets.withTranslate(widget, () ->
-                expanded[0] || !boundsAnimator.value().equals(boundsAnimator.target()) ? translateMatrix : identity));
+        return widgets;
     }
 }

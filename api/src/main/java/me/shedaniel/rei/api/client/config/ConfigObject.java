@@ -116,14 +116,6 @@ public interface ConfigObject {
     boolean isGrabbingItems();
     
     /**
-     * Returns whether favorites motions are animated.
-     *
-     * @return whether favorites motions are animated
-     */
-    @Deprecated(forRemoval = true)
-    boolean isFavoritesAnimated();
-    
-    /**
      * Returns whether motions are reduced.
      *
      * @return whether motions are reduced
@@ -280,8 +272,6 @@ public interface ConfigObject {
     
     @ApiStatus.Experimental
     boolean doDisplayIMEHints();
-    
-    boolean doesFastEntryRendering();
     
     boolean doesCacheEntryRendering();
     

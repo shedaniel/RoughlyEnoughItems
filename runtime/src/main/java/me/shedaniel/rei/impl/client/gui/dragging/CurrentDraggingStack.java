@@ -83,8 +83,6 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
             }
             
             if (entry.dragging) {
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, 0, 600);
                 entry.point.update(delta);
                 entry.dimension.update(delta);
                 int width = entry.component.getWidth();
@@ -93,7 +91,6 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
                 entry.point.setTo(new FloatingPoint(mouseX - mouseStartOffset.x * width, mouseY - mouseStartOffset.y * height), reducedMotion ? 0 : 30);
                 entry.dimension.setTo(new FloatingDimension(width, height), reducedMotion ? 0 : 700);
                 entry.component.render(graphics, getCurrentBounds(), mouseX, mouseY, delta);
-                graphics.pose().popPose();
                 
                 VoxelShape shape = entry.getBoundsProvider().bounds();
                 ShapeBounds shapeBounds = new ShapeBounds(shape);
@@ -122,10 +119,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
                     iterator.remove();
                 } else {
                     bounds.shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
-                        graphics.pose().pushPose();
-                        graphics.pose().translate(0, 0, 500);
                         graphics.fillGradient((int) x1, (int) y1, (int) x2, (int) y2, 0xfdff6b | (bounds.alpha.intValue() << 24), 0xfdff6b | (bounds.alpha.intValue() << 24));
-                        graphics.pose().popPose();
                     });
                 }
             }
@@ -140,10 +134,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
             if (value.width < 2 || value.height < 2 || (Math.abs(value.x - target.x) <= 1.3 && Math.abs(value.y - target.y) <= 1.3 && Math.abs(value.width - target.width) <= 1 && Math.abs(value.height - target.height) <= 1)) {
                 iterator.remove();
             } else {
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, 0, 600);
                 renderBackEntry.component.render(graphics, value.getBounds(), mouseX, mouseY, delta);
-                graphics.pose().popPose();
             }
         }
     }

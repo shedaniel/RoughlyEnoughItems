@@ -40,15 +40,15 @@ import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.DefaultDisplayChoosePageWidget;
+import me.shedaniel.rei.impl.client.gui.widget.EntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -72,7 +72,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
     }
     
     @Override
-    protected void renderEntries(boolean fastEntryRendering, GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+    protected void renderEntries(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.leftButton.setEnabled(getTotalPages() > 1);
         this.rightButton.setEnabled(getTotalPages() > 1);
         
@@ -93,19 +93,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             }
         }
         
-        BatchedEntryRendererManager<EntryListStackEntry> manager = new BatchedEntryRendererManager<>();
-        if (manager.isFastEntryRendering()) {
-            for (EntryListStackEntry entry : entries) {
-                CollapsedStack collapsedStack = entry.getCollapsedStack();
-                if (collapsedStack != null && !collapsedStack.isExpanded()) {
-                    manager.addSlow(entry);
-                } else {
-                    manager.add(entry);
-                }
-            }
-        } else {
-            manager.addAllSlow(entries);
-        }
+        EntryRendererManager<EntryListStackEntry> manager = new EntryRendererManager<>(entries);
         manager.render(debugger.debugTime, debugger.size, debugger.time, graphics, mouseX, mouseY, delta);
         
         new CollapsedEntriesBorderRenderer().render(graphics, entries, collapsedStackIndices);
@@ -212,10 +200,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
         this.additionalWidgets.add(leftButton);
         this.additionalWidgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             Rectangle bounds = leftButton.getBounds();
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 1);
-            graphics.blit(RenderType::guiTextured, InternalTextures.ARROW_LEFT_TEXTURE, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
-            graphics.pose().popPose();
+            graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.ARROW_LEFT_TEXTURE, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
         }));
         this.rightButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.translatable(""))
                 .onClick(button -> {
@@ -230,10 +215,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
         this.additionalWidgets.add(rightButton);
         this.additionalWidgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             Rectangle bounds = rightButton.getBounds();
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 1);
-            graphics.blit(RenderType::guiTextured, InternalTextures.ARROW_RIGHT_TEXTURE, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
-            graphics.pose().popPose();
+            graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.ARROW_RIGHT_TEXTURE, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
         }));
         this.additionalWidgets.add(Widgets.createClickableLabel(new Point(overlayBounds.x + (overlayBounds.width / 2), overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), Component.empty(), label -> {
             if (!Screen.hasShiftDown()) {

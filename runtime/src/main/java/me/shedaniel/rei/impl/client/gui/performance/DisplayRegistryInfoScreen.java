@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.performance;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -145,7 +144,6 @@ public class DisplayRegistryInfoScreen extends ScreenWithMenu {
         
         @Override
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             graphics.drawString(Minecraft.getInstance().font, this.component.getVisualOrderText(), x + 4, y + 6, -1);
             FormattedCharSequence rightText = Component.translatable("text.rei.display_registry_analysis.displays", count).getVisualOrderText();
             graphics.drawString(Minecraft.getInstance().font, rightText, x + entryWidth - 6 - 8 - Minecraft.getInstance().font.width(rightText), y + 6, -1);

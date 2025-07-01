@@ -23,13 +23,11 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
-import org.joml.Matrix4f;
 
 public final class TexturedDrawableConsumer implements DrawableConsumer {
     private ResourceLocation identifier;
@@ -52,19 +50,10 @@ public final class TexturedDrawableConsumer implements DrawableConsumer {
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        graphics.drawSpecial(source -> {
-            innerBlit(source.getBuffer(RenderType.guiTextured(identifier)), graphics.pose().last().pose(), x, x + width, y, y + height, 0, uWidth, vHeight, u, v, textureWidth, textureHeight);
-        });
+        innerBlit(graphics, RenderPipelines.GUI_TEXTURED, identifier, x, x + width, y, y + height, uWidth, vHeight, u, v, textureWidth, textureHeight);
     }
     
-    private static void innerBlit(VertexConsumer consumer, Matrix4f matrix, int xStart, int xEnd, int yStart, int yEnd, int z, int width, int height, float u, float v, int texWidth, int texHeight) {
-        innerBlit(consumer, matrix, xStart, xEnd, yStart, yEnd, z, u / texWidth, (u + width) / texWidth, v / texHeight, (v + height) / texHeight);
-    }
-    
-    private static void innerBlit(VertexConsumer consumer, Matrix4f matrix, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
-        consumer.addVertex(matrix, xStart, yEnd, z).setUv(uStart, vEnd).setColor(-1);
-        consumer.addVertex(matrix, xEnd, yEnd, z).setUv(uEnd, vEnd).setColor(-1);
-        consumer.addVertex(matrix, xEnd, yStart, z).setUv(uEnd, vStart).setColor(-1);
-        consumer.addVertex(matrix, xStart, yStart, z).setUv(uStart, vStart).setColor(-1);
+    private static void innerBlit(GuiGraphics graphics, RenderPipeline pipeline, ResourceLocation location, int xStart, int xEnd, int yStart, int yEnd, int width, int height, float u, float v, int texWidth, int texHeight) {
+        graphics.innerBlit(pipeline, location, xStart, xEnd, yStart, yEnd, u / texWidth, (u + width) / texWidth, v / texHeight, (v + height) / texHeight, -1);
     }
 }

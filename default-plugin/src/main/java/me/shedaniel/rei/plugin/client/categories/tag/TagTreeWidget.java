@@ -91,7 +91,7 @@ public class TagTreeWidget<S, T> extends WidgetWithBounds {
                     rootWidget.getBounds().getMaxY() + 6, rootWidget.getBounds().getMaxY() + 16, 0xFFFFFFFF);
             childWidget.getBounds().setLocation(getBounds().getCenterX() - childrenTotalWidth / 2 + x,
                     this.rootWidget.getBounds().getMaxY() + 16);
-            if (this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose().last().pose(), childWidget.getBounds()))) {
+            if (this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose(), childWidget.getBounds()))) {
                 childWidget.render(graphics, mouseX, mouseY, delta);
             }
             x += childWidget.getBounds().width + 6;

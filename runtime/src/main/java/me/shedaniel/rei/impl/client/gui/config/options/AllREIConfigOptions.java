@@ -248,8 +248,6 @@ public interface AllREIConfigOptions {
             .enumOptions();
     CompositeOption<String> GIVE_COMMAND = make("cheats.give_command", i -> i.advanced.commands.giveCommand, (i, v) -> i.advanced.commands.giveCommand = v)
             .string();
-    CompositeOption<Boolean> BATCHED_RENDERING = make("performance.batched_rendering", i -> i.advanced.miscellaneous.newFastEntryRendering, (i, v) -> i.advanced.miscellaneous.newFastEntryRendering = v)
-            .enabledDisabled();
     CompositeOption<Boolean> CACHED_RENDERING = make("performance.cached_rendering", i -> i.advanced.miscellaneous.cachingFastEntryRendering, (i, v) -> i.advanced.miscellaneous.cachingFastEntryRendering = v)
             .enabledDisabled();
     CompositeOption<Boolean> RELOAD_THREAD = make("performance.reload_thread", i -> i.advanced.miscellaneous.registerRecipesInAnotherThread, (i, v) -> i.advanced.miscellaneous.registerRecipesInAnotherThread = v)

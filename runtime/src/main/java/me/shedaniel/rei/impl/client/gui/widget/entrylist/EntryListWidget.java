@@ -192,8 +192,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (!hasSpace()) return;
         
-        boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
-        renderEntries(fastEntryRendering, graphics, mouseX, mouseY, delta);
+        renderEntries(graphics, mouseX, mouseY, delta);
         
         debugger.render(graphics, bounds.x, bounds.y, delta);
         
@@ -215,19 +214,16 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
         
         scaleIndicator.update(delta);
         if (scaleIndicator.value() > 0.04) {
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 500);
             Component component = Component.literal(Math.round(ConfigObject.getInstance().getEntrySize() * 100) + "%");
             int width = font.width(component);
             int backgroundColor = ((int) Math.round(0xa0 * Mth.clamp(scaleIndicator.value(), 0.0, 1.0))) << 24;
             int textColor = ((int) Math.round(0xdd * Mth.clamp(scaleIndicator.value(), 0.0, 1.0))) << 24;
             graphics.fillGradient(bounds.getCenterX() - width / 2 - 2, bounds.getCenterY() - 6, bounds.getCenterX() + width / 2 + 2, bounds.getCenterY() + 6, backgroundColor, backgroundColor);
             graphics.drawString(font, component, bounds.getCenterX() - width / 2, bounds.getCenterY() - 4, 0xFFFFFF | textColor, false);
-            graphics.pose().popPose();
         }
     }
     
-    protected abstract void renderEntries(boolean fastEntryRendering, GuiGraphics graphics, int mouseX, int mouseY, float delta);
+    protected abstract void renderEntries(GuiGraphics graphics, int mouseX, int mouseY, float delta);
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {

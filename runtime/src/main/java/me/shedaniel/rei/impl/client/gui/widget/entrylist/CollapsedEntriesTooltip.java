@@ -62,24 +62,20 @@ public class CollapsedEntriesTooltip implements ClientTooltipComponent, TooltipC
         int entrySize = EntryListWidget.entrySize();
         int w = Math.max(1, MAX_WIDTH / entrySize);
         int i = 0;
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 50);
         for (EntryStack<?> entry : stack.getIngredient()) {
             int x1 = x + (i % w) * entrySize;
             int y1 = y + (i / w) * entrySize;
             i++;
             if (i / w > 3 - 1) {
-                graphics.pose().translate(0, 0, 200);
                 Component text = Component.literal("+" + (stack.getIngredient().size() - w * 3 + 1)).withStyle(ChatFormatting.GRAY);
-                graphics.drawSpecial(source -> {
-                    font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, graphics.pose().last().pose(), source, Font.DisplayMode.NORMAL, 0, 15728880);
-                });
-                graphics.flush();
+                graphics.pose().pushMatrix();
+                graphics.pose().translate(x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1);
+                graphics.drawString(font, text, 0, 0, -1);
+                graphics.pose().popMatrix();
                 break;
             } else {
                 entry.render(graphics, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
             }
         }
-        graphics.pose().popPose();
     }
 }

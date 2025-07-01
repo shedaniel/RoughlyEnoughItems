@@ -28,8 +28,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -88,12 +88,12 @@ public class ErrorsScreen extends Screen {
     
     private void exit() {
         boolean localServer = this.minecraft.isLocalServer();
-        this.minecraft.level.disconnect();
+        this.minecraft.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
         
         if (localServer) {
-            this.minecraft.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")));
+            this.minecraft.disconnectWithSavingScreen();
         } else {
-            this.minecraft.disconnect();
+            this.minecraft.disconnectWithProgressScreen();
         }
         
         System.exit(-1);

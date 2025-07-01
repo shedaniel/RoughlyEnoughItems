@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
@@ -38,6 +37,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -221,15 +221,14 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     
     public static void renderBackBackground(GuiGraphics graphics, ResourceLocation backgroundLocation,
                                             int left, int top, int right, int bottom, int yOffset, int color) {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        graphics.drawSpecial(source -> {
+        /*graphics.drawSpecial(source -> {
             VertexConsumer buffer = source.getBuffer(RenderType.guiTextured(backgroundLocation));
             Matrix4f matrix = graphics.pose().last().pose();
             buffer.addVertex(matrix, left, bottom, 0.0F).setUv(left / 32.0F, ((bottom + yOffset) / 32.0F)).setColor(color, color, color, 255);
             buffer.addVertex(matrix, right, bottom, 0.0F).setUv(right / 32.0F, ((bottom + yOffset) / 32.0F)).setColor(color, color, color, 255);
             buffer.addVertex(matrix, right, top, 0.0F).setUv(right / 32.0F, ((top + yOffset) / 32.0F)).setColor(color, color, color, 255);
             buffer.addVertex(matrix, left, top, 0.0F).setUv(left / 32.0F, ((top + yOffset) / 32.0F)).setColor(color, color, color, 255);
-        });
+        });*/
     }
     
     protected void drawBackground() {
@@ -260,9 +259,8 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         this.renderList(graphics, rowLeft, startY, mouseX, mouseY, delta);
         this.renderHoleBackground(graphics, 0, this.top, 255, 255);
         this.renderHoleBackground(graphics, this.bottom, this.height, 255, 255);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        graphics.blit(RenderType::guiTextured, Screen.HEADER_SEPARATOR, this.left, this.top - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
-        graphics.blit(RenderType::guiTextured, Screen.FOOTER_SEPARATOR, this.left, this.bottom, 0.0F, 0.0F, this.width, 2, 32, 2);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, Screen.HEADER_SEPARATOR, this.left, this.top - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, Screen.FOOTER_SEPARATOR, this.left, this.bottom, 0.0F, 0.0F, this.width, 2, 32, 2);
         int maxScroll = this.getMaxScroll();
         this.renderScrollBar(graphics, maxScroll, scrollbarPosition, int_4);
         this.renderDecorations(graphics, mouseX, mouseY);
@@ -279,7 +277,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
             
             int finalY = y;
             int finalHeight = height;
-            graphics.drawSpecial(source -> {
+            /*graphics.drawSpecial(source -> {
                 VertexConsumer buffer = source.getBuffer(RenderType.gui());
                 Matrix4f matrix = graphics.pose().last().pose();
                 buffer.addVertex(matrix, scrollbarPositionMinX, this.bottom, 0.0F).setColor(0, 0, 0, 255);
@@ -294,7 +292,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                 buffer.addVertex((scrollbarPositionMaxX - 1), (finalY + finalHeight - 1), 0.0F).setColor(192, 192, 192, 255);
                 buffer.addVertex((scrollbarPositionMaxX - 1), finalY, 0.0F).setColor(192, 192, 192, 255);
                 buffer.addVertex(scrollbarPositionMinX, finalY, 0.0F).setColor(192, 192, 192, 255);
-            });
+            });*/
         }
     }
     
@@ -452,8 +450,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                 itemMinX = this.left + this.width / 2 - itemWidth / 2;
                 itemMaxX = itemMinX + itemWidth;
                 float float_2 = this.isFocused() ? 1.0F : 0.5F;
-                Matrix4f matrix = graphics.pose().last().pose();
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                /*Matrix4f matrix = graphics.pose().last().pose();
                 
                 int finalItemY = itemY;
                 graphics.drawSpecial(source -> {
@@ -466,7 +463,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                     buffer.addVertex(matrix, itemMaxX - 1, finalItemY + itemHeight + 1, 0.0F).setColor(0.0F, 0.0F, 0.0F, 1.0F);
                     buffer.addVertex(matrix, itemMaxX - 1, finalItemY - 1, 0.0F).setColor(0.0F, 0.0F, 0.0F, 1.0F);
                     buffer.addVertex(matrix, itemMinX + 1, finalItemY - 1, 0.0F).setColor(0.0F, 0.0F, 0.0F, 1.0F);
-                });
+                });*/
             }
             
             int y = this.getRowTop(renderIndex);
@@ -496,7 +493,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     }
     
     protected void renderHoleBackground(GuiGraphics graphics, int y1, int y2, int alpha1, int alpha2) {
-        Matrix4f matrix = graphics.pose().last().pose();
+        /*Matrix4f matrix = graphics.pose().last().pose();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         graphics.drawSpecial(source -> {
             VertexConsumer buffer = source.getBuffer(RenderType.guiTextured(backgroundLocation));
@@ -504,7 +501,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
             buffer.addVertex(matrix, this.left + this.width, y2, 0.0F).setUv(((float) this.width / 32.0F), ((float) y2 / 32.0F)).setColor(64, 64, 64, alpha2);
             buffer.addVertex(matrix, this.left + this.width, y1, 0.0F).setUv(((float) this.width / 32.0F), ((float) y1 / 32.0F)).setColor(64, 64, 64, alpha1);
             buffer.addVertex(matrix, this.left, y1, 0.0F).setUv(0, ((float) y1 / 32.0F)).setColor(64, 64, 64, alpha1);
-        });
+        });*/
     }
     
     protected E remove(int int_1) {

@@ -44,7 +44,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -110,19 +110,19 @@ public final class Widgets {
         return ClientInternals.getWidgetsProvider().wrapVanillaWidget(element);
     }
     
-    public static WidgetWithBounds withTranslate(Widget widget, double x, double y, double z) {
-        return withTranslate(widget, new Matrix4f().translate((float) x, (float) y, (float) z));
+    public static WidgetWithBounds withTranslate(Widget widget, double x, double y) {
+        return withTranslate(widget, new Matrix3x2f().translate((float) x, (float) y));
     }
     
-    public static WidgetWithBounds withTranslate(Widget widget, Matrix4f translate) {
+    public static WidgetWithBounds withTranslate(Widget widget, Matrix3x2f translate) {
         return withTranslate(widget, () -> translate);
     }
     
-    public static <T extends Widget> WidgetWithBounds withTranslate(T widget, Function<T, Matrix4f> translate) {
+    public static <T extends Widget> WidgetWithBounds withTranslate(T widget, Function<T, Matrix3x2f> translate) {
         return withTranslate(widget, () -> translate.apply(widget));
     }
     
-    public static WidgetWithBounds withTranslate(Widget widget, Supplier<Matrix4f> translate) {
+    public static WidgetWithBounds withTranslate(Widget widget, Supplier<Matrix3x2f> translate) {
         WidgetWithBounds widgetWithBounds = wrapWidgetWithBounds(widget);
         return ClientInternals.getWidgetsProvider().withTranslate(widgetWithBounds, translate);
     }
