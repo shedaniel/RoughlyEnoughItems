@@ -89,21 +89,21 @@ public class DisplayTooltipComponent implements TooltipComponent, ClientTooltipC
     
     @Override
     public void renderImage(Font font, int x, int y, int width, int height, GuiGraphics graphics) {
-        graphics.pose().pushPose();
-        graphics.pose().translate(x + 2, y + 2, 0);
-        graphics.pose().translate(-this.bounds.getX(), -this.bounds.getY(), 0);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x + 2, y + 2);
+        graphics.pose().translate(-this.bounds.getX(), -this.bounds.getY());
         widget.render(graphics, -1000, -1000, 0);
         
         AutoCraftingEvaluator.AutoCraftingResult craftingResult = autoCraftingResult.get();
         if (craftingResult.hasApplicable && craftingResult.renderer != null) {
-            graphics.pose().pushPose();
-            Rectangle transformedBounds = MatrixUtils.transform(MatrixUtils.inverse(graphics.pose().last().pose()), new Rectangle(x + 2, y + 2, bounds.width, bounds.height));
-            Point mouse = MatrixUtils.transform(graphics.pose().last().pose(), PointHelper.ofMouse());
+            graphics.pose().pushMatrix();
+            Rectangle transformedBounds = MatrixUtils.transform(MatrixUtils.inverse(graphics.pose()), new Rectangle(x + 2, y + 2, bounds.width, bounds.height));
+            Point mouse = MatrixUtils.transform(graphics.pose(), PointHelper.ofMouse());
             craftingResult.renderer.render(graphics, mouse.x, mouse.y, Minecraft.getInstance().getDeltaTracker().getRealtimeDeltaTicks(),
                     widgets, transformedBounds, display.provideInternalDisplay());
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }
         
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     }
 }

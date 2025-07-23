@@ -49,7 +49,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import java.util.Collection;
 import java.util.List;
@@ -188,7 +188,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public WidgetWithBounds withTranslate(WidgetWithBounds widget, Supplier<Matrix4f> translate) {
+        public WidgetWithBounds withTranslate(WidgetWithBounds widget, Supplier<Matrix3x2f> translate) {
             return new DelegateWidgetWithTranslate(widget, translate);
         }
         

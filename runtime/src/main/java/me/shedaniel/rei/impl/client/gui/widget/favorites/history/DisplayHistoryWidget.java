@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.history;
 
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -45,10 +44,8 @@ import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -133,22 +130,12 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
         if (ConfigObject.getInstance().isReducedMotion()) offset[0] = 0;
         if (!reverse) offset[0] = 7 - offset[0];
         
-        graphics.drawSpecial(source -> {
-            VertexConsumer buffer = source.getBuffer(RenderType.gui());
-            
-            float a = (float) (color >> 24 & 255) / 255.0F;
-            float r = (float) (color >> 16 & 255) / 255.0F;
-            float g = (float) (color >> 8 & 255) / 255.0F;
-            float b = (float) (color & 255) / 255.0F;
-            Matrix4f pose = graphics.pose().last().pose();
-            
-            for (float x = x1 - offset[0]; x < x2; x += 7) {
-                buffer.addVertex(pose, Mth.clamp(x + 4, x1, x2), y, 0).setColor(r, g, b, a);
-                buffer.addVertex(pose, Mth.clamp(x, x1, x2), y, 0).setColor(r, g, b, a);
-                buffer.addVertex(pose, Mth.clamp(x, x1, x2), y + 1, 0).setColor(r, g, b, a);
-                buffer.addVertex(pose, Mth.clamp(x + 4, x1, x2), y + 1, 0).setColor(r, g, b, a);
-            }
-        });
+        for (float x = x1 - offset[0]; x < x2; x += 7) {
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(Mth.clamp(x, x1, x2), 0);
+            graphics.fillGradient(0, y, 4, y + 1, color, color);
+            graphics.pose().popMatrix();
+        }
     }
     
     private void drawVerticalDashedLine(GuiGraphics graphics, int x, int y1, int y2, int color, boolean reverse) {
@@ -156,22 +143,12 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
         if (ConfigObject.getInstance().isReducedMotion()) offset[0] = 0;
         if (!reverse) offset[0] = 7 - offset[0];
         
-        graphics.drawSpecial(source -> {
-            VertexConsumer buffer = source.getBuffer(RenderType.gui());
-            
-            float a = (float) (color >> 24 & 255) / 255.0F;
-            float r = (float) (color >> 16 & 255) / 255.0F;
-            float g = (float) (color >> 8 & 255) / 255.0F;
-            float b = (float) (color & 255) / 255.0F;
-            Matrix4f pose = graphics.pose().last().pose();
-            
-            for (float y = y1 - offset[0]; y < y2; y += 7) {
-                buffer.addVertex(pose, x + 1, Mth.clamp(y, y1, y2), 0).setColor(r, g, b, a);
-                buffer.addVertex(pose, x, Mth.clamp(y, y1, y2), 0).setColor(r, g, b, a);
-                buffer.addVertex(pose, x, Mth.clamp(y + 4, y1, y2), 0).setColor(r, g, b, a);
-                buffer.addVertex(pose, x + 1, Mth.clamp(y + 4, y1, y2), 0).setColor(r, g, b, a);
-            }
-        });
+        for (float y = y1 - offset[0]; y < y2; y += 7) {
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(0, Mth.clamp(y, y1, y2));
+            graphics.fillGradient(x, 0, x + 1, 4, color, color);
+            graphics.pose().popMatrix();
+        }
     }
     
     private boolean updateBounds(Rectangle fullBounds) {

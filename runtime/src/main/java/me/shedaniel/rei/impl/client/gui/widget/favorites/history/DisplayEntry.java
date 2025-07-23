@@ -44,7 +44,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector4f;
+import org.joml.Vector3f;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -171,27 +171,22 @@ public class DisplayEntry extends WidgetWithBounds {
             return;
         }
         
-        graphics.pose().pushPose();
-        if (!stable || !target.equals(bounds)) {
-            graphics.pose().translate(0, 0, 600);
-        }
-        graphics.pose().translate(xOffset(), yOffset(), 0);
-        graphics.pose().scale(xScale(), yScale(), 1.0F);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(xOffset(), yOffset());
+        graphics.pose().scale(xScale(), yScale());
         
         for (Widget widget : widgets.get()) {
             widget.render(graphics, transformMouseX(mouseX), transformMouseY(mouseY), delta);
         }
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
         
         {
-            graphics.pose().pushPose();
+            graphics.pose().pushMatrix();
             if (stable && target.equals(bounds)) {
-                graphics.pose().translate(this.xOffset, 0, 200);
-            } else {
-                graphics.pose().translate(0, 0, 800);
+                graphics.pose().translate((float) this.xOffset, 0);
             }
-            Vector4f mouse = new Vector4f((float) mouseX, (float) mouseY, 0, 1);
-            graphics.pose().last().pose().transform(mouse);
+            Vector3f mouse = new Vector3f((float) mouseX, (float) mouseY, 1);
+            graphics.pose().transform(mouse);
             
             AutoCraftingEvaluator.AutoCraftingResult result = this.autoCraftingResult.get();
             
@@ -202,26 +197,23 @@ public class DisplayEntry extends WidgetWithBounds {
             if (result.hasApplicable) {
                 plusButton.setText(Component.literal("+"));
                 plusButton.render(graphics, Math.round(mouse.x()), Math.round(mouse.y()), delta);
-                graphics.pose().popPose();
+                graphics.pose().popMatrix();
                 
                 if (plusButton.containsMouse(Math.round(mouse.x()), Math.round(mouse.y()))) {
                     result.tooltipRenderer.accept(new Point(mouseX, mouseY), Tooltip::queue);
                 }
                 
                 if (result.renderer != null) {
-                    graphics.pose().pushPose();
-                    if (!stable || !target.equals(bounds)) {
-                        graphics.pose().translate(0, 0, 600);
-                    }
-                    graphics.pose().translate(xOffset(), yOffset(), 0);
-                    graphics.pose().scale(xScale(), yScale(), 1.0F);
+                    graphics.pose().pushMatrix();
+                    graphics.pose().translate(xOffset(), yOffset());
+                    graphics.pose().scale(xScale(), yScale());
                     
-                    Rectangle transformedBounds = MatrixUtils.transform(MatrixUtils.inverse(graphics.pose().last().pose()), getBounds());
+                    Rectangle transformedBounds = MatrixUtils.transform(MatrixUtils.inverse(graphics.pose()), getBounds());
                     result.renderer.render(graphics, mouseX, mouseY, delta, widgets.get(), transformedBounds, display);
-                    graphics.pose().popPose();
+                    graphics.pose().popMatrix();
                 }
             } else {
-                graphics.pose().popPose();
+                graphics.pose().popMatrix();
             }
         }
     }

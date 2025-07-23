@@ -110,9 +110,8 @@ public interface AllREIConfigGroups {
             .add(CHEATS_AMOUNT);
     OptionGroup CHEATS_ADVANCED = make("cheats.advanced")
             .add(GIVE_COMMAND);
-    OptionGroup PERFORMANCE_RENDERING = make("performance.rendering")
-            .add(BATCHED_RENDERING)
-            /*.add(CACHED_RENDERING)*/;
+    /*OptionGroup PERFORMANCE_RENDERING = make("performance.rendering")
+            .add(CACHED_RENDERING);*/
     OptionGroup PERFORMANCE_RELOAD = make("performance.reload")
             .add(RELOAD_THREAD)
             .add(CACHED_DISPLAY_LOOKUP);

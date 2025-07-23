@@ -46,7 +46,7 @@ import java.util.Optional;
 public class ScreenOverlayImplForge extends ScreenOverlayImpl {
     @Override
     public void renderTooltipInner(Screen screen, GuiGraphics graphics, Tooltip tooltip, int mouseX, int mouseY) {
-        graphics.pose().pushPose();
+        graphics.pose().pushMatrix();
         EntryStack<?> stack = tooltip.getContextStack();
         ItemStack itemStack = stack.getType() == VanillaEntryTypes.ITEM ? stack.castValue() : ItemStack.EMPTY;
         List<Component> texts = CollectionUtils.filterAndMap(tooltip.entries(), Tooltip.Entry::isText, Tooltip.Entry::getAsText);
@@ -71,6 +71,6 @@ public class ScreenOverlayImplForge extends ScreenOverlayImpl {
         graphics.tooltipStack = itemStack;
         graphics.renderTooltipInternal(font, components, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE);
         graphics.tooltipStack = ItemStack.EMPTY;
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     }
 }

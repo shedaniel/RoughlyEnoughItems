@@ -41,10 +41,7 @@ public class ScreenWithMenu extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         super.render(graphics, mouseX, mouseY, delta);
         if (this.menu != null) {
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 400);
             this.menu.render(graphics, mouseX, mouseY, delta);
-            graphics.pose().popPose();
         }
     }
     

@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -243,7 +242,6 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             EntryHighlighter.render(graphics);
         }
         if (!hasSpace()) return;
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         this.renderWidgets(graphics, mouseX, mouseY, delta);
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             Screen screen = Minecraft.getInstance().screen;
@@ -304,15 +302,9 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
                 else if (widget instanceof OverlaySearchField field)
                     field.laterRender(graphics, mouseX, mouseY, delta);
             }
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 500);
             menuHolder.lateRender(graphics, mouseX, mouseY, delta);
-            graphics.pose().popPose();
             if (choosePageWidget != null) {
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, 0, 500);
                 graphics.fillGradient(0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight(), -1072689136, -804253680);
-                graphics.pose().popPose();
                 choosePageWidget.render(graphics, mouseX, mouseY, delta);
             }
         }
@@ -325,6 +317,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (REIRuntime.getInstance().isOverlayVisible()) {
             menuHolder.afterRender();
         }
+        graphics.renderDeferredTooltip();
     }
     
     public void renderTooltip(GuiGraphics graphics, Tooltip tooltip) {

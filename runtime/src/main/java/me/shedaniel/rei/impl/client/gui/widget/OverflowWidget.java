@@ -33,7 +33,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import net.minecraft.client.gui.GuiGraphics;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 @SuppressWarnings("UnstableApiUsage")
 public class OverflowWidget extends DelegateWidgetWithTranslate {
@@ -44,7 +44,7 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     private boolean dragging;
     
     public OverflowWidget(Rectangle bounds, WidgetWithBounds widget) {
-        super(widget, Matrix4f::new);
+        super(widget, Matrix3x2f::new);
         this.bounds = bounds;
         this.scale = ValueAnimator.ofFloat()
                 .setAs(1f);
@@ -55,11 +55,11 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     }
     
     @Override
-    protected Matrix4f translate() {
+    protected Matrix3x2f translate() {
         FloatingPoint translate = this.translate.value();
         float scale = 1 / Math.max(this.scale.floatValue(), 0.001f);
-        Matrix4f matrix = new Matrix4f().translate(bounds.getCenterX() + (float) translate.x * scale, bounds.getCenterY() + (float) translate.y * scale, 0);
-        matrix.mul(new Matrix4f().scale(scale, scale, 1));
+        Matrix3x2f matrix = new Matrix3x2f().translate(bounds.getCenterX() + (float) translate.x * scale, bounds.getCenterY() + (float) translate.y * scale);
+        matrix.mul(new Matrix3x2f().scale(scale, scale));
         return matrix;
     }
     

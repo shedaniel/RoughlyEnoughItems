@@ -41,7 +41,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -144,7 +144,7 @@ public class UncertainDisplayViewingScreen extends Screen {
             widget.render(graphics, int_1, int_2, float_1);
         }
         if (isSet) {
-            graphics.pose().pushPose();
+            graphics.pose().pushMatrix();
             updateFramePosition(float_1);
             int x = (int) (width / 2 - 205 + (200 * frame)) + 10;
             int y = height / 2 - 112 / 2 - 10;
@@ -152,7 +152,7 @@ public class UncertainDisplayViewingScreen extends Screen {
             graphics.fillGradient(x - 2, y - 4 + 126 - 2, x - 6 + 208- 10, y - 4 + 126, -1778384897, -1778384897);
             graphics.fillGradient(x - 4, y - 4, x - 4 + 2, y - 4 + 126, -1778384897, -1778384897);
             graphics.fillGradient(x - 4 + 208 - 2 - 10, y - 4, x - 4 + 208 - 10, y - 4 + 126, -1778384897, -1778384897);
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }
         graphics.disableScissor();
         button.render(graphics, int_1, int_2, float_1);
@@ -203,7 +203,7 @@ public class UncertainDisplayViewingScreen extends Screen {
         
         @Override
         public void render(GuiGraphics graphics, int i, int i1, float delta) {
-            graphics.blit(RenderType::guiTextured, type == DisplayScreenType.ORIGINAL ? DEFAULT : COMPOSITE, bounds.x + (type == DisplayScreenType.ORIGINAL ? 8 : 4), bounds.y + 4, bounds.width - 8, bounds.height - 8, 113, type == DisplayScreenType.ORIGINAL ? 16 : 27, 854 - 113 * 2, 480 - 27 * 2, 854, 480);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, type == DisplayScreenType.ORIGINAL ? DEFAULT : COMPOSITE, bounds.x + (type == DisplayScreenType.ORIGINAL ? 8 : 4), bounds.y + 4, bounds.width - 8, bounds.height - 8, 113, type == DisplayScreenType.ORIGINAL ? 16 : 27, 854 - 113 * 2, 480 - 27 * 2, 854, 480);
         }
         
         @Override

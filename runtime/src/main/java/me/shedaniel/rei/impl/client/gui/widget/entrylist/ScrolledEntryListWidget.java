@@ -33,7 +33,7 @@ import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
+import me.shedaniel.rei.impl.client.gui.widget.EntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.client.gui.GuiGraphics;
@@ -62,14 +62,14 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
     };
     
     @Override
-    protected void renderEntries(boolean fastEntryRendering, GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+    protected void renderEntries(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         graphics.enableScissor(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY());
         
         int entrySize = entrySize();
         int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) entrySize));
         int nextIndex = skip * innerBounds.width / entrySize;
         this.blockedCount = 0;
-        BatchedEntryRendererManager<EntryListStackEntry> helper = new BatchedEntryRendererManager<>();
+        EntryRendererManager<EntryListStackEntry> helper = new EntryRendererManager<>();
         Int2ObjectMap<CollapsedStack> indexedCollapsedStack = getCollapsedStackIndexed();
         int collapsedStacksIndex = 0;
         Object2IntMap<CollapsedStack> collapsedStackIndices = new Object2IntOpenHashMap<>();
@@ -97,7 +97,7 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
                     List<EntryStack<?>> ingredient = (List<EntryStack<?>>) stack;
                     if (!ingredient.isEmpty()) {
                         entry.entries(ingredient);
-                        helper.addSlow(entry);
+                        helper.add(entry);
                     }
                 }
                 

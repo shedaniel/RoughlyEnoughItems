@@ -70,6 +70,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -421,19 +422,16 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     protected void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (background) {
             darkBackgroundAlpha.update(delta);
-            graphics.blit(RenderType::guiTextured, InternalTextures.CHEST_GUI_TEXTURE, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height, 256, 256);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height, 256, 256);
             if (darkBackgroundAlpha.value() > 0.0F) {
-                graphics.blit(RenderType::guiTextured, InternalTextures.CHEST_GUI_TEXTURE_DARK, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height, 256, 256, ARGB.white(darkBackgroundAlpha.value()));
+                graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE_DARK, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height, 256, 256, ARGB.white(darkBackgroundAlpha.value()));
             }
         }
     }
     
     protected void drawCurrentEntry(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         EntryStack<?> entry = getCurrentEntry();
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 100);
         entry.render(graphics, getInnerBounds(), mouseX, mouseY, delta);
-        graphics.pose().popPose();
     }
     
     protected void queueTooltip(GuiGraphics graphics, int mouseX, int mouseY, float delta) {

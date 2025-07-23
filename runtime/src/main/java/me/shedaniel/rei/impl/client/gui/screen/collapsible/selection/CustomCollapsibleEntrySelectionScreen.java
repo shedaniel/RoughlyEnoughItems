@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.screen.collapsible.selection;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
@@ -40,7 +39,6 @@ import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
@@ -50,13 +48,11 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -219,7 +215,6 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) entrySize()));
         int nextIndex = skip * innerBounds.width / entrySize();
         int i = nextIndex;
-        BatchedEntryRendererManager<InnerStackEntry> manager = new BatchedEntryRendererManager<>();
         for (; i < entryStacks.size(); i++) {
             EntryStack<?> stack = entryStacks.get(i);
             InnerStackEntry entry = entries.get(nextIndex);
@@ -227,30 +222,19 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
             if (entry.getBounds().y > bounds.getMaxY())
                 break;
             entry.entry(stack);
-            manager.add(entry);
+            entry.render(graphics, mouseX, mouseY, delta);
             nextIndex++;
         }
-        manager.render(graphics, mouseX, mouseY, delta);
         updatePosition(delta);
         scrolling.renderScrollBar(graphics, 0, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8F : 1F);
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 300);
         this.searchField.render(graphics, mouseX, mouseY, delta);
         this.selectAllButton.render(graphics, mouseX, mouseY, delta);
         this.selectNoneButton.render(graphics, mouseX, mouseY, delta);
         this.addButton.render(graphics, mouseX, mouseY, delta);
         this.removeButton.render(graphics, mouseX, mouseY, delta);
-        graphics.pose().popPose();
         
         graphics.disableScissor();
-        graphics.drawSpecial(source -> {
-            VertexConsumer buffer = source.getBuffer(RenderType.gui());
-            Matrix4f matrix = graphics.pose().last().pose();
-            buffer.addVertex(matrix, 0, bounds.y + 4, 0.0F).setColor(0, 0, 0, 0);
-            buffer.addVertex(matrix, width, bounds.y + 4, 0.0F).setColor(0, 0, 0, 0);
-            buffer.addVertex(matrix, width, bounds.y, 0.0F).setColor(0, 0, 0, 255);
-            buffer.addVertex(matrix, 0, bounds.y, 0.0F).setColor(0, 0, 0, 255);
-        });
+        graphics.fillGradient(0, bounds.y, width, bounds.y + 4, 0xFF000000, 0x00000000);
         
         this.backButton.render(graphics, mouseX, mouseY, delta);
         

@@ -265,7 +265,7 @@ public class WarningAndErrorScreen extends Screen {
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
-                graphics.renderTooltip(font, Component.literal("Click to open link."), mouseX, mouseY);
+                graphics.setTooltipForNextFrame(font, Component.literal("Click to open link."), mouseX, mouseY);
                 graphics.drawString(Minecraft.getInstance().font, characterVisitor -> {
                     return text.accept((charIndex, style, codePoint) -> characterVisitor.accept(charIndex, style.applyFormat(ChatFormatting.UNDERLINE), codePoint));
                 }, x + 5, y, 0xff1fc3ff);

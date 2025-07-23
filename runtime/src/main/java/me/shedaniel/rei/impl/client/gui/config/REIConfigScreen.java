@@ -419,7 +419,7 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
             this.widgets.remove(this.menuWidget);
         }
         this.menu = menu;
-        this.widgets.add(this.menuWidget = Widgets.withTranslate(menu, 0, 0, 300));
+        this.widgets.add(this.menuWidget = menu);
     }
     
     @Override

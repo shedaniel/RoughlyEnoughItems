@@ -249,10 +249,7 @@ public class ConfigureCategoriesScreen extends Screen {
             }
             
             Minecraft client = Minecraft.getInstance();
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 100);
             configuration.getCategory().getIcon().render(graphics, new Rectangle(x + 2, y, 16, 16), mouseY, mouseY, delta);
-            graphics.pose().popPose();
             int xPos = x + 22;
             {
                 Component title = configuration.getCategory().getTitle();
@@ -279,14 +276,16 @@ public class ConfigureCategoriesScreen extends Screen {
             {
                 Component subtitle = Component.translatable("config.roughlyenoughitems.configureCategories.visibility." + shown)
                         .withStyle(shown ? ChatFormatting.GREEN : ChatFormatting.RED);
-                int i = graphics.drawString(client.font, subtitle.getVisualOrderText(), xPos, y + 22, 8421504);
+                graphics.drawString(client.font, subtitle, xPos, y + 22, 8421504);
+                int i = xPos + client.font.width(subtitle);
                 visibilityToggleButton.getPoint().setLocation(i + 3, y + 22);
                 visibilityToggleButton.render(graphics, mouseX, mouseY, delta);
             }
             if (shown) {
                 Component subtitle = Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure." + filteringQuickCraftCategories.getOrDefault(configuration.getCategoryIdentifier(), configuration.isQuickCraftingEnabledByDefault()))
                         .withStyle(ChatFormatting.GRAY);
-                int i = graphics.drawString(client.font, subtitle.getVisualOrderText(), xPos, y + 32, 8421504);
+                graphics.drawString(client.font, subtitle, xPos, y + 32, 8421504);
+                int i = xPos + client.font.width(subtitle);
                 quickCraftToggleButton.getPoint().setLocation(i + 3, y + 32);
                 quickCraftToggleButton.render(graphics, mouseX, mouseY, delta);
             } else {

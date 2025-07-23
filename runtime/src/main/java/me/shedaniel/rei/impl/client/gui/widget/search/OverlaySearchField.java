@@ -194,27 +194,26 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         int background = 0xf0100010;
         int color1 = color.getColor();
         int color2 = color.darker(2).getColor();
-        if (!top) graphics.fillGradient(x, y - 1, x + width, y, 400, background, background);
+        if (!top) graphics.fillGradient(x, y - 1, x + width, y, background, background);
         if (top)
-            graphics.fillGradient(x, y + height, x + width, y + height + 1, 400, background, background);
-        graphics.fillGradient(x, y, x + width, y + height, 400, background, background);
-        graphics.fillGradient(x - 1, y, x, y + height, 400, background, background);
-        graphics.fillGradient(x + width, y, x + width + 1, y + height, 400, background, background);
-        graphics.fillGradient(x, y + 1, x + 1, y + height - 1, 400, color1, color2);
-        graphics.fillGradient(x + width - 1, y + 1, x + width, y + height - 1, 400, color1, color2);
-        if (!top) graphics.fillGradient(x, y, x + width, y + 1, 400, color1, color1);
-        if (top) graphics.fillGradient(x, y + height - 1, x + width, y + height, 400, color2, color2);
+            graphics.fillGradient(x, y + height, x + width, y + height + 1, background, background);
+        graphics.fillGradient(x, y, x + width, y + height, background, background);
+        graphics.fillGradient(x - 1, y, x, y + height, background, background);
+        graphics.fillGradient(x + width, y, x + width + 1, y + height, background, background);
+        graphics.fillGradient(x, y + 1, x + 1, y + height - 1, color1, color2);
+        graphics.fillGradient(x + width - 1, y + 1, x + width, y + height - 1, color1, color2);
+        if (!top) graphics.fillGradient(x, y, x + width, y + 1, color1, color1);
+        if (top) graphics.fillGradient(x, y + height - 1, x + width, y + height, color2, color2);
         
         if (hasProgress) {
             int progressWidth = (int) Math.round(width * this.progress.doubleValue());
-            graphics.fillGradient(x + 1, y + height - 3, x + progressWidth - 1, y + height - 1, 400, 0xffffffff, 0xffffffff);
+            graphics.fillGradient(x + 1, y + height - 3, x + progressWidth - 1, y + height - 1, 0xffffffff, 0xffffffff);
         }
         
-        graphics.pose().pushPose();
-        graphics.pose().translate(0.0D, 0.0D, 450.0D);
         for (int i = 0; i < sequences.size(); i++) {
             Pair<HintProvider, FormattedCharSequence> pair = sequences.get(i);
-            int lineWidth = graphics.drawString(font, pair.getSecond(), x + 3, y + 3 + font.lineHeight * i, -1);
+            graphics.drawString(font, pair.getSecond(), x + 3, y + 3 + font.lineHeight * i, -1);
+            int lineWidth = font.width(pair.getSecond());
             if (new Rectangle(x + 3, y + 3 + font.lineHeight * i, lineWidth, font.lineHeight).contains(mouseX, mouseY)) {
                 Tooltip tooltip = pair.getFirst().provideTooltip(new Point(mouseX, mouseY));
                 if (tooltip != null) {
@@ -240,8 +239,6 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                 button.action().accept(bounds);
             }
         }
-        
-        graphics.pose().popPose();
     }
     
     @Override

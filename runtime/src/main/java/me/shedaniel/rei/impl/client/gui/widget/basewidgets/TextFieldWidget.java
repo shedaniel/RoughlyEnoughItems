@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.clothconfig2.api.TickableWidget;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
@@ -34,14 +33,13 @@ import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.Collections;
 import java.util.List;
@@ -57,8 +55,8 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     protected int firstCharacterIndex;
     protected int cursorPos;
     protected int highlightPos;
-    protected int editableColor = 0xe0e0e0;
-    protected int notEditableColor = 0x707070;
+    protected int editableColor = 0xffe0e0e0;
+    protected int notEditableColor = 0xff707070;
     protected TextFormatter formatter = TextFormatter.DEFAULT;
     private Rectangle bounds;
     private String text = "";
@@ -425,7 +423,9 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
             
             if (!textClipped.isEmpty()) {
                 String string_2 = boolean_1 ? textClipped.substring(0, int_4) : textClipped;
-                int_8 = graphics.drawString(this.font, this.formatter.format(this, string_2, this.firstCharacterIndex), x, y, color);
+                FormattedCharSequence sequence = this.formatter.format(this, string_2, this.firstCharacterIndex);
+                graphics.drawString(this.font, sequence, x, y, color);
+                int_8 = x + this.font.width(sequence);
             }
             
             boolean isCursorInsideText = this.cursorPos < this.text.length() || this.text.length() >= this.getMaxLength();
@@ -485,18 +485,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
         }
         
         int finalX1 = x1, finalX2 = x2, finalY1 = y1, finalY2 = y2;
-        graphics.drawSpecial(source -> {
-            int r = (color >> 16 & 255);
-            int g = (color >> 8 & 255);
-            int b = (color & 255);
-            
-            VertexConsumer buffer = source.getBuffer(RenderType.gui());
-            Matrix4f matrix = graphics.pose().last().pose();
-            buffer.addVertex(matrix, finalX1, finalY2, 50f).setColor(r, g, b, 120);
-            buffer.addVertex(matrix, finalX2, finalY2, 50f).setColor(r, g, b, 120);
-            buffer.addVertex(matrix, finalX2, finalY1, 50f).setColor(r, g, b, 120);
-            buffer.addVertex(matrix, finalX1, finalY1, 50f).setColor(r, g, b, 120);
-        });
+        graphics.fillGradient(x1, y1, x2, y2, ARGB.color(120, color), ARGB.color(120, color));
     }
     
     @Override

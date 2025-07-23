@@ -36,7 +36,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import static me.shedaniel.rei.api.client.gui.widgets.Widget.scissor;
 
@@ -54,7 +54,7 @@ public class ConfigCategoryEntryWidget {
         return Widgets.concatWithBounds(
                 bounds,
                 label,
-                hasDescription ? Widgets.withTranslate(Widgets.withTranslate(descriptionLabel, new Matrix4f().scale(0.75f, 0.75f, 0.75f)), 21, 5 + 10, 0) : Widgets.noOp(),
+                hasDescription ? Widgets.withTranslate(Widgets.withTranslate(descriptionLabel, new Matrix3x2f().scale(0.75f, 0.75f)), 21, 5 + 10) : Widgets.noOp(),
                 Widgets.createTexturedWidget(category.getIcon(), new Rectangle(3, hasDescription ? 5 : 3, 16, 16), 0, 0, 1, 1, 1, 1)
         );
     }
@@ -77,15 +77,15 @@ public class ConfigCategoryEntryWidget {
         try (CloseableScissors scissors = scissor(graphics, new Rectangle(x, y, width, y + 9))) {
             Font font = Minecraft.getInstance().font;
             int textWidth = font.width(text);
-            textWidth = MatrixUtils.transform(MatrixUtils.inverse(graphics.pose().last().pose()), new Rectangle(0, 0, textWidth, 100)).width;
-            width = MatrixUtils.transform(MatrixUtils.inverse(graphics.pose().last().pose()), new Rectangle(0, 0, width, 100)).width;
+            textWidth = MatrixUtils.transform(MatrixUtils.inverse(graphics.pose()), new Rectangle(0, 0, textWidth, 100)).width;
+            width = MatrixUtils.transform(MatrixUtils.inverse(graphics.pose()), new Rectangle(0, 0, width, 100)).width;
             if (textWidth > width && !ConfigUtils.isReducedMotion()) {
-                graphics.pose().pushPose();
+                graphics.pose().pushMatrix();
                 float textX = (System.currentTimeMillis() % ((textWidth + 10) * textWidth / 3)) / (float) textWidth * 3;
-                graphics.pose().translate(-textX, 0, 0);
+                graphics.pose().translate(-textX, 0);
                 graphics.drawString(font, text, x + width - textWidth - 10, y, color);
                 graphics.drawString(font, text, x + width, y, color);
-                graphics.pose().popPose();
+                graphics.pose().popMatrix();
             } else {
                 graphics.drawString(font, text, x, y, color);
             }

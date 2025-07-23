@@ -70,7 +70,7 @@ public interface AllREIConfigCategories {
             .add(CHEATS_CHEATS)
             .add(CHEATS_ADVANCED);
     OptionCategory PERFORMANCE = make("performance")
-            .add(PERFORMANCE_RENDERING)
+            /*.add(PERFORMANCE_RENDERING)*/
             .add(PERFORMANCE_RELOAD);
     OptionCategory DEBUG = make("debug")
             .add(DEBUG_PERFORMANCE);

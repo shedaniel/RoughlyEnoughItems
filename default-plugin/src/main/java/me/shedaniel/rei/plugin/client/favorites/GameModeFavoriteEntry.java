@@ -105,21 +105,21 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 int color = bounds.contains(mouseX, mouseY) ? 0xFFEEEEEE : 0xFFAAAAAA;
                 if (bounds.width > 4 && bounds.height > 4) {
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY(), 0);
-                    graphics.pose().scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f, 1);
+                    graphics.pose().pushMatrix();
+                    graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY());
+                    graphics.pose().scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f);
                     renderGameModeText(graphics, type, 0, 0, color);
-                    graphics.pose().popPose();
+                    graphics.pose().popMatrix();
                 }
             }
             
             private void renderGameModeText(GuiGraphics graphics, GameType type, int centerX, int centerY, int color) {
                 Component s = Component.translatable("text.rei.short_gamemode." + type.getName());
                 Font font = Minecraft.getInstance().font;
-                graphics.pose().pushPose();
-                graphics.pose().translate(centerX - font.width(s) / 2f + 0.5f, centerY - 3.5f, 0);
+                graphics.pose().pushMatrix();
+                graphics.pose().translate(centerX - font.width(s) / 2f + 0.5f, centerY - 3.5f);
                 graphics.drawString(font, s, 0, 0, color, false);
-                graphics.pose().popPose();
+                graphics.pose().popMatrix();
             }
             
             @Override

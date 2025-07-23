@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
@@ -157,7 +156,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         this.widgets.addAll(setupDisplay);
         Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
-            this.widgets.add(Widgets.withTranslate(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), Component.literal(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category), 0, 0, 100));
+            this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), Component.literal(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category));
 
         this.initTabs(this.bounds.width);
         this.widgets.addAll(this.tabs.widgets());
@@ -310,7 +309,6 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         super.render(graphics, mouseX, mouseY, delta);
         getOverlay().render(graphics, mouseX, mouseY, delta);
         for (Widget widget : widgets) {
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             widget.render(graphics, mouseX, mouseY, delta);
         }
     }
@@ -377,7 +375,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         @Override
         public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             int yOffset = 0;
-            graphics.pose().pushPose();
+            graphics.pose().pushMatrix();
             graphics.enableScissor(scrolling.getBounds().x, scrolling.getBounds().y, scrolling.getBounds().getMaxX(), scrolling.getBounds().getMaxY());
             for (Button button : buttonList) {
                 button.getBounds().y = scrollListBounds.y + 1 + yOffset - scrolling.scrollAmountInt();
@@ -394,7 +392,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             }
             scrolling.renderScrollBar(graphics, 0, scrollBarAlpha);
             graphics.disableScissor();
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }
         
         @Override

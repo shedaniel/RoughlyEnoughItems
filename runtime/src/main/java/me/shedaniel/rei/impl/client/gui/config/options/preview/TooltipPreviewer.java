@@ -36,7 +36,6 @@ import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigOptions;
 import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
@@ -71,35 +70,28 @@ public class TooltipPreviewer {
             int minHeight = components.stream().mapToInt(component -> components.get(0) == component && components.size() >= 2 ? 2 + 10 : 10).sum() + 4;
             
             int tX = Math.max(6, (width - minWidth) / 2), tWidth = Math.min(width - 12, minWidth), tY = 24 + 4, tHeight = Math.min(minHeight, height == null ? 100000 : height.getAsInt() - tY - 4);
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, height == null ? 4 : Math.max(0, (height.getAsInt() - (tY + tHeight)) / 2), 400);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(0, height == null ? 4 : Math.max(0, (height.getAsInt() - (tY + tHeight)) / 2));
             bounds.setSize(width, height == null ? tY + tHeight + 12 : height.getAsInt());
             stack.getRenderer().render(stack, graphics, new Rectangle(width / 2 - 12, 0, 24, 24), mouseX, mouseY, delta);
             
-            graphics.pose().translate(0, 0, -400);
             int finalTY = tY;
-            graphics.drawSpecial(source -> {
-                VertexConsumer buffer = source.getBuffer(RenderType.gui());
-                Matrix4f matrix4f = graphics.pose().last().pose();
-                fillGradient(matrix4f, buffer, tX - 3, finalTY - 4, tX + tWidth + 3, finalTY - 3, 400, -267386864, -267386864);
-                fillGradient(matrix4f, buffer, tX - 3, finalTY + tHeight + 3, tX + tWidth + 3, finalTY + tHeight + 4, 400, -267386864, -267386864);
-                fillGradient(matrix4f, buffer, tX - 3, finalTY - 3, tX + tWidth + 3, finalTY + tHeight + 3, 400, -267386864, -267386864);
-                fillGradient(matrix4f, buffer, tX - 4, finalTY - 3, tX - 3, finalTY + tHeight + 3, 400, -267386864, -267386864);
-                fillGradient(matrix4f, buffer, tX + tWidth + 3, finalTY - 3, tX + tWidth + 4, finalTY + tHeight + 3, 400, -267386864, -267386864);
-                fillGradient(matrix4f, buffer, tX - 3, finalTY - 3 + 1, tX - 3 + 1, finalTY + tHeight + 3 - 1, 400, 1347420415, 1344798847);
-                fillGradient(matrix4f, buffer, tX + tWidth + 2, finalTY - 3 + 1, tX + tWidth + 3, finalTY + tHeight + 3 - 1, 400, 1347420415, 1344798847);
-                fillGradient(matrix4f, buffer, tX - 3, finalTY - 3, tX + tWidth + 3, finalTY - 3 + 1, 400, 1347420415, 1347420415);
-                fillGradient(matrix4f, buffer, tX - 3, finalTY + tHeight + 2, tX + tWidth + 3, finalTY + tHeight + 3, 400, 1344798847, 1344798847);
-            });
-            
-            graphics.pose().translate(0, 0, 400);
+            graphics.fillGradient(tX - 3, finalTY - 4, tX + tWidth + 3, finalTY - 3, -267386864, -267386864);
+            graphics.fillGradient(tX - 3, finalTY + tHeight + 3, tX + tWidth + 3, finalTY + tHeight + 4, -267386864, -267386864);
+            graphics.fillGradient(tX - 3, finalTY - 3, tX + tWidth + 3, finalTY + tHeight + 3, -267386864, -267386864);
+            graphics.fillGradient(tX - 4, finalTY - 3, tX - 3, finalTY + tHeight + 3, -267386864, -267386864);
+            graphics.fillGradient(tX + tWidth + 3, finalTY - 3, tX + tWidth + 4, finalTY + tHeight + 3, -267386864, -267386864);
+            graphics.fillGradient(tX - 3, finalTY - 3 + 1, tX - 3 + 1, finalTY + tHeight + 3 - 1, 1347420415, 1344798847);
+            graphics.fillGradient(tX + tWidth + 2, finalTY - 3 + 1, tX + tWidth + 3, finalTY + tHeight + 3 - 1, 1347420415, 1344798847);
+            graphics.fillGradient(tX - 3, finalTY - 3, tX + tWidth + 3, finalTY - 3 + 1, 1347420415, 1347420415);
+            graphics.fillGradient(tX - 3, finalTY + tHeight + 2, tX + tWidth + 3, finalTY + tHeight + 3, 1344798847, 1344798847);
             
             for (int i = 0; i < components.size(); i++) {
                 graphics.drawString(Minecraft.getInstance().font, components.get(i), tX + 2, tY + 2, -1, false);
                 tY += 10 + (i == 0 ? 2 : 0);
             }
             
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }), bounds);
     }
     

@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Point;
@@ -46,7 +45,7 @@ import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.ApiStatus;
@@ -114,13 +113,9 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
         if (renderer != null) {
             try (CloseableScissors scissors = Widget.scissor(graphics, new Rectangle(bounds.x, bounds.y + 2, bounds.width, (selected ? bounds.height + 2 : bounds.height - 2)))) {
                 darkBackgroundAlpha.update(delta);
-                graphics.blit(RenderType::guiTextured, InternalTextures.CHEST_GUI_TEXTURE, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 2), 256, 256, ARGB.white(opacity));
-                graphics.blit(RenderType::guiTextured, InternalTextures.CHEST_GUI_TEXTURE_DARK, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 2), 256, 256, ARGB.white(darkBackgroundAlpha.value() * opacity));
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, opacity);
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, 0, 100);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 2), 256, 256, ARGB.white(opacity));
+                graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE_DARK, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 2), 256, 256, ARGB.white(darkBackgroundAlpha.value() * opacity));
                 renderer.render(graphics, new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
-                graphics.pose().popPose();
             }
             if (containsMouse(mouseX, mouseY) && category != null) {
                 drawTooltip();

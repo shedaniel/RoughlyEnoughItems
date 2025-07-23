@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.fabric;
 
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -64,13 +63,8 @@ public class ScreenOverlayImplFabric extends ScreenOverlayImpl {
                 
                 if (component instanceof ClientTooltipComponent client) {
                     lines.add(client);
-                    continue;
-                }
-                
-                try {
-                    ClientInternals.getClientTooltipComponent(lines, component);
-                } catch (Throwable exception) {
-                    throw new IllegalArgumentException("Failed to add tooltip component! " + component + ", Class: " + (component == null ? null : component.getClass().getCanonicalName()), exception);
+                } else {
+                    lines.add(ClientTooltipComponent.create(component));
                 }
             }
         }
@@ -81,8 +75,8 @@ public class ScreenOverlayImplFabric extends ScreenOverlayImpl {
         if (lines.isEmpty()) {
             return;
         }
-        graphics.pose().pushPose();
-        graphics.renderTooltipInternal(Minecraft.getInstance().font, lines, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, tooltipStyle);
-        graphics.pose().popPose();
+        graphics.pose().pushMatrix();
+        graphics.setTooltipForNextFrameInternal(Minecraft.getInstance().font, lines, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, tooltipStyle, false);
+        graphics.pose().popMatrix();
     }
 }

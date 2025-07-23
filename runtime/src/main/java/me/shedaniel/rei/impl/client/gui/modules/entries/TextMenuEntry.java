@@ -64,7 +64,7 @@ public class TextMenuEntry extends AbstractMenuEntry {
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        graphics.drawString(font, lastText = text.get(), getX() + 2, getY() + 2, 8947848, false);
+        graphics.drawString(font, lastText = text.get(), getX() + 2, getY() + 2, 0xFF888888, false);
         this.lastTextWidth = Math.max(0, font.width(lastText));
     }
 }

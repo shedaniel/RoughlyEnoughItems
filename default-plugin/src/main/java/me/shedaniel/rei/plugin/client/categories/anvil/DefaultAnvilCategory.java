@@ -73,7 +73,7 @@ public class DefaultAnvilCategory implements DisplayCategory<DefaultAnvilDisplay
                 Component component = Component.translatable("container.repair.cost", display.getCost().getAsInt());
                 int x = startPoint.x + 102 - font.width(component) - 2;
                 graphics.fill(x - 2, startPoint.y + 28, startPoint.x + 102, startPoint.y + 28 + 12, 0x4f000000);
-                graphics.drawString(font, component, x, startPoint.y + 28 + 2, 0x80ff20);
+                graphics.drawString(font, component, x, startPoint.y + 28 + 2, 0xff80ff20);
             }));
         }
         return widgets;

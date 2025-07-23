@@ -64,7 +64,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -75,7 +74,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
@@ -404,38 +402,34 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                 int entrySize = EntryListWidget.entrySize();
                 int w = Math.max(1, MAX_WIDTH / entrySize);
                 int i = 0;
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, 0, 50);
                 for (EntryStack<?> entry : widget.getEntries()) {
                     int x1 = x + (i % w) * entrySize;
                     int y1 = y + 13 + (i / w) * entrySize;
                     i++;
                     if (i / w > 5) {
                         Component text = Component.literal("+" + (widget.getEntries().size() - w * 6 + 1)).withStyle(ChatFormatting.GRAY);
-                        graphics.drawSpecial(source -> {
-                            font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, graphics.pose().last().pose(), source, Font.DisplayMode.NORMAL, 0, 15728880);
-                        });
-                        graphics.flush();
+                        graphics.pose().pushMatrix();
+                        graphics.pose().translate(x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1);
+                        graphics.drawString(font, text, 0, 0, -1, true);
+                        graphics.pose().popMatrix();
                         break;
                     } else {
                         entry.render(graphics, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
                     }
                 }
-                graphics.pose().popPose();
             }
             
             @Override
-            public void renderText(Font font, int x, int y, Matrix4f pose, MultiBufferSource.BufferSource buffers) {
-                font.drawInBatch(Component.translatable("text.rei.accepts").withStyle(ChatFormatting.GRAY),
-                        x, y + 2, -1, true, pose, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
+            public void renderText(GuiGraphics graphics, Font font, int x, int y) {
+                graphics.drawString(font, Component.translatable("text.rei.accepts").withStyle(ChatFormatting.GRAY), x, y + 2, -1);
                 
                 if (widget.tagMatch != null) {
                     int entrySize = EntryListWidget.entrySize();
                     int w = Math.max(1, MAX_WIDTH / entrySize);
-                    font.drawInBatch(Component.translatable("text.rei.tag_accept", widget.tagMatch.toString())
+                    graphics.drawString(font, Component.translatable("text.rei.tag_accept", widget.tagMatch.toString())
                                     .withStyle(ChatFormatting.GRAY),
                             x, y + 16 + Math.min(6, Mth.ceil(widget.getEntries().size() / (float) w)) * entrySize,
-                            -1, true, pose, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
+                            -1);
                 }
             }
         }

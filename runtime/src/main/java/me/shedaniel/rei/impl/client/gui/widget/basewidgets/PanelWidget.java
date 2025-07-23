@@ -33,7 +33,7 @@ import me.shedaniel.rei.api.client.gui.widgets.utils.PanelTextures;
 import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.ApiStatus;
@@ -114,7 +114,7 @@ public final class PanelWidget extends Panel {
     
     public void renderBackground(GuiGraphics graphics, int x, int y, int width, int height, boolean dark, float alpha, float red, float green, float blue) {
         ResourceLocation texture = dark ? this.darkTexture : this.texture;
-        graphics.blitSprite(RenderType::guiTextured, texture, x, y, width, height, ARGB.colorFromFloat(alpha, red, green, blue));
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, texture, x, y, width, height, ARGB.colorFromFloat(alpha, red, green, blue));
     }
     
     @Override

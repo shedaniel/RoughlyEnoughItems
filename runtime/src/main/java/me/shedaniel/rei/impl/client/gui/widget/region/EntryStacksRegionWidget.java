@@ -46,7 +46,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
+import me.shedaniel.rei.impl.client.gui.widget.EntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -108,7 +108,6 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         if (bounds.isEmpty()) return;
         
         int entrySize = entrySize();
-        boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
         updateEntriesPosition(entry -> true);
         for (RealRegionEntry<T> entry : entries.values()) {
             entry.update(delta);
@@ -130,7 +129,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         Stream<RegionEntryWidget<T>> entryStream = this.entriesList.stream()
                 .filter(entry -> entry.getBounds().getMaxY() >= this.bounds.getY() && entry.getBounds().y <= this.bounds.getMaxY());
         
-        new BatchedEntryRendererManager<>(entryStream.collect(Collectors.toList()))
+        new EntryRendererManager<>(entryStream.collect(Collectors.toList()))
                 .render(graphics, mouseX, mouseY, delta);
         
         updatePosition(delta);

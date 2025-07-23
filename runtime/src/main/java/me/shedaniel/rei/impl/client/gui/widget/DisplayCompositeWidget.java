@@ -186,31 +186,31 @@ public class DisplayCompositeWidget extends DelegateWidgetWithBounds implements 
                 this.onFavoritesRegion = false;
             }
             
-            graphics.pose().pushPose();
+            graphics.pose().pushMatrix();
             if (bounds.width <= Math.max(18, this.bounds.width / 2 - 6) && bounds.height <= Math.max(18, this.bounds.height / 2 - 6) && this.onFavoritesRegion) {
                 this.panel.texture(PanelTextures.LIGHTER);
                 this.panel.getBounds().setBounds(bounds);
                 this.panel.render(graphics, mouseX, mouseY, delta);
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, 0.5, 0);
+                graphics.pose().pushMatrix();
+                graphics.pose().translate(0, 0.5f);
                 this.slot.getBounds().setBounds(bounds.getCenterX() - 7, bounds.getCenterY() - 7, 14, 14);
                 this.slot.render(graphics, mouseX, mouseY, delta);
-                graphics.pose().popPose();
+                graphics.pose().popMatrix();
             } else {
                 this.panel.texture(ConfigObject.getInstance().getRecipeBorderType());
-                graphics.pose().pushPose();
-                graphics.pose().translate(bounds.getX(), bounds.getY(), 1);
-                graphics.pose().scale(bounds.width / (float) this.bounds.getWidth(), bounds.height / (float) this.bounds.getHeight(), 1);
-                graphics.pose().translate(-this.bounds.getX(), -this.bounds.getY(), 0);
+                graphics.pose().pushMatrix();
+                graphics.pose().translate(bounds.getX(), bounds.getY());
+                graphics.pose().scale(bounds.width / (float) this.bounds.getWidth(), bounds.height / (float) this.bounds.getHeight());
+                graphics.pose().translate(-this.bounds.getX(), -this.bounds.getY());
                 this.panel.getBounds().setBounds(this.bounds);
                 this.panel.render(graphics, mouseX, mouseY, delta);
-                graphics.pose().popPose();
-                graphics.pose().translate(bounds.getX(), bounds.getY(), 1);
-                graphics.pose().scale(bounds.width / (float) this.bounds.getWidth(), bounds.height / (float) this.bounds.getHeight(), 1);
-                graphics.pose().translate(-this.bounds.getX(), -this.bounds.getY(), 0);
+                graphics.pose().popMatrix();
+                graphics.pose().translate(bounds.getX(), bounds.getY());
+                graphics.pose().scale(bounds.width / (float) this.bounds.getWidth(), bounds.height / (float) this.bounds.getHeight());
+                graphics.pose().translate(-this.bounds.getX(), -this.bounds.getY());
                 widget.render(graphics, -1000, -1000, delta);
             }
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }
         
         @Override

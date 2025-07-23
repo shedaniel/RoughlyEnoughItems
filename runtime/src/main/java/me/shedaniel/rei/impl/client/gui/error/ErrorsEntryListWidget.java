@@ -35,7 +35,7 @@ import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -47,8 +47,8 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
-import org.joml.Vector4f;
+import org.joml.Matrix3x2f;
+import org.joml.Vector3f;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -181,12 +181,12 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
     public static class ScaledEntry extends Entry implements ContainerEventHandler {
         public final Entry entry;
         public final float scale;
-        public final Matrix4f transform;
+        public final Matrix3x2f transform;
         
         public ScaledEntry(Entry entry, float scale) {
             this.entry = entry;
             this.scale = scale;
-            this.transform = new Matrix4f().scale(scale, scale, scale);
+            this.transform = new Matrix3x2f().scale(scale, scale);
         }
         
         public Entry getEntry() {
@@ -194,22 +194,22 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
             return entry;
         }
         
-        private Vector4f transformMouse(double mouseX, double mouseY) {
-            Vector4f mouse = new Vector4f((float) mouseX, (float) mouseY, 0, 1);
+        private Vector3f transformMouse(double mouseX, double mouseY) {
+            Vector3f mouse = new Vector3f((float) mouseX, (float) mouseY, 1);
             transform.transform(mouse);
             return mouse;
         }
         
         @Override
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            Vector4f mouse = transformMouse(mouseX, mouseY);
-            graphics.pose().pushPose();
-            graphics.pose().last().pose().mul(transform);
+            Vector3f mouse = transformMouse(mouseX, mouseY);
+            graphics.pose().pushMatrix();
+            graphics.pose().mul(transform);
             
-            Vector4f pos = new Vector4f(x, y, 0, 1);
-            pos.mul(new Matrix4f().scale(1 / scale, 1 / scale, 1 / scale));
+            Vector3f pos = new Vector3f(x, y, 1);
+            pos.mul(new Matrix3x2f().scale(1 / scale, 1 / scale));
             getEntry().render(graphics, index, Math.round(pos.y()), Math.round(pos.x()), Math.round(entryWidth / scale), Math.round(entryHeight / scale), (int) mouse.x(), (int) mouse.y(), isSelected, delta);
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }
         
         @Override
@@ -229,31 +229,31 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         
         @Override
         public boolean isMouseOver(double mouseX, double mouseY) {
-            Vector4f mouse = transformMouse(mouseX, mouseY);
+            Vector3f mouse = transformMouse(mouseX, mouseY);
             return super.isMouseOver(mouse.x(), mouse.y());
         }
         
         @Override
         public boolean mouseClicked(double d, double e, int i) {
-            Vector4f mouse = transformMouse(d, e);
+            Vector3f mouse = transformMouse(d, e);
             return super.mouseClicked(mouse.x(), mouse.y(), i);
         }
         
         @Override
         public boolean mouseReleased(double d, double e, int i) {
-            Vector4f mouse = transformMouse(d, e);
+            Vector3f mouse = transformMouse(d, e);
             return super.mouseReleased(mouse.x(), mouse.y(), i);
         }
         
         @Override
         public boolean mouseDragged(double d, double e, int i, double f, double g) {
-            Vector4f mouse = transformMouse(d, e);
+            Vector3f mouse = transformMouse(d, e);
             return super.mouseDragged(mouse.x(), mouse.y(), i, f, g);
         }
         
         @Override
         public boolean mouseScrolled(double d, double e, double amountX, double amountY) {
-            Vector4f mouse = transformMouse(d, e);
+            Vector3f mouse = transformMouse(d, e);
             return super.mouseScrolled(mouse.x(), mouse.y(), amountX, amountY);
         }
         
@@ -316,7 +316,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
                 if (style.getHoverEvent() != null) {
                     HoverEvent hoverEvent = style.getHoverEvent();
                     if (hoverEvent instanceof HoverEvent.ShowText(Component component)) {
-                        graphics.renderTooltip(Minecraft.getInstance().font, Minecraft.getInstance().font.split(component, Math.max(this.width / 2, 200)), x, y);
+                        graphics.setTooltipForNextFrame(Minecraft.getInstance().font, Minecraft.getInstance().font.split(component, Math.max(this.width / 2, 200)), x, y);
                     }
                 }
             }
@@ -400,7 +400,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
             width = (entryWidth - 6) / 2;
             this.height = (int) ((double) width * ((double) image.getHeight() / (double) image.getWidth()));
             graphics.fill(x, y, x + width, y + height + 2, 0xFFFFFFFF);
-            graphics.innerBlit(RenderType::guiTextured, id, x + 1, x + width - 1, y + 1, y + height + 1, 0, 0, 1, 0, 1);
+            graphics.innerBlit(RenderPipelines.GUI_TEXTURED, id, x + 1, x + width - 1, y + 1, y + height + 1, 0, 0, 1, 0, 1);
         }
         
         @Override
@@ -425,7 +425,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
-                graphics.renderTooltip(Minecraft.getInstance().font, Component.literal("Click to open link."), mouseX, mouseY);
+                graphics.setTooltipForNextFrame(Minecraft.getInstance().font, Component.literal("Click to open link."), mouseX, mouseY);
                 int yy = y;
                 for (FormattedCharSequence textSp : textSplit) {
                     FormattedCharSequence underlined = characterVisitor -> {

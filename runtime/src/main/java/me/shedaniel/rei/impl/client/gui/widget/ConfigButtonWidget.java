@@ -46,7 +46,7 @@ import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.modules.entries.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
@@ -87,10 +87,7 @@ public class ConfigButtonWidget {
                 .focusable(false)
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y));
         Widget overlayWidget = Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 1);
-            graphics.blit(RenderType::guiTextured, InternalTextures.CHEST_GUI_TEXTURE, bounds.x + 3, bounds.y + 3, 0, 0, 14, 14, 256, 256);
-            graphics.pose().popPose();
+            graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, bounds.x + 3, bounds.y + 3, 0, 0, 14, 14, 256, 256);
         });
         return Widgets.concat(configButton, overlayWidget);
     }

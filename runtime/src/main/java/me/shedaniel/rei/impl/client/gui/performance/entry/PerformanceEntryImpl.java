@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.performance.entry;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.rei.impl.client.gui.performance.PerformanceScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -48,7 +47,6 @@ public class PerformanceEntryImpl extends PerformanceScreen.PerformanceEntry {
     }
     
     public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         graphics.drawString(Minecraft.getInstance().font, this.name.getVisualOrderText(), x, y + 6, -1);
         FormattedCharSequence timeText = PerformanceScreen.formatTime(time, false);
         graphics.drawString(Minecraft.getInstance().font, timeText, x + entryWidth - 6 - 4 - Minecraft.getInstance().font.width(timeText), y + 6, -1);

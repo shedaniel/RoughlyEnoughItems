@@ -36,7 +36,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -286,6 +286,6 @@ public class ButtonWidget extends Button {
     protected void renderBackground(GuiGraphics graphics, int x, int y, int width, int height, boolean focused, boolean dark, Color color) {
         WidgetSprites sprites = dark ? DARK_SPRITES : SPRITES;
         ResourceLocation texture = sprites.get(this.isEnabled(), focused);
-        graphics.blitSprite(RenderType::guiTextured, texture, x, y, width, height, color.getColor());
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, texture, x, y, width, height, color.getColor());
     }
 }

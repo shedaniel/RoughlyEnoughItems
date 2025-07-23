@@ -104,11 +104,8 @@ public class DefaultFuelCategory implements DisplayCategory<DefaultFuelDisplay> 
             
             @Override
             public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, 0, 50);
                 slot.getBounds().setLocation(bounds.x + 4, bounds.y + 2);
                 slot.render(graphics, mouseX, mouseY, delta);
-                graphics.pose().popPose();
                 graphics.drawString(Minecraft.getInstance().font, text.getVisualOrderText(), bounds.x + 25, bounds.y + 8, -1);
             }
         };

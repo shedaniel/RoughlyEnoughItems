@@ -131,8 +131,6 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
             List<EntryStack<?>> stacks = collapsedStack.getIngredient();
             float fullSize = bounds.getWidth();
             
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 10);
             
             for (int i = stacks.size() - 1; i >= 0; i--) {
                 EntryStack<?> stack = stacks.get(i);
@@ -148,11 +146,7 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
                 double scaledSize = value.width * fullSize;
                 
                 stack.render(graphics, new Rectangle(x - scaledSize / 2, y - scaledSize / 2, scaledSize, scaledSize), mouseX, mouseY, delta);
-                
-                graphics.pose().translate(0, 0, 10);
             }
-            
-            graphics.pose().popPose();
         } else {
             super.drawCurrentEntry(graphics, mouseX, mouseY, delta);
         }

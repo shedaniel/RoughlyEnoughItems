@@ -150,7 +150,7 @@ public class CreditsEntryListWidget extends UpdatedListWidget<CreditsEntryListWi
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
-                graphics.renderTooltip(Minecraft.getInstance().font, Component.literal("Click to open link."), mouseX, mouseY);
+                graphics.setTooltipForNextFrame(Minecraft.getInstance().font, Component.literal("Click to open link."), mouseX, mouseY);
                 int yy = y;
                 for (FormattedCharSequence textSp : textSplit) {
                     FormattedCharSequence underlined = characterVisitor -> {

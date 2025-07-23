@@ -79,7 +79,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -118,7 +118,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                 
                 @Override
                 public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                    graphics.innerBlit(RenderType::guiTextured, id, bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), 0, 0, 1, 0, 1);
+                    graphics.innerBlit(RenderPipelines.GUI_TEXTURED, id, bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), 0, 0, 1, 0, 1);
                 }
                 
                 @Override
@@ -361,17 +361,17 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
             return new Renderer() {
                 @Override
                 public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(bounds.getX(), bounds.getY(), 1);
-                    graphics.pose().scale(bounds.width / (float) panel.getBounds().getWidth(), bounds.height / (float) panel.getBounds().getHeight(), 1);
+                    graphics.pose().pushMatrix();
+                    graphics.pose().translate(bounds.getX(), bounds.getY());
+                    graphics.pose().scale(bounds.width / (float) panel.getBounds().getWidth(), bounds.height / (float) panel.getBounds().getHeight());
                     panel.render(graphics, mouseX, mouseY, delta);
-                    graphics.pose().popPose();
+                    graphics.pose().popMatrix();
                     if (bounds.width > 4 && bounds.height > 4) {
-                        graphics.pose().pushPose();
-                        graphics.pose().translate(0, 0.5, 0);
+                        graphics.pose().pushMatrix();
+                        graphics.pose().translate(0, 0.5f);
                         slot.getBounds().setBounds(bounds.x + 2, bounds.y + 2, bounds.width - 4, bounds.height - 4);
                         slot.render(graphics, mouseX, mouseY, delta);
-                        graphics.pose().popPose();
+                        graphics.pose().popMatrix();
                     }
                 }
                 

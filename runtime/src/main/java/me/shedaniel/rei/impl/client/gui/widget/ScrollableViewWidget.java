@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,7 +62,7 @@ public class ScrollableViewWidget {
         }
         
         widgets.add(Widgets.scissored(scrollingRef[0].getScissorBounds(), Widgets.withTranslate(inner,
-                () -> new Matrix4f().translate(0, -scrollingRef[0].scrollAmountInt(), 0))));
+                () -> new Matrix3x2f().translate(0, -scrollingRef[0].scrollAmountInt()))));
         widgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             scrollingRef[0].updatePosition(delta);
             scrollingRef[0].renderScrollBar(graphics);
