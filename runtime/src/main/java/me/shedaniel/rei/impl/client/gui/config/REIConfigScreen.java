@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.config;
 
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.architectury.platform.Platform;
 import dev.architectury.utils.value.IntValue;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
@@ -57,9 +56,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -134,18 +131,6 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     @Override
     public void init() {
         super.init();
-        
-        if (true) {
-            LocalPlayer player = Minecraft.getInstance().player;
-            if (player != null) {
-                player.displayClientMessage(Component.literal("Alpha REI Build: Config not yet implemented!"), false);
-                player.displayClientMessage(Component.literal("Click here to open the config file...").withStyle(ChatFormatting.UNDERLINE, ChatFormatting.AQUA)
-                        .withStyle(style -> style.withClickEvent(new ClickEvent.OpenFile(Platform.getConfigFolder().resolve("roughlyenoughitems")))), false);
-            }
-            Minecraft.getInstance().setScreen(null);
-            return;
-        }
-        
         this.widgets.clear();
         this.widgets.add(Widgets.createLabel(new Point(width / 2, 12), this.title));
         int sideWidth = (int) Math.round(width / 4.2);

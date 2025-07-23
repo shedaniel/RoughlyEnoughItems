@@ -195,7 +195,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         }
         
         private Vector3f transformMouse(double mouseX, double mouseY) {
-            Vector3f mouse = new Vector3f((float) mouseX, (float) mouseY, 0);
+            Vector3f mouse = new Vector3f((float) mouseX, (float) mouseY, 1);
             transform.transform(mouse);
             return mouse;
         }
@@ -206,7 +206,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
             graphics.pose().pushMatrix();
             graphics.pose().mul(transform);
             
-            Vector3f pos = new Vector3f(x, y, 0);
+            Vector3f pos = new Vector3f(x, y, 1);
             pos.mul(new Matrix3x2f().scale(1 / scale, 1 / scale));
             getEntry().render(graphics, index, Math.round(pos.y()), Math.round(pos.x()), Math.round(entryWidth / scale), Math.round(entryHeight / scale), (int) mouse.x(), (int) mouse.y(), isSelected, delta);
             graphics.pose().popMatrix();

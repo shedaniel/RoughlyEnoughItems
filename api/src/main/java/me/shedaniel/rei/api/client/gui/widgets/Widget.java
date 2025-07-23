@@ -76,7 +76,7 @@ public abstract class Widget extends AbstractContainerEventHandler implements Re
     
     public static Point translateMouse(Matrix3x2f pose) {
         Point mouse = mouse();
-        Vector3f mouseVec = new Vector3f(mouse.x, mouse.y, 0);
+        Vector3f mouseVec = new Vector3f(mouse.x, mouse.y, 1);
         pose.transform(mouseVec);
         return pushMouse(new Point(mouseVec.x(), mouseVec.y()));
     }

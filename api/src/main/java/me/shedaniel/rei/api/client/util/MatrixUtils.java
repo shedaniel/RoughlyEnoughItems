@@ -67,9 +67,9 @@ public class MatrixUtils {
     }
     
     public static Rectangle transform(Matrix3x2f matrix, Rectangle rectangle) {
-        Vector3f vec1 = new Vector3f((float) rectangle.x, (float) rectangle.y, 0);
+        Vector3f vec1 = new Vector3f((float) rectangle.x, (float) rectangle.y, 1);
         matrix.transform(vec1);
-        Vector3f vec2 = new Vector3f((float) rectangle.getMaxX(), (float) rectangle.getMaxY(), 0);
+        Vector3f vec2 = new Vector3f((float) rectangle.getMaxX(), (float) rectangle.getMaxY(), 1);
         matrix.transform(vec2);
         int x1 = Math.round(vec1.x());
         int x2 = Math.round(vec2.x());
@@ -79,7 +79,7 @@ public class MatrixUtils {
     }
     
     public static Point transform(Matrix3x2f matrix, Point point) {
-        Vector3f mouse = new Vector3f((float) point.x, (float) point.y, 0);
+        Vector3f mouse = new Vector3f((float) point.x, (float) point.y, 1);
         matrix.transform(mouse);
         return new Point(mouse.x(), mouse.y());
     }

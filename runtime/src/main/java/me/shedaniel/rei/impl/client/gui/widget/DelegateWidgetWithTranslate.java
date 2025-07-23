@@ -60,7 +60,7 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     }
     
     private Vector3f transformMouse(double mouseX, double mouseY) {
-        Vector3f mouse = new Vector3f((float) mouseX, (float) mouseY, 0);
+        Vector3f mouse = new Vector3f((float) mouseX, (float) mouseY, 1);
         inverseTranslate().transform(mouse);
         return mouse;
     }

@@ -78,7 +78,7 @@ public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryW
             
             access.openOrClose(uuid, getBounds(), menuEntries.get());
         }
-        Vector3f vector3f = new Vector3f(mouseX, mouseY, 0);
+        Vector3f vector3f = new Vector3f(mouseX, mouseY, 1);
         graphics.pose().transform(vector3f);
         super.render(graphics, (int) vector3f.x(), (int) vector3f.y(), delta);
     }

@@ -185,7 +185,7 @@ public class DisplayEntry extends WidgetWithBounds {
             if (stable && target.equals(bounds)) {
                 graphics.pose().translate((float) this.xOffset, 0);
             }
-            Vector3f mouse = new Vector3f((float) mouseX, (float) mouseY, 0);
+            Vector3f mouse = new Vector3f((float) mouseX, (float) mouseY, 1);
             graphics.pose().transform(mouse);
             
             AutoCraftingEvaluator.AutoCraftingResult result = this.autoCraftingResult.get();
