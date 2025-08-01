@@ -50,6 +50,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.ApiStatus;
@@ -257,9 +258,9 @@ public class FilteringScreen extends Screen {
             ((ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().get()).renderTooltip(graphics, tooltip);
         }
         
-        graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
+        graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, CommonColors.WHITE);
         Component hint = Component.translatable("config.roughlyenoughitems.filteringRulesScreen.hint").withStyle(ChatFormatting.YELLOW);
-        graphics.drawString(this.font, hint, this.width - this.font.width(hint) - 15, 12, -1);
+        graphics.drawString(this.font, hint, this.width - this.font.width(hint) - 15, 12, CommonColors.WHITE);
     }
     
     private Predicate<Rectangle> getSelection() {
