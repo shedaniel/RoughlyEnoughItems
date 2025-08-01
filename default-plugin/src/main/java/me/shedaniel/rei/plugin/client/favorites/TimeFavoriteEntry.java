@@ -47,6 +47,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.CommonColors;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -295,7 +296,7 @@ public class TimeFavoriteEntry extends FavoriteEntry {
             if (selected && containsMouse) {
                 REIRuntime.getInstance().queueTooltip(Tooltip.create(Component.translatable("text.rei.time_button.tooltip.entry", text)));
             }
-            graphics.drawString(font, text, x + 2, y + 2, selected ? 16777215 : 8947848, false);
+            graphics.drawString(font, text, x + 2, y + 2, selected ? CommonColors.WHITE : 0xFF888888, false);
         }
         
         @Override

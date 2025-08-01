@@ -40,6 +40,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
@@ -137,9 +138,9 @@ public class WarningAndErrorScreen extends Screen {
         super.render(graphics, int_1, int_2, float_1);
         this.listWidget.render(graphics, int_1, int_2, float_1);
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-            graphics.drawCenteredString(this.font, "Warnings during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
+            graphics.drawCenteredString(this.font, "Warnings during Roughly Enough Items' " + action, this.width / 2, 16, CommonColors.WHITE);
         } else {
-            graphics.drawCenteredString(this.font, "Errors during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
+            graphics.drawCenteredString(this.font, "Errors during Roughly Enough Items' " + action, this.width / 2, 16, CommonColors.WHITE);
         }
         this.buttonExit.render(graphics, int_1, int_2, float_1);
     }

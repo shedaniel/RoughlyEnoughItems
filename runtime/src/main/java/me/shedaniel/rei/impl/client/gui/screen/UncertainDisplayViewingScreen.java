@@ -44,6 +44,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
@@ -128,7 +129,7 @@ public class UncertainDisplayViewingScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int int_1, int int_2, float float_1) {
         super.render(graphics, int_1, int_2, float_1);
-        graphics.drawCenteredString(this.font, Component.translatable("text.rei.recipe_screen_type.selection"), this.width / 2, 20, 16777215);
+        graphics.drawCenteredString(this.font, Component.translatable("text.rei.recipe_screen_type.selection"), this.width / 2, 20, CommonColors.WHITE);
         graphics.enableScissor(0, 20 + font.lineHeight + 2, width, 20 + font.lineHeight + 2 + height - 42);
         if (showTips) {
             int i = 32;
