@@ -480,7 +480,7 @@
   "config.rei.value.trueFalse.true": "Так",
   "config.rei.value.enabledDisabled.false": "ВИМК.",
   "config.rei.value.enabledDisabled.true": "УВІМК.",
-  "config.rei.texts.search_options": "Налаштування пошуку",
+  "config.rei.texts.search_options": "Пошук…",
   "config.rei.texts.preview": "Попередній перегляд…",
   "config.rei.texts.configure": "Налаштувати…",
   "config.rei.texts.details": "Деталі…",
