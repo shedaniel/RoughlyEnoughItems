@@ -245,7 +245,7 @@
   "config.rei.categories.input.desc": "Призначення клавіш, методи вводу.",
   "config.rei.categories.layout": "Макет",
   "config.rei.categories.layout.desc": "Віджети, межі.",
-  "config.rei.categories.accessibility": "Спеціальні можливості",
+  "config.rei.categories.accessibility": "Доступність",
   "config.rei.categories.accessibility.desc": "Бачення, особливості.",
   "config.rei.categories.filtering": "Фільтрація",
   "config.rei.categories.filtering.desc": "Категорії, фільтрування вкладкок.",
