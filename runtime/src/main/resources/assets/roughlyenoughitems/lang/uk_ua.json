@@ -96,7 +96,7 @@
   "text.rei.input.methods.default": "Усталений",
   "text.rei.input.methods.default.description": "Усталений метод уведення. Це не змінює термін пошуку.",
   "text.rei.input.methods.jyutping": "Джютпінг (кантонська)",
-  "text.rei.input.methods.jyutping.description": "Метод уведення для відповідности китайських ієрогліфів Джютпінг (кантонська).",
+  "text.rei.input.methods.jyutping.description": "Метод уведення для відповідности китайських ієрогліфів із Джютпінг (кантонська).",
   "text.rei.input.methods.pinyin": "Піньїнь (мандаринська)",
   "text.rei.input.methods.pinyin.description": "Метод уведення для відповідности китайських ієрогліфів із Піньїнь (мандаринська).",
   "text.rei.input.methods.pinyin.fuzzy.matching": "Нечітка відповідність…",
