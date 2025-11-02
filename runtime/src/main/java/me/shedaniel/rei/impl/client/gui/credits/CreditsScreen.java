@@ -59,7 +59,7 @@ public class CreditsScreen extends Screen {
     
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (event.key() == 256 && this.shouldCloseOnEsc()) {
+        if (event.isEscape() && this.shouldCloseOnEsc()) {
             openPrevious();
             return true;
         }

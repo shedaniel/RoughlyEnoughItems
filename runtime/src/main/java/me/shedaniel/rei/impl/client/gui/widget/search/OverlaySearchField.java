@@ -305,7 +305,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                 addToHistory(getText());
                 setFocused(false);
                 return true;
-            } else if (keyEvent.key() == 265) {
+            } else if (keyEvent.isUp()) {
                 int i = history.indexOf(getText()) - 1;
                 if (i < -1 && getText().isEmpty())
                     i = history.size() - 1;
@@ -317,7 +317,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                     setText(history.get(i));
                     return true;
                 }
-            } else if (keyEvent.key() == 264) {
+            } else if (keyEvent.isDown()) {
                 int i = history.indexOf(getText()) + 1;
                 if (i > 0) {
                     setText(i < history.size() ? history.get(i) : "");

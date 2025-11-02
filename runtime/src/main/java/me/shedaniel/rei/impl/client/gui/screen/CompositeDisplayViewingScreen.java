@@ -361,7 +361,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         for (GuiEventListener element : children())
             if (element.keyPressed(event))
                 return true;
-        if (event.key() == 256) {
+        if (event.isEscape()) {
             Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
             return true;
         }

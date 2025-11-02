@@ -409,10 +409,10 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     public boolean keyPressed(KeyEvent event) {
         if (super.keyPressed(event)) {
             return true;
-        } else if (event.key() == 264) {
+        } else if (event.isDown()) {
             this.moveSelection(1);
             return true;
-        } else if (event.key() == 265) {
+        } else if (event.isUp()) {
             this.moveSelection(-1);
             return true;
         } else {

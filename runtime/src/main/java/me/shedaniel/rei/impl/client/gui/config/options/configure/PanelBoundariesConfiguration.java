@@ -108,11 +108,11 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
                 @Override
                 public boolean keyPressed(KeyEvent event) {
                     if (horizontalUsePercentage) return super.keyPressed(event);
-                    boolean leftArrow = event.key() == 263;
+                    boolean leftArrow = event.isLeft();
                     double newValue;
                     if (leftArrow) {
                         newValue = Mth.clamp((valueToLimit(value, 50) - 1) / 50.0, 0, 1);
-                    } else if (event.key() == 262) {
+                    } else if (event.isRight()) {
                         newValue = Mth.clamp((valueToLimit(value, 50) + 1) / 50.0, 0, 1);
                     } else {
                         return super.keyPressed(event);
@@ -170,11 +170,11 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
                 @Override
                 public boolean keyPressed(KeyEvent event) {
                     if (verticalUsePercentage) return super.keyPressed(event);
-                    boolean leftArrow = event.key() == 263;
+                    boolean leftArrow = event.isLeft();
                     double newValue;
                     if (leftArrow) {
                         newValue = Mth.clamp((valueToLimit(value, 1000) - 1) / 1000.0, 0, 1);
-                    } else if (event.key() == 262) {
+                    } else if (event.isRight()) {
                         newValue = Mth.clamp((valueToLimit(value, 1000) + 1) / 1000.0, 0, 1);
                     } else {
                         return super.keyPressed(event);

@@ -404,7 +404,7 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
             return true;
         }
         
-        if (event.key() == 256 && this.shouldCloseOnEsc()) {
+        if (event.isEscape() && this.shouldCloseOnEsc()) {
             this.backButton.onPress(event);
             return true;
         }
