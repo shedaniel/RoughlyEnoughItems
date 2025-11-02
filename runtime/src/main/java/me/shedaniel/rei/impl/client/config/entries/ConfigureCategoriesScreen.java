@@ -43,6 +43,7 @@ import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.CommonColors;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -111,7 +112,7 @@ public class ConfigureCategoriesScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         super.render(graphics, mouseX, mouseY, delta);
         this.listWidget.render(graphics, mouseX, mouseY, delta);
-        graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
+        graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, CommonColors.WHITE);
     }
     
     @Override
@@ -250,16 +251,16 @@ public class ConfigureCategoriesScreen extends Screen {
             }
             
             Minecraft client = Minecraft.getInstance();
-            configuration.getCategory().getIcon().render(graphics, new Rectangle(x + 2, y, 16, 16), mouseY, mouseY, delta);
+            configuration.getCategory().getIcon().render(graphics, new Rectangle(x + 2, y, 16, 16), mouseX, mouseY, delta);
             int xPos = x + 22;
             {
                 Component title = configuration.getCategory().getTitle();
                 int i = client.font.width(title);
                 if (i > entryWidth - 28) {
                     FormattedText titleTrimmed = FormattedText.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, CommonColors.WHITE);
                 } else {
-                    graphics.drawString(client.font, title.getVisualOrderText(), xPos, y + 1, 16777215);
+                    graphics.drawString(client.font, title.getVisualOrderText(), xPos, y + 1, CommonColors.WHITE);
                 }
             }
             {
@@ -268,16 +269,16 @@ public class ConfigureCategoriesScreen extends Screen {
                 int i = client.font.width(id);
                 if (i > entryWidth - 28) {
                     FormattedText idTrimmed = FormattedText.composite(client.font.substrByWidth(id, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(idTrimmed), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(idTrimmed), x + 2, y + 12, CommonColors.GRAY);
                 } else {
-                    graphics.drawString(client.font, id.getVisualOrderText(), xPos, y + 12, 8421504);
+                    graphics.drawString(client.font, id.getVisualOrderText(), xPos, y + 12, CommonColors.GRAY);
                 }
             }
             boolean shown = !hiddenCategories.contains(configuration.getCategoryIdentifier());
             {
                 Component subtitle = Component.translatable("config.roughlyenoughitems.configureCategories.visibility." + shown)
                         .withStyle(shown ? ChatFormatting.GREEN : ChatFormatting.RED);
-                graphics.drawString(client.font, subtitle, xPos, y + 22, 8421504);
+                graphics.drawString(client.font, subtitle, xPos, y + 22, CommonColors.GRAY);
                 int i = xPos + client.font.width(subtitle);
                 visibilityToggleButton.getPoint().setLocation(i + 3, y + 22);
                 visibilityToggleButton.render(graphics, mouseX, mouseY, delta);
@@ -285,7 +286,7 @@ public class ConfigureCategoriesScreen extends Screen {
             if (shown) {
                 Component subtitle = Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure." + filteringQuickCraftCategories.getOrDefault(configuration.getCategoryIdentifier(), configuration.isQuickCraftingEnabledByDefault()))
                         .withStyle(ChatFormatting.GRAY);
-                graphics.drawString(client.font, subtitle, xPos, y + 32, 8421504);
+                graphics.drawString(client.font, subtitle, xPos, y + 32, CommonColors.GRAY);
                 int i = xPos + client.font.width(subtitle);
                 quickCraftToggleButton.getPoint().setLocation(i + 3, y + 32);
                 quickCraftToggleButton.render(graphics, mouseX, mouseY, delta);

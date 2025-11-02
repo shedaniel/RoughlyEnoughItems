@@ -47,6 +47,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.CommonColors;
 import net.minecraft.world.level.GameType;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -271,7 +272,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             if (disabled) {
                 s = ChatFormatting.STRIKETHROUGH + s;
             }
-            graphics.drawString(font, s, x + 2, y + 2, selected && !disabled ? 16777215 : 8947848, false);
+            graphics.drawString(font, s, x + 2, y + 2, selected && !disabled ? CommonColors.WHITE : 0xFF888888, false);
         }
         
         @Override

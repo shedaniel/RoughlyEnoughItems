@@ -32,6 +32,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonColors;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -110,7 +111,7 @@ public class ErrorsScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         super.render(graphics, mouseX, mouseY, delta);
-        graphics.drawCenteredString(this.font, getTitle(), this.width / 2, 16, 16777215);
+        graphics.drawCenteredString(this.font, getTitle(), this.width / 2, 16, CommonColors.WHITE);
     }
     
     @Override

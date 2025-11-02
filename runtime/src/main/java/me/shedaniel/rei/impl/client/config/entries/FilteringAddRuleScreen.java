@@ -36,6 +36,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.util.CommonColors;
 
 import java.util.Collections;
 import java.util.List;
@@ -76,7 +77,7 @@ public class FilteringAddRuleScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         super.render(graphics, mouseX, mouseY, delta);
         this.rulesList.render(graphics, mouseX, mouseY, delta);
-        graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
+        graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, CommonColors.WHITE);
     }
     
     @Override
@@ -152,9 +153,9 @@ public class FilteringAddRuleScreen extends Screen {
                 int i = client.font.width(title);
                 if (i > entryWidth - 28) {
                     FormattedText titleTrimmed = FormattedText.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, CommonColors.WHITE);
                 } else {
-                    graphics.drawString(client.font, title.getVisualOrderText(), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, title.getVisualOrderText(), x + 2, y + 1, CommonColors.WHITE);
                 }
             }
             {
@@ -162,9 +163,9 @@ public class FilteringAddRuleScreen extends Screen {
                 int i = client.font.width(subtitle);
                 if (i > entryWidth - 28) {
                     FormattedText subtitleTrimmed = FormattedText.composite(client.font.substrByWidth(subtitle, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, CommonColors.GRAY);
                 } else {
-                    graphics.drawString(client.font, subtitle.getVisualOrderText(), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, subtitle.getVisualOrderText(), x + 2, y + 12, CommonColors.GRAY);
                 }
             }
             addButton.setX(x + entryWidth - 25);

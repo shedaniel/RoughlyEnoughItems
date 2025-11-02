@@ -37,6 +37,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -155,7 +156,7 @@ public class CreditsScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         super.render(graphics, mouseX, mouseY, delta);
-        graphics.drawCenteredString(this.font, I18n.get("text.rei.credits"), this.width / 2, 16, 16777215);
+        graphics.drawCenteredString(this.font, I18n.get("text.rei.credits"), this.width / 2, 16, CommonColors.WHITE);
     }
     
     @Override
