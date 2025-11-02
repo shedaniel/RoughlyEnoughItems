@@ -67,6 +67,10 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
         inverseTranslate().transform(mouse);
         return mouse;
     }
+
+    private Vector3f transformMouse(MouseButtonEvent event) {
+        return transformMouse(event.x(), event.y());
+    }
     
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
@@ -77,19 +81,19 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
         Vector3f mouse = transformMouse(event);
-        return super.mouseClicked(event, doubled);
+        return super.mouseClicked(new MouseButtonEvent(mouse.x(), mouse.y(), event.buttonInfo()), doubled);
     }
     
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
         Vector3f mouse = transformMouse(event);
-        return super.mouseReleased(event);
+        return super.mouseReleased(new MouseButtonEvent(mouse.x(), mouse.y(), event.buttonInfo()));
     }
     
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
         Vector3f mouse = transformMouse(event);
-        return super.mouseDragged(event, deltaX, deltaY);
+        return super.mouseDragged(new MouseButtonEvent(mouse.x(), mouse.y(), event.buttonInfo()), deltaX, deltaY);
     }
     
     @Override
