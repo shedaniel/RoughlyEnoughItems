@@ -43,7 +43,7 @@ public abstract class AbstractMenuEntry extends FavoriteMenuEntry {
     
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
-        if (containsMouse(event.x(), event.y())) {
+        if (containsMouse(event)) {
             if (onClick(event, doubled)) {
                 return true;
             }

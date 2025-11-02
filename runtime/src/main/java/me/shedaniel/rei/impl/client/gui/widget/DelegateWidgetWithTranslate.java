@@ -76,19 +76,19 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
-        Vector3f mouse = transformMouse(event.x(), event.y());
+        Vector3f mouse = transformMouse(event);
         return super.mouseClicked(event, doubled);
     }
     
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        Vector3f mouse = transformMouse(event.x(), event.y());
+        Vector3f mouse = transformMouse(event);
         return super.mouseReleased(event);
     }
     
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        Vector3f mouse = transformMouse(event.x(), event.y());
+        Vector3f mouse = transformMouse(event);
         return super.mouseDragged(event, deltaX, deltaY);
     }
     

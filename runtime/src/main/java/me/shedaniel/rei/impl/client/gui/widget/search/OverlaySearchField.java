@@ -280,7 +280,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
-        boolean contains = containsMouse(event.x(), event.y());
+        boolean contains = containsMouse(event);
         if (isVisible() && contains && event.button() == 1)
             setText("");
         if (contains && event.button() == 0 && isMain && ConfigObject.getInstance().isInventoryHighlightingAllowed())

@@ -100,7 +100,7 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
     
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
-        if (isVisible() && containsMouse(event.x(), event.y())) {
+        if (isVisible() && containsMouse(event)) {
             this.wasClicked = true;
             return true;
         }
@@ -109,7 +109,7 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
     
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (wasClicked() && isVisible() && containsMouse(event.x(), event.y())) {
+        if (wasClicked() && isVisible() && containsMouse(event)) {
             onClick();
             return true;
         }

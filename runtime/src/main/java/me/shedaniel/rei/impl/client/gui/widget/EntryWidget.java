@@ -561,7 +561,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
-        if (containsMouse(event.x(), event.y())) {
+        if (containsMouse(event)) {
             this.wasClicked = true;
             return true;
         }
@@ -593,7 +593,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public boolean mouseReleased(MouseButtonEvent event) {
         if (!interactable)
             return false;
-        if (wasClicked() && containsMouse(event.x(), event.y())) {
+        if (wasClicked() && containsMouse(event)) {
             if (doAction(event)) {
                 ((CurrentDraggingStack) DraggingContext.getInstance()).drop();
                 return true;
