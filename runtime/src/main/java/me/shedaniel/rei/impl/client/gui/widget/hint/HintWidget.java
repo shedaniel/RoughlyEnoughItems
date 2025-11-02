@@ -38,6 +38,7 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
@@ -161,14 +162,14 @@ public class HintWidget extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.okayBounds.contains(mouseX, mouseY)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+        if (this.okayBounds.contains(event.x(), event.y())) {
             this.parent.removeHint(this);
             Widgets.produceClickSound();
             return true;
         }
         
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubled);
     }
     
     @Override

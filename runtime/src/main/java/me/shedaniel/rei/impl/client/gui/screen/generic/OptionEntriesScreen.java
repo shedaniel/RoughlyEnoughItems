@@ -34,6 +34,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -367,8 +368,8 @@ public abstract class OptionEntriesScreen extends Screen {
             }
             
             @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                if (this.rectangle.contains(mouseX, mouseY)) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+                if (this.rectangle.contains(event.x(), event.y())) {
                     SubListEntry.this.expanded = !SubListEntry.this.expanded;
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     return true;

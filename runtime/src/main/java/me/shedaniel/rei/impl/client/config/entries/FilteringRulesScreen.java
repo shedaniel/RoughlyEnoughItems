@@ -45,6 +45,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.locale.Language;
@@ -133,10 +134,10 @@ public class FilteringRulesScreen extends Screen {
         }
         
         @Override
-        public boolean mouseClicked(double double_1, double double_2, int int_1) {
-            if (super.mouseClicked(double_1, double_2, int_1))
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+            if (super.mouseClicked(event, doubled))
                 return true;
-            RuleEntry item = getItemAtPosition(double_1, double_2);
+            RuleEntry item = getItemAtPosition(event.x(), event.y());
             if (item != null) {
                 client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 selectItem(item);

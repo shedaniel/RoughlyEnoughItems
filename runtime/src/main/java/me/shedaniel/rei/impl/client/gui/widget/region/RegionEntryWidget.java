@@ -34,6 +34,7 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.joml.Vector3f;
 
 import java.util.Collection;
@@ -84,8 +85,8 @@ public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryW
     }
     
     @Override
-    protected boolean doAction(double mouseX, double mouseY, int button) {
-        return entry.getEntry().doAction(button) || super.doAction(mouseX, mouseY, button);
+    protected boolean doAction(MouseButtonEvent event) {
+        return entry.getEntry().doAction(event.button()) || super.doAction(event);
     }
     
     public RealRegionEntry<T> getEntry() {

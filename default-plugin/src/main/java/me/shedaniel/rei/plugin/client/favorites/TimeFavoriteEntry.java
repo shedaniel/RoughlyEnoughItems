@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
@@ -299,7 +300,7 @@ public class TimeFavoriteEntry extends FavoriteEntry {
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean doubled) {
             Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getTimeCommand().replaceAll("\\{time}", time.getPart().toLowerCase(Locale.ROOT)), "/"));
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             closeMenu();

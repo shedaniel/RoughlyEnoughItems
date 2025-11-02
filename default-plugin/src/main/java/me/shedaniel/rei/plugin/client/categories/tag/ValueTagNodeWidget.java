@@ -32,6 +32,8 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import org.joml.Matrix3x2f;
@@ -103,17 +105,17 @@ public class ValueTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
         for (GuiEventListener element : children())
-            if (element.mouseReleased(mouseX, mouseY, button))
+            if (element.mouseReleased(mouseButtonEvent))
                 return true;
         return false;
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent keyEvent) {
         for (GuiEventListener element : children())
-            if (element.keyPressed(keyCode, scanCode, modifiers))
+            if (element.keyPressed(keyEvent))
                 return true;
         return false;
     }

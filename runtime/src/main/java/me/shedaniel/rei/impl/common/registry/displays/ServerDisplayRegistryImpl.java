@@ -79,7 +79,7 @@ public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommon
                     }
                     long versionHash = playerVersionMap.getLong(player.getUUID());
                     if (versionHash != currentVersion) {
-                        InternalLogger.getInstance().debug("Player %s has outdated displays version %X [latest version: %X]", player.getGameProfile().getName(), versionHash, currentVersion);
+                        InternalLogger.getInstance().debug("Player %s has outdated displays version %X [latest version: %X]", player.getGameProfile().name(), versionHash, currentVersion);
                         toUpdate.add(player);
                     }
                 }
@@ -111,7 +111,7 @@ public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommon
             long playerReloadHash = playerVersion >>> 32;
             playerVersionMap.put(player.getUUID(), version);
             if (playerReloadHash != reloadVersionHash) {
-                InternalLogger.getInstance().debug("Player %s has outdated displays version %X [latest version: %X], sending reset packet request.", player.getGameProfile().getName(), playerVersion, version);
+                InternalLogger.getInstance().debug("Player %s has outdated displays version %X [latest version: %X], sending reset packet request.", player.getGameProfile().name(), playerVersion, version);
                 for (Packet<?> packet : resetPacket.get()) {
                     player.connection.send(packet);
                 }
@@ -120,13 +120,13 @@ public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommon
                 int playerMinorVersion = (int) playerVersion;
                 int currentMinorVersion = (int) version;
                 if (playerMinorVersion > currentMinorVersion) {
-                    InternalLogger.getInstance().debug("Player %s has too new displays version %X [latest version: %X], sending reset packet request.", player.getGameProfile().getName(), playerVersion, version);
+                    InternalLogger.getInstance().debug("Player %s has too new displays version %X [latest version: %X], sending reset packet request.", player.getGameProfile().name(), playerVersion, version);
                     // Reset the player
                     for (Packet<?> packet : resetPacket.get()) {
                         player.connection.send(packet);
                     }
                 } else {
-                    InternalLogger.getInstance().debug("Player %s has outdated displays version %X [latest version: %X], sending update packets.", player.getGameProfile().getName(), playerVersion, version);
+                    InternalLogger.getInstance().debug("Player %s has outdated displays version %X [latest version: %X], sending update packets.", player.getGameProfile().name(), playerVersion, version);
                     // Update the player
                     for (Packet<?> packet : updatePackets.apply(IntIntPair.of(playerMinorVersion, currentMinorVersion))) {
                         player.connection.send(packet);

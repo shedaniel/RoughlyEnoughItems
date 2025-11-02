@@ -29,6 +29,7 @@ import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.input.MouseButtonEvent;
 
 import java.util.function.Supplier;
 
@@ -70,7 +71,7 @@ public class ScissoredWidget extends DelegateWidget {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return containsMouse(mouseX, mouseY) && super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+        return containsMouse(event) && super.mouseClicked(event, doubled);
     }
 }

@@ -44,6 +44,8 @@ import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -227,18 +229,18 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
         for (DisplayEntry entry : DisplayHistoryManager.INSTANCE.getEntries(this)) {
-            if (!ignoreNextMouse && entry.mouseClicked(mouseX, mouseY, button)) {
+            if (!ignoreNextMouse && entry.mouseClicked(event, doubled)) {
                 return true;
             }
         }
         
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubled);
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         if (ignoreNextMouse) {
             ignoreNextMouse = false;
             return true;
@@ -247,12 +249,12 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
         Collection<DisplayEntry> entries = DisplayHistoryManager.INSTANCE.getEntries(this);
         
         for (DisplayEntry entry : entries) {
-            if (entry.mouseReleased(mouseX, mouseY, button)) {
+            if (entry.mouseReleased(event)) {
                 return true;
             }
         }
         
-        if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
+        if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(event.button())) {
             Point mouse = PointHelper.ofMouse();
             
             if (containsMouse(mouse)) {
@@ -272,20 +274,20 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
             }
         }
         
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         Collection<DisplayEntry> entries = DisplayHistoryManager.INSTANCE.getEntries(this);
         
         for (DisplayEntry entry : entries) {
-            if (entry.keyPressed(keyCode, scanCode, modifiers)) {
+            if (entry.keyPressed(event)) {
                 return true;
             }
         }
         
-        if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
+        if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(event.key(), event.scancode())) {
             Point mouse = PointHelper.ofMouse();
             
             if (containsMouse(mouse)) {
@@ -305,7 +307,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
             }
         }
         
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
     
     @Override

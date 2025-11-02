@@ -38,6 +38,8 @@ import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -265,8 +267,8 @@ public final class LabelWidget extends Label {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0 && isClickable() && containsMouse(mouseX, mouseY)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+        if (event.button() == 0 && isClickable() && containsMouse(event)) {
             Widgets.produceClickSound();
             if (onClick != null)
                 onClick.accept(this);
@@ -276,10 +278,10 @@ public final class LabelWidget extends Label {
     }
     
     @Override
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
+    public boolean keyPressed(KeyEvent event) {
         if (!isClickable() || !isFocusable() || !focused)
             return false;
-        if (int_1 != 257 && int_1 != 32 && int_1 != 335)
+        if (event.key() != 257 && event.key() != 32 && event.key() != 335)
             return false;
         Widgets.produceClickSound();
         if (onClick != null)

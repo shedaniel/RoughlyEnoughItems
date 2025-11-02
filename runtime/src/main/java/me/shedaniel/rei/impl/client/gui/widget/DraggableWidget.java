@@ -30,6 +30,7 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -60,9 +61,9 @@ public abstract class DraggableWidget extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
+    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
         Point mouse = PointHelper.ofMouse();
-        if (int_1 == 0) {
+        if (event.button() == 0) {
             if (!dragged) {
                 if (getGrabBounds().contains(mouse)) {
                     startPoint = new Point(midPoint.x, midPoint.y);
@@ -78,7 +79,7 @@ public abstract class DraggableWidget extends WidgetWithBounds {
             return true;
         }
         for (GuiEventListener listener : children())
-            if (listener.mouseDragged(double_1, double_2, int_1, double_3, double_4))
+            if (listener.mouseDragged(event, dx, dy))
                 return true;
         return false;
     }
@@ -86,15 +87,15 @@ public abstract class DraggableWidget extends WidgetWithBounds {
     public abstract Point processMidPoint(Point midPoint, Point mouse, Point startPoint, Window window, int relateX, int relateY);
     
     @Override
-    public boolean mouseReleased(double double_1, double double_2, int int_1) {
-        if (int_1 == 0)
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (event.button() == 0)
             if (dragged) {
                 dragged = false;
                 onMouseReleaseMidPoint(getMidPoint());
                 return true;
             }
         for (GuiEventListener listener : children())
-            if (listener.mouseReleased(double_1, double_2, int_1))
+            if (listener.mouseReleased(event))
                 return true;
         return false;
     }

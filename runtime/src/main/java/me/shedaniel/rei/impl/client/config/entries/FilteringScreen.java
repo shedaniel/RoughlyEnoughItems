@@ -49,6 +49,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
@@ -290,10 +293,10 @@ public class FilteringScreen extends Screen {
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-        if (scrolling.mouseDragged(mouseX, mouseY, button, dx, dy))
+    public boolean mouseDragged(MouseButtonEvent mouseButtonEvent, double dx, double dy) {
+        if (scrolling.mouseDragged(mouseButtonEvent.x(), mouseButtonEvent.y(), mouseButtonEvent.button(), dx, dy))
             return true;
-        return super.mouseDragged(mouseX, mouseY, button, dx, dy);
+        return super.mouseDragged(mouseButtonEvent, dx, dy);
     }
     
     private void updatePosition(float delta) {
@@ -347,65 +350,65 @@ public class FilteringScreen extends Screen {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (scrolling.updateDraggingState(mouseX, mouseY, button))
+    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean doubled) {
+        if (scrolling.updateDraggingState(mouseButtonEvent.x(), mouseButtonEvent.y(), mouseButtonEvent.button()))
             return true;
         
-        if (getBounds().contains(mouseX, mouseY)) {
-            if (searchField.mouseClicked(mouseX, mouseY, button)) {
+        if (getBounds().contains(mouseButtonEvent.x(), mouseButtonEvent.y())) {
+            if (searchField.mouseClicked(mouseButtonEvent, doubled)) {
                 this.points.clear();
                 return true;
-            } else if (selectAllButton.mouseClicked(mouseX, mouseY, button)) {
+            } else if (selectAllButton.mouseClicked(mouseButtonEvent, doubled)) {
                 return true;
-            } else if (selectNoneButton.mouseClicked(mouseX, mouseY, button)) {
+            } else if (selectNoneButton.mouseClicked(mouseButtonEvent, doubled)) {
                 return true;
-            } else if (hideButton.mouseClicked(mouseX, mouseY, button)) {
+            } else if (hideButton.mouseClicked(mouseButtonEvent, doubled)) {
                 return true;
-            } else if (showButton.mouseClicked(mouseX, mouseY, button)) {
+            } else if (showButton.mouseClicked(mouseButtonEvent, doubled)) {
                 return true;
-            } else if (button == 0) {
-                if (!Screen.hasShiftDown()) {
+            } else if (mouseButtonEvent.button() == 0) {
+                if (!minecraft.hasControlDown()) {
                     this.points.clear();
                 }
-                this.points.add(new PointPair(new Point(mouseX, mouseY + scrolling.scrollAmount()), null));
+                this.points.add(new PointPair(new Point(mouseButtonEvent.x(), mouseButtonEvent.y() + scrolling.scrollAmount()), null));
                 return true;
             }
         }
-        return backButton.mouseClicked(mouseX, mouseY, button);
+        return backButton.mouseClicked(mouseButtonEvent, doubled);
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (button == 0 && !points.isEmpty()) {
+    public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
+        if (mouseButtonEvent.button() == 0 && !points.isEmpty()) {
             PointPair pair = this.points.get(points.size() - 1);
             if (pair.secondPoint() == null) {
-                this.points.set(points.size() - 1, new PointPair(pair.firstPoint(), new Point(mouseX, mouseY + scrolling.scrollAmount())));
+                this.points.set(points.size() - 1, new PointPair(pair.firstPoint(), new Point(mouseButtonEvent.x(), mouseButtonEvent.y() + scrolling.scrollAmount())));
                 return true;
             }
         }
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(mouseButtonEvent);
     }
     
     @Override
-    public boolean charTyped(char chr, int keyCode) {
+    public boolean charTyped(CharacterEvent characterEvent) {
         for (GuiEventListener element : children())
-            if (element.charTyped(chr, keyCode))
+            if (element.charTyped(characterEvent))
                 return true;
-        return super.charTyped(chr, keyCode);
+        return super.charTyped(characterEvent);
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent keyEvent) {
         for (GuiEventListener element : children())
-            if (element.keyPressed(keyCode, scanCode, modifiers))
+            if (element.keyPressed(keyEvent))
                 return true;
-        if (Screen.isSelectAll(keyCode)) {
+        if (keyEvent.isSelectAll()) {
             this.points.clear();
             this.points.add(new PointPair(new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2), new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2)));
             return true;
         }
-        if (keyCode == 256 && this.shouldCloseOnEsc()) {
-            this.backButton.onPress();
+        if (keyEvent.isEscape() && this.shouldCloseOnEsc()) {
+            this.backButton.onPress(keyEvent);
             return true;
         }
         return false;

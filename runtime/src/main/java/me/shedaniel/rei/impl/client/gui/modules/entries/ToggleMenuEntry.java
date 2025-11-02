@@ -32,6 +32,7 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -121,7 +122,7 @@ public class ToggleMenuEntry extends AbstractMenuEntry {
     }
     
     @Override
-    protected boolean onClick(double mouseX, double mouseY, int button) {
+    protected boolean onClick(MouseButtonEvent event, boolean doubled) {
         if (!active.getAsBoolean()) return false;
         if (consumer.apply(!supplier.getAsBoolean())) {
             REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);

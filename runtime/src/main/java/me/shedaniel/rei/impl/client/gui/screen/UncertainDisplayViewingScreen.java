@@ -41,6 +41,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -139,7 +141,7 @@ public class UncertainDisplayViewingScreen extends Screen {
         }
         int k = 10, l = 44, m = width - 20, n = height - l - 10 - 5;
         graphics.fill( k + 1, l, k + m, l + n, -16777216);
-        graphics.renderOutline(k, l, m, n, -1);
+        graphics.submitOutline(k, l, m, n, -1);
         for (Widget widget : widgets) {
             widget.render(graphics, int_1, int_2, float_1);
         }
@@ -176,15 +178,15 @@ public class UncertainDisplayViewingScreen extends Screen {
     }
     
     @Override
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (int_1 == 256 || this.minecraft.options.keyInventory.matches(int_1, int_2)) {
+    public boolean keyPressed(KeyEvent event) {
+        if (event.key() == 256 || minecraft.options.keyInventory.matches(event)) {
             Minecraft.getInstance().setScreen(parent);
             if (parent instanceof AbstractContainerScreen) {
                 REIRuntime.getInstance().getOverlay().get().queueReloadOverlay();
             }
             return true;
         }
-        return super.keyPressed(int_1, int_2, int_3);
+        return super.keyPressed(event);
     }
     
     public class ScreenTypeSelection extends WidgetWithBounds {
@@ -207,8 +209,8 @@ public class UncertainDisplayViewingScreen extends Screen {
         }
         
         @Override
-        public boolean mouseClicked(double double_1, double double_2, int int_1) {
-            if (containsMouse(double_1, double_2)) {
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+            if (containsMouse(event)) {
                 original = (type == DisplayScreenType.ORIGINAL);
                 if (!isSet) {
                     moveFrameTo(original ? 0 : 1, false, 0);

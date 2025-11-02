@@ -44,6 +44,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -154,17 +155,17 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (scrolling.updateDraggingState(mouseX, mouseY, button))
+        public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean doubled) {
+            if (scrolling.updateDraggingState(mouseButtonEvent.x(), mouseButtonEvent.y(), mouseButtonEvent.button()))
                 return true;
-            return super.mouseClicked(mouseX, mouseY, button);
+            return super.mouseClicked(mouseButtonEvent, doubled);
         }
         
         @Override
-        public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-            if (scrolling.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+        public boolean mouseDragged(MouseButtonEvent mouseButtonEvent, double deltaX, double deltaY) {
+            if (scrolling.mouseDragged(mouseButtonEvent.x(), mouseButtonEvent.y(), mouseButtonEvent.button(), deltaX, deltaY))
                 return true;
-            return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+            return super.mouseDragged(mouseButtonEvent, deltaX, deltaY);
         }
         
         @Override

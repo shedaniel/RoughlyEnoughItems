@@ -209,7 +209,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     @Environment(EnvType.CLIENT)
     public static class FluidEntryRenderer implements EntryRenderer<FluidStack> {
         private static final Supplier<TextureAtlasSprite> MISSING_SPRITE = Suppliers.memoize(() -> {
-            TextureAtlas atlas = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
+            TextureAtlas atlas = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(TextureAtlas.LOCATION_BLOCKS);
             return atlas.getSprite(MissingTextureAtlasSprite.getLocation());
         });
         
@@ -221,9 +221,10 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         public void render(EntryStack<FluidStack> entry, GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
             FluidStack stack = entry.getValue();
             if (stack.isEmpty()) return;
-            TextureAtlasSprite sprite = FluidStackHooks.getStillTexture(stack);
-            if (sprite == null) return;
-            int color = FluidStackHooks.getColor(stack);
+            // TODO: 1.21.9 - fix
+//            TextureAtlasSprite sprite = FluidStackHooks.getStillTexture(stack);
+//            if (sprite == null) return;
+//            int color = FluidStackHooks.getColor(stack);
             
             /*SpriteRenderer.beginPass()
                     .setup(immediate, RenderType.solid())

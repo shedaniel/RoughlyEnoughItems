@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.joml.Matrix3x2f;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -119,10 +120,10 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) return true;
-        if (containsMouse(mouseX, mouseY)) {
-            if (button == 0) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+        if (super.mouseClicked(event, doubled)) return true;
+        if (containsMouse(event)) {
+            if (event.button() == 0) {
                 dragging = true;
             }
             
@@ -133,18 +134,18 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (dragging && button == 0) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (dragging && event.button() == 0) {
             dragging = false;
             return true;
         }
         
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (dragging && button == 0) {
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (dragging && event.button() == 0) {
             double newXTranslate = translate.target().x;
             double newYTranslate = translate.target().y;
             newXTranslate += deltaX * scale.doubleValue();
@@ -155,6 +156,6 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
             return true;
         }
         
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(event, deltaX, deltaY);
     }
 }

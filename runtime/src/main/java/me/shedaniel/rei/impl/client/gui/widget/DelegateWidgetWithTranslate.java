@@ -29,6 +29,9 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.joml.Matrix3x2f;
 import org.joml.Vector3f;
 
@@ -72,21 +75,21 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        Vector3f mouse = transformMouse(mouseX, mouseY);
-        return super.mouseClicked(mouse.x(), mouse.y(), button);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+        Vector3f mouse = transformMouse(event.x(), event.y());
+        return super.mouseClicked(event, doubled);
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        Vector3f mouse = transformMouse(mouseX, mouseY);
-        return super.mouseReleased(mouse.x(), mouse.y(), button);
+    public boolean mouseReleased(MouseButtonEvent event) {
+        Vector3f mouse = transformMouse(event.x(), event.y());
+        return super.mouseReleased(event);
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        Vector3f mouse = transformMouse(mouseX, mouseY);
-        return super.mouseDragged(mouse.x(), mouse.y(), button, deltaX, deltaY);
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        Vector3f mouse = transformMouse(event.x(), event.y());
+        return super.mouseDragged(event, deltaX, deltaY);
     }
     
     @Override
@@ -96,30 +99,30 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         try {
             Widget.translateMouse(inverseTranslate());
-            return super.keyPressed(keyCode, scanCode, modifiers);
+            return super.keyPressed(event);
         } finally {
             Widget.popMouse();
         }
     }
     
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    public boolean keyReleased(KeyEvent event) {
         try {
             Widget.translateMouse(inverseTranslate());
-            return super.keyReleased(keyCode, scanCode, modifiers);
+            return super.keyReleased(event);
         } finally {
             Widget.popMouse();
         }
     }
     
     @Override
-    public boolean charTyped(char character, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         try {
             Widget.translateMouse(inverseTranslate());
-            return super.charTyped(character, modifiers);
+            return super.charTyped(event);
         } finally {
             Widget.popMouse();
         }

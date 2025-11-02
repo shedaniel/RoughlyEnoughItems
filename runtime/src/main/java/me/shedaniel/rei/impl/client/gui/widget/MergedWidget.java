@@ -28,6 +28,9 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 
 import java.util.Comparator;
 import java.util.List;
@@ -67,45 +70,45 @@ public class MergedWidget extends Widget {
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         for (Widget widget : this.widgets) {
-            if (widget.keyPressed(keyCode, scanCode, modifiers))
+            if (widget.keyPressed(event))
                 return true;
         }
         return false;
     }
     
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    public boolean keyReleased(KeyEvent event) {
         for (Widget widget : this.widgets) {
-            if (widget.keyReleased(keyCode, scanCode, modifiers))
+            if (widget.keyReleased(event))
                 return true;
         }
         return false;
     }
     
     @Override
-    public boolean charTyped(char character, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         for (Widget widget : this.widgets) {
-            if (widget.charTyped(character, modifiers))
+            if (widget.charTyped(event))
                 return true;
         }
         return false;
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
         for (Widget widget : this.widgets) {
-            if (widget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+            if (widget.mouseDragged(event, deltaX, deltaY))
                 return true;
         }
         return false;
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         for (Widget widget : this.widgets) {
-            if (widget.mouseReleased(mouseX, mouseY, button))
+            if (widget.mouseReleased(event))
                 return true;
         }
         return false;

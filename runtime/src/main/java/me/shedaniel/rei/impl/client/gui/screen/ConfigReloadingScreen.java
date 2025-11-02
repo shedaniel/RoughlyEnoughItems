@@ -92,7 +92,7 @@ public class ConfigReloadingScreen extends Screen {
         int n = height + 12 * 2;
         int o = this.isFocused() ? -1 : -6250336;
         graphics.fill(k + 1, l, k + m, l + n, -16777216);
-        graphics.renderOutline(k, l, m, n, o);
+        graphics.submitOutline(k, l, m, n, o);
         graphics.drawCenteredString(this.font, title, this.width / 2, l + 12, CommonColors.WHITE);
         graphics.drawCenteredString(this.font, text, this.width / 2, l + 12 + 9, 0xFF808080);
         if (subtitle != null) {

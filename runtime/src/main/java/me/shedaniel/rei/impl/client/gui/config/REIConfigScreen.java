@@ -56,6 +56,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.InputQuirks;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.Mutable;
@@ -245,54 +249,54 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     }
     
     @Override
-    public boolean charTyped(char character, int modifiers) {
-        if (menu != null && menu.charTyped(character, modifiers))
+    public boolean charTyped(CharacterEvent event) {
+        if (menu != null && menu.charTyped(event))
             return true;
         for (GuiEventListener listener : children())
-            if (listener.charTyped(character, modifiers))
+            if (listener.charTyped(event))
                 return true;
-        return super.charTyped(character, modifiers);
+        return super.charTyped(event);
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (menu != null && menu.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (menu != null && menu.mouseDragged(event, deltaX, deltaY))
             return true;
         for (GuiEventListener entry : children())
-            if (entry.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+            if (entry.mouseDragged(event, deltaX, deltaY))
                 return true;
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(event, deltaX, deltaY);
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
         if (menu != null) {
-            if (!menu.mouseClicked(mouseX, mouseY, button))
+            if (!menu.mouseClicked(event, doubled))
                 closeMenu();
             return true;
         }
         
         if (this.focusedKeycodeOption != null && this.partialKeycode != null) {
             if (this.partialKeycode.isUnknown()) {
-                this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(button));
+                this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(event.button()));
             } else if (this.partialKeycode.getType() == InputConstants.Type.KEYSYM) {
                 Modifier modifier = this.partialKeycode.getModifier();
                 int code = this.partialKeycode.getKeyCode().getValue();
-                if (Minecraft.ON_OSX ? code == 343 || code == 347 : code == 341 || code == 345) {
+                if (InputQuirks.REPLACE_CTRL_KEY_WITH_CMD_KEY ? code == 343 || code == 347 : code == 341 || code == 345) {
                     this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), true, modifier.hasShift()));
-                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(button));
+                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(event.button()));
                     return true;
                 }
                 
                 if (code == 344 || code == 340) {
                     this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), modifier.hasControl(), true));
-                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(button));
+                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(event.button()));
                     return true;
                 }
                 
                 if (code == 342 || code == 346) {
                     this.partialKeycode.setModifier(Modifier.of(true, modifier.hasControl(), modifier.hasShift()));
-                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(button));
+                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(event.button()));
                     return true;
                 }
             }
@@ -300,7 +304,7 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
             return true;
         }
         
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubled);
     }
     
     @Override
@@ -323,8 +327,8 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (menu != null && menu.mouseReleased(mouseX, mouseY, button))
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (menu != null && menu.mouseReleased(event))
             return true;
         if (this.focusedKeycodeOption != null && this.partialKeycode != null && !this.partialKeycode.isUnknown()) {
             this.set(this.focusedKeycodeOption, this.partialKeycode);
@@ -332,9 +336,9 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
             return true;
         }
         for (GuiEventListener entry : children())
-            if (entry.mouseReleased(mouseX, mouseY, button))
+            if (entry.mouseReleased(event))
                 return true;
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
     
     @Override
@@ -348,45 +352,45 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (this.focusedKeycodeOption != null) {
-            if (keyCode != 256) {
+            if (event.key() != 256) {
                 if (this.partialKeycode.isUnknown()) {
-                    this.partialKeycode.setKeyCode(InputConstants.getKey(keyCode, scanCode));
+                    this.partialKeycode.setKeyCode(InputConstants.getKey(event));
                 } else {
                     Modifier modifier = this.partialKeycode.getModifier();
                     if (this.partialKeycode.getType() == InputConstants.Type.KEYSYM) {
                         int code = this.partialKeycode.getKeyCode().getValue();
-                        if (Minecraft.ON_OSX ? code == 343 || code == 347 : code == 341 || code == 345) {
+                        if (InputQuirks.REPLACE_CTRL_KEY_WITH_CMD_KEY ? code == 343 || code == 347 : code == 341 || code == 345) {
                             this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), true, modifier.hasShift()));
-                            this.partialKeycode.setKeyCode(InputConstants.getKey(keyCode, scanCode));
+                            this.partialKeycode.setKeyCode(InputConstants.getKey(event));
                             return true;
                         }
                         
                         if (code == 344 || code == 340) {
                             this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), modifier.hasControl(), true));
-                            this.partialKeycode.setKeyCode(InputConstants.getKey(keyCode, scanCode));
+                            this.partialKeycode.setKeyCode(InputConstants.getKey(event));
                             return true;
                         }
                         
                         if (code == 342 || code == 346) {
                             this.partialKeycode.setModifier(Modifier.of(true, modifier.hasControl(), modifier.hasShift()));
-                            this.partialKeycode.setKeyCode(InputConstants.getKey(keyCode, scanCode));
+                            this.partialKeycode.setKeyCode(InputConstants.getKey(event));
                             return true;
                         }
                     }
                     
-                    if (Minecraft.ON_OSX ? keyCode == 343 || keyCode == 347 : keyCode == 341 || keyCode == 345) {
+                    if (InputQuirks.REPLACE_CTRL_KEY_WITH_CMD_KEY ? event.key() == 343 || event.key() == 347 : event.key() == 341 || event.key() == 345) {
                         this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), true, modifier.hasShift()));
                         return true;
                     }
                     
-                    if (keyCode == 344 || keyCode == 340) {
+                    if (event.key() == 344 || event.key() == 340) {
                         this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), modifier.hasControl(), true));
                         return true;
                     }
                     
-                    if (keyCode == 342 || keyCode == 346) {
+                    if (event.key() == 342 || event.key() == 346) {
                         this.partialKeycode.setModifier(Modifier.of(true, modifier.hasControl(), modifier.hasShift()));
                         return true;
                     }
@@ -399,18 +403,18 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
             return true;
         }
         
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
     
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    public boolean keyReleased(KeyEvent event) {
         if (this.focusedKeycodeOption != null && this.partialKeycode != null) {
             this.set(this.focusedKeycodeOption, this.partialKeycode);
             this.focusKeycode(null);
             return true;
         }
         
-        return super.keyReleased(keyCode, scanCode, modifiers);
+        return super.keyReleased(event);
     }
     
     @Override

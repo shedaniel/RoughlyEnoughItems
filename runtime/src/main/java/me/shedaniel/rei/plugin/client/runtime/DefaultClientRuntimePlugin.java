@@ -390,8 +390,9 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         public boolean doAction(int button) {
             Widgets.produceClickSound();
             
-            if (!(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
-                AutoCraftingEvaluator.evaluateAutoCrafting(true, Screen.hasShiftDown(), display, Collections::emptyList);
+            Minecraft minecraft = Minecraft.getInstance();
+            if (!(minecraft.screen instanceof DisplayScreen) && minecraft.hasControlDown()) {
+                AutoCraftingEvaluator.evaluateAutoCrafting(true, minecraft.hasShiftDown(), display, Collections::emptyList);
                 return true;
             }
             

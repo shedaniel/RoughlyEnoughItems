@@ -33,6 +33,9 @@ import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
@@ -166,7 +169,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     }
     
     private void erase(int offset) {
-        if (Screen.hasControlDown()) {
+        if (minecraft.hasControlDown()) {
             this.eraseWords(offset);
         } else {
             this.eraseCharacters(offset);
@@ -268,23 +271,23 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (this.isVisible() && this.isFocused()) {
-            this.selecting = Screen.hasShiftDown();
-            if (Screen.isSelectAll(keyCode)) {
+            this.selecting = minecraft.hasShiftDown();
+            if (event.isSelectAll()) {
                 this.moveCursorToEnd();
                 this.setHighlightPos(0);
                 return true;
-            } else if (Screen.isCopy(keyCode)) {
+            } else if (event.isCopy()) {
                 minecraft.keyboardHandler.setClipboard(this.getSelectedText());
                 return true;
-            } else if (Screen.isPaste(keyCode)) {
+            } else if (event.isPaste()) {
                 if (this.editable) {
                     this.addText(minecraft.keyboardHandler.getClipboard());
                 }
                 
                 return true;
-            } else if (Screen.isCut(keyCode)) {
+            } else if (event.isCut()) {
                 minecraft.keyboardHandler.setClipboard(this.getSelectedText());
                 if (this.editable) {
                     this.addText("");
@@ -292,12 +295,12 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
                 
                 return true;
             } else {
-                switch (keyCode) {
+                switch (event.key()) {
                     case 259:
                         if (this.editable) {
                             this.selecting = false;
                             this.erase(-1);
-                            this.selecting = Screen.hasShiftDown();
+                            this.selecting = event.hasShiftDown();
                         }
                         
                         return true;
@@ -307,17 +310,17 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
                     case 266:
                     case 267:
                     default:
-                        return keyCode != 256;
+                        return event.key() != 256;
                     case 261:
                         if (this.editable) {
                             this.selecting = false;
                             this.erase(1);
-                            this.selecting = Screen.hasShiftDown();
+                            this.selecting = event.hasShiftDown();
                         }
                         
                         return true;
                     case 262:
-                        if (Screen.hasControlDown()) {
+                        if (event.hasControlDown()) {
                             this.moveCursorTo(this.getWordPosition(1));
                         } else {
                             this.moveCursor(1);
@@ -325,7 +328,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
                         
                         return true;
                     case 263:
-                        if (Screen.hasControlDown()) {
+                        if (event.hasControlDown()) {
                             this.moveCursorTo(this.getWordPosition(-1));
                         } else {
                             this.moveCursor(-1);
@@ -346,15 +349,16 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     }
     
     @Override
-    public boolean charTyped(char character, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         if (this.isVisible() && this.isFocused()) {
-            if (StringUtil.isAllowedChatCharacter(character) && !(
-                    Screen.hasControlDown() && !Screen.hasShiftDown() && !Screen.hasAltDown() && (
-                            character == 'a' || character == 'c' || character == 'v'
+            String character = event.codepointAsString();
+            if (event.isAllowedChatCharacter() && !(
+                    minecraft.hasControlDown() && !minecraft.hasShiftDown() && !minecraft.hasAltDown() && (
+                            character.equals("a") || character.equals("c") || character.equals("v")
                     )
             )) {
                 if (this.editable) {
-                    this.addText(Character.toString(character));
+                    this.addText(character);
                 }
                 
                 return true;
@@ -372,17 +376,18 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
         if (!this.isVisible()) {
             return false;
         } else {
-            boolean hovered = mouseX >= (double) this.bounds.x && mouseX < (double) (this.bounds.x + this.bounds.width) && mouseY >= (double) this.bounds.y && mouseY < (double) (this.bounds.y + this.bounds.height);
+            boolean hovered = event.x() >= (double) this.bounds.x && event.x() < (double) (this.bounds.x + this.bounds.width)
+                    && event.y() >= (double) this.bounds.y && event.y() < (double) (this.bounds.y + this.bounds.height);
             if (this.focusUnlocked) {
                 this.setFocused(hovered);
             }
             
-            if (this.focused && hovered && button == 0) {
-                int int_2 = Mth.floor(mouseX) - this.bounds.x;
+            if (this.focused && hovered && event.button() == 0) {
+                int int_2 = Mth.floor(event.x()) - this.bounds.x;
                 if (this.hasBorder) {
                     int_2 -= 4;
                 }

@@ -65,6 +65,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.ApiStatus;
@@ -317,7 +320,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (REIRuntime.getInstance().isOverlayVisible()) {
             menuHolder.afterRender();
         }
-        graphics.renderDeferredTooltip();
+        graphics.renderDeferredElements();
     }
     
     public void renderTooltip(GuiGraphics graphics, Tooltip tooltip) {
@@ -369,19 +372,21 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (!hasSpace()) return false;
+        int keyCode = event.key();
+        int scanCode = event.scancode();
         if (REIRuntime.getInstance().isOverlayVisible()) {
             if (keyCode == 256 && choosePageWidget != null) {
                 choosePageWidget = null;
                 return true;
             }
             if (choosePageWidget != null)
-                return choosePageWidget.keyPressed(keyCode, scanCode, modifiers);
-            if (REIRuntimeImpl.getSearchField().keyPressed(keyCode, scanCode, modifiers))
+                return choosePageWidget.keyPressed(event);
+            if (REIRuntimeImpl.getSearchField().keyPressed(event))
                 return true;
             for (GuiEventListener listener : widgets)
-                if (listener != REIRuntimeImpl.getSearchField() && listener.keyPressed(keyCode, scanCode, modifiers))
+                if (listener != REIRuntimeImpl.getSearchField() && listener.keyPressed(event))
                     return true;
         }
         if (ConfigObject.getInstance().getHideKeybind().matchesKey(keyCode, scanCode)) {
@@ -414,14 +419,14 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    public boolean keyReleased(KeyEvent event) {
         if (!hasSpace()) return false;
         if (REIRuntime.getInstance().isOverlayVisible()) {
             if (choosePageWidget == null) {
-                if (REIRuntimeImpl.getSearchField().keyReleased(keyCode, scanCode, modifiers))
+                if (REIRuntimeImpl.getSearchField().keyReleased(event))
                     return true;
                 for (GuiEventListener listener : widgets)
-                    if (listener != REIRuntimeImpl.getSearchField() && listener == getFocused() && listener.keyPressed(keyCode, scanCode, modifiers))
+                    if (listener != REIRuntimeImpl.getSearchField() && listener == getFocused() && listener.keyPressed(event))
                         return true;
             }
         }
@@ -429,17 +434,17 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     @Override
-    public boolean charTyped(char character, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
         if (!hasSpace()) return false;
         if (choosePageWidget != null) {
-            return choosePageWidget.charTyped(character, modifiers);
+            return choosePageWidget.charTyped(event);
         }
-        if (REIRuntimeImpl.getSearchField().charTyped(character, modifiers))
+        if (REIRuntimeImpl.getSearchField().charTyped(event))
             return true;
         for (GuiEventListener listener : widgets)
-            if (listener != REIRuntimeImpl.getSearchField() && listener.charTyped(character, modifiers))
+            if (listener != REIRuntimeImpl.getSearchField() && listener.charTyped(event))
                 return true;
         return false;
     }
@@ -450,11 +455,12 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+        int button = event.button();
         boolean visible = REIRuntime.getInstance().isOverlayVisible();
         if (choosePageWidget != null) {
-            if (choosePageWidget.containsMouse(mouseX, mouseY)) {
-                return choosePageWidget.mouseClicked(mouseX, mouseY, button);
+            if (choosePageWidget.containsMouse(event)) {
+                return choosePageWidget.mouseClicked(event, doubled);
             } else {
                 choosePageWidget = null;
                 init();
@@ -462,13 +468,13 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             }
         }
         if (!hasSpace()) return false;
-        if (visible && configButton.mouseClicked(mouseX, mouseY, button)) {
+        if (visible && configButton.mouseClicked(event, doubled)) {
             this.setFocused(configButton);
-            if (button == 0)
+            if (event.button() == 0)
                 this.setDragging(true);
             return true;
         }
-        if (ConfigObject.getInstance().getHideKeybind().matchesMouse(button)) {
+        if (ConfigObject.getInstance().getHideKeybind().matchesMouse(event.button())) {
             REIRuntime.getInstance().toggleOverlayVisible();
             return REIRuntime.getInstance().isOverlayVisible();
         }
@@ -487,14 +493,14 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         }
         if (visible) {
             Widget menuWidget = menuHolder.widget();
-            if (menuWidget != null && menuWidget.mouseClicked(mouseX, mouseY, button)) {
+            if (menuWidget != null && menuWidget.mouseClicked(event, doubled)) {
                 this.setFocused(menuWidget);
                 if (button == 0)
                     this.setDragging(true);
                 REIRuntimeImpl.getSearchField().setFocused(false);
                 return true;
             }
-            if (hintsWidget.mouseClicked(mouseX, mouseY, button)) {
+            if (hintsWidget.mouseClicked(event, doubled)) {
                 this.setFocused(hintsWidget);
                 if (button == 0)
                     this.setDragging(true);
@@ -504,7 +510,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         }
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             Screen screen = Minecraft.getInstance().screen;
-            ClickArea.ClickAreaContext<Screen> context = createClickAreaContext(mouseX, mouseY, screen);
+            ClickArea.ClickAreaContext<Screen> context = createClickAreaContext(event.x(), event.y(), screen);
             if (ScreenRegistry.getInstance().executeClickArea((Class<Screen>) screen.getClass(), context)) {
                 return true;
             }
@@ -513,10 +519,10 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             return false;
         }
         if (draggingStack != null) {
-            draggingStack.mouseClicked(mouseX, mouseY, button);
+            draggingStack.mouseClicked(event, doubled);
         }
         for (GuiEventListener element : widgets) {
-            if (element != configButton && element != menuHolder.widget() && element != hintsWidget && element != draggingStack && element.mouseClicked(mouseX, mouseY, button)) {
+            if (element != configButton && element != menuHolder.widget() && element != hintsWidget && element != draggingStack && element.mouseClicked(event, doubled)) {
                 this.setFocused(element);
                 if (button == 0)
                     this.setDragging(true);
@@ -536,23 +542,23 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
         if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
         if (!hasSpace()) return false;
         if (choosePageWidget != null) {
-            return choosePageWidget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+            return choosePageWidget.mouseDragged(event, deltaX, deltaY);
         }
-        return (this.getFocused() != null && this.isDragging() && button == 0) && this.getFocused().mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return (this.getFocused() != null && this.isDragging() && event.button() == 0) && this.getFocused().mouseDragged(event, deltaX, deltaY);
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         if (draggingStack != null) {
-            draggingStack.mouseReleased(mouseX, mouseY, button);
+            draggingStack.mouseReleased(event);
         }
         
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
     
     @Override

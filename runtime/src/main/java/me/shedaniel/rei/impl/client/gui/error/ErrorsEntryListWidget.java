@@ -35,6 +35,7 @@ import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -194,6 +195,10 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
             return entry;
         }
         
+        private Vector3f transformMouse(MouseButtonEvent event) {
+            return transformMouse(event.x(), event.y());
+        }
+        
         private Vector3f transformMouse(double mouseX, double mouseY) {
             Vector3f mouse = new Vector3f((float) mouseX, (float) mouseY, 1);
             transform.transform(mouse);
@@ -234,21 +239,21 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         }
         
         @Override
-        public boolean mouseClicked(double d, double e, int i) {
-            Vector3f mouse = transformMouse(d, e);
-            return super.mouseClicked(mouse.x(), mouse.y(), i);
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+            Vector3f mouse = transformMouse(event);
+            return super.mouseClicked(new MouseButtonEvent(mouse.x(), mouse.y(), event.buttonInfo()), doubled);
         }
         
         @Override
-        public boolean mouseReleased(double d, double e, int i) {
-            Vector3f mouse = transformMouse(d, e);
-            return super.mouseReleased(mouse.x(), mouse.y(), i);
+        public boolean mouseReleased(MouseButtonEvent event) {
+            Vector3f mouse = transformMouse(event);
+            return super.mouseReleased(new MouseButtonEvent(mouse.x(), mouse.y(), event.buttonInfo()));
         }
         
         @Override
-        public boolean mouseDragged(double d, double e, int i, double f, double g) {
-            Vector3f mouse = transformMouse(d, e);
-            return super.mouseDragged(mouse.x(), mouse.y(), i, f, g);
+        public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+            Vector3f mouse = transformMouse(event);
+            return super.mouseDragged(new MouseButtonEvent(mouse.x(), mouse.y(), event.buttonInfo()), deltaX, deltaY);
         }
         
         @Override
@@ -328,16 +333,16 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (button == 0) {
-                Style style = this.getTextAt(mouseX, mouseY);
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+            if (event.x() == 0) {
+                Style style = this.getTextAt(event.x(), event.y());
                 if (style != null && style.getClickEvent() != null) {
                     Minecraft.getInstance().screen.handleComponentClicked(style);
                     return true;
                 }
             }
             
-            return super.mouseClicked(mouseX, mouseY, button);
+            return super.mouseClicked(event, doubled);
         }
         
         @Nullable
@@ -449,8 +454,8 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (contains && button == 0) {
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+            if (contains && event.button() == 0) {
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 try {
                     Util.getPlatform().openUri(new URI(link));

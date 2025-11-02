@@ -50,6 +50,9 @@ import me.shedaniel.rei.impl.client.search.argument.type.TextArgumentType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -149,7 +152,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     }
     
     private void drawHint(GuiGraphics graphics, int mouseX, int mouseY) {
-        boolean mouseDown = GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT) != 0;
+        boolean mouseDown = GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) != 0;
         boolean clicking = false;
         if (mouseDown != previouslyClicking) {
             previouslyClicking = mouseDown;
@@ -276,33 +279,33 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean contains = containsMouse(mouseX, mouseY);
-        if (isVisible() && contains && button == 1)
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+        boolean contains = containsMouse(event.x(), event.y());
+        if (isVisible() && contains && event.button() == 1)
             setText("");
-        if (contains && button == 0 && isMain && ConfigObject.getInstance().isInventoryHighlightingAllowed())
+        if (contains && event.button() == 0 && isMain && ConfigObject.getInstance().isInventoryHighlightingAllowed())
             if (lastClickedDetails == null)
-                lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(mouseX, mouseY));
+                lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(event.x(), event.y()));
             else if (System.currentTimeMillis() - lastClickedDetails.getA() > 1500)
                 lastClickedDetails = null;
-            else if (getManhattanDistance(lastClickedDetails.getB(), new Point(mouseX, mouseY)) <= 25) {
+            else if (getManhattanDistance(lastClickedDetails.getB(), new Point(event.x(), event.y())) <= 25) {
                 lastClickedDetails = null;
                 isHighlighting = !isHighlighting;
                 minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             } else {
-                lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(mouseX, mouseY));
+                lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(event.x(), event.y()));
             }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubled);
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent keyEvent) {
         if (this.isVisible() && this.isFocused() && isMain)
-            if (keyCode == 257 || keyCode == 335) {
+            if (keyEvent.key() == 257 || keyEvent.key() == 335) {
                 addToHistory(getText());
                 setFocused(false);
                 return true;
-            } else if (keyCode == 265) {
+            } else if (keyEvent.key() == 265) {
                 int i = history.indexOf(getText()) - 1;
                 if (i < -1 && getText().isEmpty())
                     i = history.size() - 1;
@@ -314,34 +317,34 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                     setText(history.get(i));
                     return true;
                 }
-            } else if (keyCode == 264) {
+            } else if (keyEvent.key() == 264) {
                 int i = history.indexOf(getText()) + 1;
                 if (i > 0) {
                     setText(i < history.size() ? history.get(i) : "");
                     return true;
                 }
             }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(keyEvent);
     }
     
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    public boolean keyReleased(KeyEvent keyEvent) {
         if (this.isVisible() && this.isFocused() && isMain && keybindFocusKey != -1) {
             keybindFocusTime = -1;
             keybindFocusKey = -1;
             return true;
         }
-        return super.keyReleased(keyCode, scanCode, modifiers);
+        return super.keyReleased(keyEvent);
     }
     
     @Override
-    public boolean charTyped(char character, int modifiers) {
-        if (isMain && System.currentTimeMillis() - keybindFocusTime < 1000 && keybindFocusKey != -1 && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), keybindFocusKey)) {
+    public boolean charTyped(CharacterEvent event) {
+        if (isMain && System.currentTimeMillis() - keybindFocusTime < 1000 && keybindFocusKey != -1 && InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), keybindFocusKey)) {
             keybindFocusTime = -1;
             keybindFocusKey = -1;
             return true;
         }
-        return super.charTyped(character, modifiers);
+        return super.charTyped(event);
     }
     
     @Override

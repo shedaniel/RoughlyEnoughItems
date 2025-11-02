@@ -28,6 +28,7 @@ import me.shedaniel.rei.api.client.config.ConfigManager;
 
 public class REIModMenuEntryPoint {
     public void onInitializeClient() {
-        Platform.getMod("roughlyenoughitems").registerConfigurationScreen(ConfigManager.getInstance()::getConfigScreen);
+        // TODO - 1.21.9 fix
+//        Platform.getMod("roughlyenoughitems").registerConfigurationScreen(ConfigManager.getInstance()::getConfigScreen);
     }
 }

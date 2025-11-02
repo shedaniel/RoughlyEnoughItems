@@ -30,6 +30,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -176,8 +177,8 @@ public class CreditsEntryListWidget extends UpdatedListWidget<CreditsEntryListWi
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (contains && button == 0) {
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+            if (contains && event.button() == 0) {
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 try {
                     Util.getPlatform().openUri(new URI(link));

@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 
 import java.util.Collections;
 import java.util.List;
@@ -98,8 +99,8 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (isVisible() && containsMouse(mouseX, mouseY)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+        if (isVisible() && containsMouse(event.x(), event.y())) {
             this.wasClicked = true;
             return true;
         }
@@ -107,8 +108,8 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (wasClicked() && isVisible() && containsMouse(mouseX, mouseY)) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (wasClicked() && isVisible() && containsMouse(event.x(), event.y())) {
             onClick();
             return true;
         }

@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
@@ -206,11 +207,11 @@ public class ListWidget {
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            boolean clicked = super.mouseClicked(mouseX, mouseY, button);
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+            boolean clicked = super.mouseClicked(event, doubled);
             Rectangle bounds = delegate().getBounds();
             
-            if (clicked || new Rectangle(position.x, position.y, this.bounds.width, bounds.height).contains(mouseX, mouseY)) {
+            if (clicked || new Rectangle(position.x, position.y, this.bounds.width, bounds.height).contains(event.x(), event.y())) {
                 if (isSelectable.test(index, list.get(index))) {
                     selected.accept(index);
                     if (!clicked) {

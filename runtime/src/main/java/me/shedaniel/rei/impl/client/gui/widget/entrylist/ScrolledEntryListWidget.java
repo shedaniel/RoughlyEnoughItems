@@ -38,6 +38,7 @@ import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
@@ -149,7 +150,7 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
-        if (containsChecked(mouseX, mouseY, false) && !Screen.hasControlDown() && amountY != 0) {
+        if (containsChecked(mouseX, mouseY, false) && !minecraft.hasControlDown() && amountY != 0) {
             scrolling.offset(ClothConfigInitializer.getScrollStep() * -amountY, true);
             return true;
         }
@@ -158,18 +159,18 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-        if (hasSpace() && scrolling.mouseDragged(mouseX, mouseY, button, dx, dy))
+    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+        if (hasSpace() && scrolling.mouseDragged(event.x(), event.y(), event.button(), dx, dy))
             return true;
-        return super.mouseDragged(mouseX, mouseY, button, dx, dy);
+        return super.mouseDragged(event, dx, dy);
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
         if (!hasSpace()) return false;
-        if (scrolling.updateDraggingState(mouseX, mouseY, button))
+        if (scrolling.updateDraggingState(event.x(), event.y(), event.button()))
             return true;
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubled);
     }
     
     @Override

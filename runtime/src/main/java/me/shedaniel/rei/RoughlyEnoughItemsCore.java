@@ -156,12 +156,13 @@ public class RoughlyEnoughItemsCore {
             LifecycleEvent.SERVER_STARTED.register(server -> {
                 ReloadManagerImpl.reloadPlugins(null, ReloadInterruptionContext.ofNever());
             });
-            ReloadListenerRegistry.register(PackType.SERVER_DATA, (preparationBarrier, resourceManager, executor, executor2) -> {
-                return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(() -> {
-                    if (GameInstance.getServer() == null) return;
-                    ReloadManagerImpl.reloadPlugins(null, ReloadInterruptionContext.ofNever());
-                }, executor2);
-            }, ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "reload_plugins"));
+            // TODO: 1.21.9 - fix
+//            ReloadListenerRegistry.register(PackType.SERVER_DATA, (preparationBarrier, resourceManager, executor, executor2) -> {
+//                return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(() -> {
+//                    if (GameInstance.getServer() == null) return;
+//                    ReloadManagerImpl.reloadPlugins(null, ReloadInterruptionContext.ofNever());
+//                }, executor2);
+//            }, ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "reload_plugins"));
         }
     }
     

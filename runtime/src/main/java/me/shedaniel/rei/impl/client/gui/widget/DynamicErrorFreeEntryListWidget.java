@@ -37,6 +37,8 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
@@ -334,28 +336,28 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         return (int) this.getScroll() - this.height - this.headerHeight;
     }
     
-    protected void updateScrollingState(double double_1, double double_2, int int_1) {
-        this.scrolling = int_1 == 0 && double_1 >= (double) this.getScrollbarPosition() && double_1 < (double) (this.getScrollbarPosition() + 6);
+    protected void updateScrollingState(MouseButtonEvent event) {
+        this.scrolling = event.button() == 0 && event.x() >= (double) this.getScrollbarPosition() && event.x() < (double) (this.getScrollbarPosition() + 6);
     }
     
     protected int getScrollbarPosition() {
         return this.width / 2 + 124;
     }
     
-    public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        this.updateScrollingState(double_1, double_2, int_1);
-        if (!this.isMouseOver(double_1, double_2)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+        this.updateScrollingState(event);
+        if (!this.isMouseOver(event.x(), event.y())) {
             return false;
         } else {
-            E item = this.getItemAtPosition(double_1, double_2);
+            E item = this.getItemAtPosition(event.x(), event.y());
             if (item != null) {
-                if (item.mouseClicked(double_1, double_2, int_1)) {
+                if (item.mouseClicked(event, doubled)) {
                     this.setFocused(item);
                     this.setDragging(true);
                     return true;
                 }
-            } else if (int_1 == 0) {
-                this.clickedHeader((int) (double_1 - (double) (this.left + this.width / 2 - this.getItemWidth() / 2)), (int) (double_2 - (double) this.top) + (int) this.getScroll() - 4);
+            } else if (event.button() == 0) {
+                this.clickedHeader((int) (event.x() - (double) (this.left + this.width / 2 - this.getItemWidth() / 2)), (int) (event.y() - (double) this.top) + (int) this.getScroll() - 4);
                 return true;
             }
             
@@ -363,21 +365,21 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         }
     }
     
-    public boolean mouseReleased(double double_1, double double_2, int int_1) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         if (this.getFocused() != null) {
-            this.getFocused().mouseReleased(double_1, double_2, int_1);
+            this.getFocused().mouseReleased(event);
         }
         
         return false;
     }
     
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (super.mouseDragged(event, deltaX, deltaY)) {
             return true;
-        } else if (button == 0 && this.scrolling) {
-            if (mouseY < (double) this.top) {
+        } else if (event.button() == 0 && this.scrolling) {
+            if (event.y() < (double) this.top) {
                 this.capYPosition(0.0F);
-            } else if (mouseY > (double) this.bottom) {
+            } else if (event.y() > (double) this.bottom) {
                 this.capYPosition(this.getMaxScroll());
             } else {
                 double double_5 = Math.max(1, this.getMaxScroll());
@@ -404,13 +406,13 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         return true;
     }
     
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (super.keyPressed(int_1, int_2, int_3)) {
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event)) {
             return true;
-        } else if (int_1 == 264) {
+        } else if (event.key() == 264) {
             this.moveSelection(1);
             return true;
-        } else if (int_1 == 265) {
+        } else if (event.key() == 265) {
             this.moveSelection(-1);
             return true;
         } else {
@@ -562,18 +564,18 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
             List<? extends NarratableEntry> list = this.narratables();
             Screen.NarratableSearchResult narratableSearchResult = Screen.findNarratableWidget(list, this.lastNarratable);
             if (narratableSearchResult != null) {
-                if (narratableSearchResult.priority.isTerminal()) {
-                    this.lastNarratable = narratableSearchResult.entry;
+                if (narratableSearchResult.priority().isTerminal()) {
+                    this.lastNarratable = narratableSearchResult.entry();
                 }
                 
                 if (list.size() > 1) {
-                    narrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.object_list", narratableSearchResult.index + 1, list.size()));
-                    if (narratableSearchResult.priority == NarrationPriority.FOCUSED) {
+                    narrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.object_list", narratableSearchResult.index() + 1, list.size()));
+                    if (narratableSearchResult.priority() == NarrationPriority.FOCUSED) {
                         narrationElementOutput.add(NarratedElementType.USAGE, Component.translatable("narration.component_list.usage"));
                     }
                 }
                 
-                narratableSearchResult.entry.updateNarration(narrationElementOutput.nest());
+                narratableSearchResult.entry().updateNarration(narrationElementOutput.nest());
             }
             
         }

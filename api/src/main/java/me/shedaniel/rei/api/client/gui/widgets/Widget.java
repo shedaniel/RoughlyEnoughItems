@@ -34,6 +34,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Matrix3x2f;
 import org.joml.Vector3f;
@@ -79,6 +80,10 @@ public abstract class Widget extends AbstractContainerEventHandler implements Re
         Vector3f mouseVec = new Vector3f(mouse.x, mouse.y, 1);
         pose.transform(mouseVec);
         return pushMouse(new Point(mouseVec.x(), mouseVec.y()));
+    }
+    
+    public boolean containsMouse(MouseButtonEvent event) {
+        return containsMouse(event.x(), event.y());
     }
     
     public boolean containsMouse(double mouseX, double mouseY) {

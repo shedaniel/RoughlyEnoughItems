@@ -24,6 +24,7 @@
 package me.shedaniel.rei.mixin.fabric;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(InputConstants.class)
 public class MixinInputConstants {
     @Inject(method = "isKeyDown", at = @At("HEAD"), cancellable = true)
-    private static void isKeyDown(long windowId, int key, CallbackInfoReturnable<Boolean> cir) {
+    private static void isKeyDown(Window window, int i, CallbackInfoReturnable<Boolean> cir) {
         if (isPatchingAsyncThreadCrash() && !RenderSystem.isOnRenderThread()) {
             cir.setReturnValue(false);
         }
