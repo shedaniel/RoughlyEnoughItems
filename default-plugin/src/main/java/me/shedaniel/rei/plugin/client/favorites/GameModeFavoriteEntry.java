@@ -275,7 +275,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         }
         
         @Override
-        public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean doubled) {
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
             Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", gameMode.name().toLowerCase(Locale.ROOT)), "/"));
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             closeMenu();

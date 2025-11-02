@@ -309,7 +309,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
         }
         
         @Override
-        public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean doubled) {
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
             Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)), "/"));
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             closeMenu();

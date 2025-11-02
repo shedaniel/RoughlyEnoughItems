@@ -142,10 +142,10 @@ public class ConfigureCategoriesScreen extends Screen {
         }
         
         @Override
-        public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean doubled) {
-            if (super.mouseClicked(mouseButtonEvent, doubled))
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+            if (super.mouseClicked(event, doubled))
                 return true;
-            ListEntry item = getItemAtPosition(mouseButtonEvent.x(), mouseButtonEvent.y());
+            ListEntry item = getItemAtPosition(event.x(), event.y());
             if (item != null) {
                 client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 selectItem(item);

@@ -292,17 +292,17 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     }
     
     @Override
-    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
         if (!hasSpace()) return false;
         for (Widget widget : children())
-            if (widget.mouseClicked(mouseButtonEvent, doubled))
+            if (widget.mouseClicked(event, doubled))
                 return true;
         return false;
     }
     
     @Override
-    public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
-        if (containsChecked(mouseButtonEvent.x(), mouseButtonEvent.y(), false)) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (containsChecked(event.x(), event.y(), false)) {
             LocalPlayer player = minecraft.player;
             if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && player != null && player.containerMenu != null && !player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
                 EntryStack<?> stack = EntryStacks.of(minecraft.player.containerMenu.getCarried().copy());
@@ -313,7 +313,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
                 boolean canDelete = true;
                 
                 for (Widget child : children()) {
-                    if (child.containsMouse(mouseButtonEvent.x(), mouseButtonEvent.y()) && child instanceof EntryWidget widget) {
+                    if (child.containsMouse(event.x(), event.y()) && child instanceof EntryWidget widget) {
                         if (widget.cancelDeleteItems(stack)) {
                             canDelete = false;
                             break;
@@ -327,7 +327,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
                 }
             }
             for (Widget widget : children())
-                if (widget.mouseReleased(mouseButtonEvent))
+                if (widget.mouseReleased(event))
                     return true;
         }
         return false;

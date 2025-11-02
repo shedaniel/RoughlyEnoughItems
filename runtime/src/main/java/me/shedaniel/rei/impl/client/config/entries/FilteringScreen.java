@@ -293,10 +293,10 @@ public class FilteringScreen extends Screen {
     }
     
     @Override
-    public boolean mouseDragged(MouseButtonEvent mouseButtonEvent, double dx, double dy) {
-        if (scrolling.mouseDragged(mouseButtonEvent.x(), mouseButtonEvent.y(), mouseButtonEvent.button(), dx, dy))
+    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+        if (scrolling.mouseDragged(event.x(), event.y(), event.button(), dx, dy))
             return true;
-        return super.mouseDragged(mouseButtonEvent, dx, dy);
+        return super.mouseDragged(event, dx, dy);
     }
     
     private void updatePosition(float delta) {
@@ -350,43 +350,43 @@ public class FilteringScreen extends Screen {
     }
     
     @Override
-    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean doubled) {
-        if (scrolling.updateDraggingState(mouseButtonEvent.x(), mouseButtonEvent.y(), mouseButtonEvent.button()))
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+        if (scrolling.updateDraggingState(event.x(), event.y(), event.button()))
             return true;
         
-        if (getBounds().contains(mouseButtonEvent.x(), mouseButtonEvent.y())) {
-            if (searchField.mouseClicked(mouseButtonEvent, doubled)) {
+        if (getBounds().contains(event.x(), event.y())) {
+            if (searchField.mouseClicked(event, doubled)) {
                 this.points.clear();
                 return true;
-            } else if (selectAllButton.mouseClicked(mouseButtonEvent, doubled)) {
+            } else if (selectAllButton.mouseClicked(event, doubled)) {
                 return true;
-            } else if (selectNoneButton.mouseClicked(mouseButtonEvent, doubled)) {
+            } else if (selectNoneButton.mouseClicked(event, doubled)) {
                 return true;
-            } else if (hideButton.mouseClicked(mouseButtonEvent, doubled)) {
+            } else if (hideButton.mouseClicked(event, doubled)) {
                 return true;
-            } else if (showButton.mouseClicked(mouseButtonEvent, doubled)) {
+            } else if (showButton.mouseClicked(event, doubled)) {
                 return true;
-            } else if (mouseButtonEvent.button() == 0) {
+            } else if (event.button() == 0) {
                 if (!minecraft.hasControlDown()) {
                     this.points.clear();
                 }
-                this.points.add(new PointPair(new Point(mouseButtonEvent.x(), mouseButtonEvent.y() + scrolling.scrollAmount()), null));
+                this.points.add(new PointPair(new Point(event.x(), event.y() + scrolling.scrollAmount()), null));
                 return true;
             }
         }
-        return backButton.mouseClicked(mouseButtonEvent, doubled);
+        return backButton.mouseClicked(event, doubled);
     }
     
     @Override
-    public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
-        if (mouseButtonEvent.button() == 0 && !points.isEmpty()) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (event.button() == 0 && !points.isEmpty()) {
             PointPair pair = this.points.get(points.size() - 1);
             if (pair.secondPoint() == null) {
-                this.points.set(points.size() - 1, new PointPair(pair.firstPoint(), new Point(mouseButtonEvent.x(), mouseButtonEvent.y() + scrolling.scrollAmount())));
+                this.points.set(points.size() - 1, new PointPair(pair.firstPoint(), new Point(event.x(), event.y() + scrolling.scrollAmount())));
                 return true;
             }
         }
-        return super.mouseReleased(mouseButtonEvent);
+        return super.mouseReleased(event);
     }
     
     @Override

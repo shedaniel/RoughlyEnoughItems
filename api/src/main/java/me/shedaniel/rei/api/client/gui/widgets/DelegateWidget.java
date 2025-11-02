@@ -109,14 +109,14 @@ public class DelegateWidget extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseDragged(MouseButtonEvent mouseButtonEvent, double deltaX, double deltaY) {
-        return delegate().mouseDragged(mouseButtonEvent, deltaX, deltaY);
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        return delegate().mouseDragged(event, deltaX, deltaY);
     }
     
     @Override
-    public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         this.setDragging(false);
-        return delegate().mouseReleased(mouseButtonEvent);
+        return delegate().mouseReleased(event);
     }
     
     @Override

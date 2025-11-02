@@ -105,9 +105,9 @@ public class ValueTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
     }
     
     @Override
-    public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         for (GuiEventListener element : children())
-            if (element.mouseReleased(mouseButtonEvent))
+            if (element.mouseReleased(event))
                 return true;
         return false;
     }

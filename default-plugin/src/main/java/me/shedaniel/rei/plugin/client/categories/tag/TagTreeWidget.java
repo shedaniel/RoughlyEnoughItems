@@ -106,14 +106,14 @@ public class TagTreeWidget<S, T> extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean doubled) {
-        return super.mouseClicked(mouseButtonEvent, doubled);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
+        return super.mouseClicked(event, doubled);
     }
     
     @Override
-    public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         for (GuiEventListener element : children())
-            if (element.mouseReleased(mouseButtonEvent))
+            if (element.mouseReleased(event))
                 return true;
         return false;
     }
