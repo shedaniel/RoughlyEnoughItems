@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class Uuids {
+public class UUIDUtils {
     public static final StreamCodec<ByteBuf, UUID> STREAM_CODEC = new StreamCodec<ByteBuf, UUID>() {
         @Override
         public void encode(ByteBuf buf, UUID uuid) {

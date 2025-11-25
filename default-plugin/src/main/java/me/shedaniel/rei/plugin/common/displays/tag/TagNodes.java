@@ -31,7 +31,7 @@ import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import me.shedaniel.rei.api.common.util.Uuids;
+import me.shedaniel.rei.api.common.util.UUIDUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -101,7 +101,7 @@ public class TagNodes {
 
     public record C2STagDataPacket(UUID uuid, ResourceLocation registryName) implements CustomPacketPayload {
         public static final StreamCodec<RegistryFriendlyByteBuf, C2STagDataPacket> STREAM_CODEC = StreamCodec.composite(
-                Uuids.STREAM_CODEC, C2STagDataPacket::uuid,
+                UUIDUtils.STREAM_CODEC, C2STagDataPacket::uuid,
                 ResourceLocation.STREAM_CODEC, C2STagDataPacket::registryName,
                 C2STagDataPacket::new
         );
@@ -114,7 +114,7 @@ public class TagNodes {
 
     public record S2CTagDataPacket(UUID uuid, Map<ResourceLocation, TagData> map) implements CustomPacketPayload {
         public static final StreamCodec<RegistryFriendlyByteBuf, S2CTagDataPacket> STREAM_CODEC = StreamCodec.composite(
-                Uuids.STREAM_CODEC, S2CTagDataPacket::uuid,
+                UUIDUtils.STREAM_CODEC, S2CTagDataPacket::uuid,
                 ByteBufCodecs.map(
                         Maps::newHashMapWithExpectedSize,
                         ResourceLocation.STREAM_CODEC,
