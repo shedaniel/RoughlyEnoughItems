@@ -249,7 +249,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.configure(TAG, config -> config.setQuickCraftingEnabledByDefault(false));
         
         registry.registerVisibilityPredicate(category -> {
-            if (category instanceof DefaultTagCategory && Minecraft.getInstance().getSingleplayerServer() == null && !NetworkManager.canServerReceive(TagNodes.REQUEST_TAGS_PACKET_C2S)) {
+            if (category instanceof DefaultTagCategory && Minecraft.getInstance().getSingleplayerServer() == null && !NetworkManager.canServerReceive(TagNodes.REQUEST_TAGS_C2S_PACKET_ID)) {
                 return EventResult.interruptFalse();
             }
             
