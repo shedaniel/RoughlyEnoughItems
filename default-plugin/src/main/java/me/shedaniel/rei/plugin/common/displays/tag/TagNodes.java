@@ -101,31 +101,6 @@ public class TagNodes {
                 ByteBufCodecs.collection(ArrayList::new, ResourceLocation.STREAM_CODEC), TagData::otherTags,
                 TagData::new
         );
-
-        private static TagData fromNetwork(FriendlyByteBuf buf) {
-            int count = buf.readVarInt();
-            IntList otherElements = new IntArrayList(count + 1);
-            for (int i = 0; i < count; i++) {
-                otherElements.add(buf.readVarInt());
-            }
-            count = buf.readVarInt();
-            List<ResourceLocation> otherTags = new ArrayList<>(count + 1);
-            for (int i = 0; i < count; i++) {
-                otherTags.add(buf.readResourceLocation());
-            }
-            return new TagData(otherElements, otherTags);
-        }
-        
-        private void toNetwork(FriendlyByteBuf buf) {
-            buf.writeVarInt(otherElements.size());
-            for (int integer : otherElements) {
-                buf.writeVarInt(integer);
-            }
-            buf.writeVarInt(otherTags.size());
-            for (ResourceLocation tag : otherTags) {
-                writeResourceLocation(buf, tag);
-            }
-        }
     }
 
     public record S2CTagDataPacket(UUID uuid, Map<ResourceLocation, TagData> map) implements CustomPacketPayload {
