@@ -104,9 +104,9 @@ public class TagNodes {
 
     public record C2STagDataPacket(UUID uuid, ResourceLocation registryName) implements CustomPacketPayload {
         public static final StreamCodec<RegistryFriendlyByteBuf, C2STagDataPacket> STREAM_CODEC = StreamCodec.composite(
-            Uuids.STREAM_CODEC, C2STagDataPacket::uuid,
-            ResourceLocation.STREAM_CODEC, C2STagDataPacket::registryName,
-            C2STagDataPacket::new
+                Uuids.STREAM_CODEC, C2STagDataPacket::uuid,
+                ResourceLocation.STREAM_CODEC, C2STagDataPacket::registryName,
+                C2STagDataPacket::new
         );
 
         @Override
@@ -117,13 +117,13 @@ public class TagNodes {
 
     public record S2CTagDataPacket(UUID uuid, Map<ResourceLocation, TagData> map) implements CustomPacketPayload {
         public static final StreamCodec<RegistryFriendlyByteBuf, S2CTagDataPacket> STREAM_CODEC = StreamCodec.composite(
-            Uuids.STREAM_CODEC, S2CTagDataPacket::uuid,
-            ByteBufCodecs.map(
-                    Maps::newHashMapWithExpectedSize,
-                    ResourceLocation.STREAM_CODEC,
-                    TagData.STREAM_CODEC
-            ), S2CTagDataPacket::map,
-            S2CTagDataPacket::new
+                Uuids.STREAM_CODEC, S2CTagDataPacket::uuid,
+                ByteBufCodecs.map(
+                        Maps::newHashMapWithExpectedSize,
+                        ResourceLocation.STREAM_CODEC,
+                        TagData.STREAM_CODEC
+                ), S2CTagDataPacket::map,
+                S2CTagDataPacket::new
         );
 
         @Override
@@ -145,15 +145,15 @@ public class TagNodes {
         EnvExecutor.runInEnv(Env.SERVER, () -> Server::init);
 
         NetworkManager.registerReceiver(
-            NetworkManager.c2s(),
-            REQUEST_TAGS_C2S_PACKET_TYPE,
-            C2STagDataPacket.STREAM_CODEC,
-            (C2STagDataPacket payload, NetworkManager.PacketContext context) -> {
-                ResourceKey<? extends Registry<?>> registryKey = ResourceKey.createRegistryKey(payload.registryName);
-                Map<ResourceLocation, TagData> dataMap = TAG_DATA_MAP.getOrDefault(registryKey, Collections.emptyMap());
-                var packet = new S2CTagDataPacket(payload.uuid, dataMap);
-                NetworkManager.sendToPlayer((ServerPlayer) context.getPlayer(), packet);
-            }
+                NetworkManager.c2s(),
+                REQUEST_TAGS_C2S_PACKET_TYPE,
+                C2STagDataPacket.STREAM_CODEC,
+                (C2STagDataPacket payload, NetworkManager.PacketContext context) -> {
+                    ResourceKey<? extends Registry<?>> registryKey = ResourceKey.createRegistryKey(payload.registryName);
+                    Map<ResourceLocation, TagData> dataMap = TAG_DATA_MAP.getOrDefault(registryKey, Collections.emptyMap());
+                    var packet = new S2CTagDataPacket(payload.uuid, dataMap);
+                    NetworkManager.sendToPlayer((ServerPlayer) context.getPlayer(), packet);
+                }
         );
     }
 
