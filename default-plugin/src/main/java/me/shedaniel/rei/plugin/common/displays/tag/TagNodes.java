@@ -72,7 +72,7 @@ public class TagNodes {
     public static final Map<String, Map<CollectionWrapper<?>, RawTagData>> RAW_TAG_DATA_MAP = new ConcurrentHashMap<>();
     public static final Map<ResourceKey<? extends Registry<?>>, Map<ResourceLocation, TagData>> TAG_DATA_MAP = new HashMap<>();
     public static Map<ResourceKey<? extends Registry<?>>, Consumer<Consumer<DataResult<Map<ResourceLocation, TagData>>>>> requestedTags = new HashMap<>();
-    
+
     public static class CollectionWrapper<T> {
         private final Collection<T> collection;
         
@@ -90,10 +90,10 @@ public class TagNodes {
             return System.identityHashCode(collection);
         }
     }
-    
+
     public record RawTagData(List<ResourceLocation> otherElements, List<ResourceLocation> otherTags) {
     }
-    
+
     public record TagData(IntList otherElements, List<ResourceLocation> otherTags) {
         public static final StreamCodec<RegistryFriendlyByteBuf, TagData> STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.collection(IntArrayList::new, ByteBufCodecs.VAR_INT), TagData::otherElements,
@@ -110,7 +110,7 @@ public class TagNodes {
         );
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public @NotNull Type<? extends CustomPacketPayload> type() {
             return REQUEST_TAGS_C2S_PACKET_TYPE;
         }
     }
@@ -139,20 +139,24 @@ public class TagNodes {
             buf.writeUtf(location.toString());
         }
     }
-    
+
     public static void init() {
         EnvExecutor.runInEnv(Env.CLIENT, () -> Client::init);
         EnvExecutor.runInEnv(Env.SERVER, () -> Server::init);
 
-        NetworkManager.registerReceiver(NetworkManager.c2s(), REQUEST_TAGS_C2S_PACKET_ID, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
-            UUID uuid = buf.readUUID();
-            ResourceKey<? extends Registry<?>> resourceKey = ResourceKey.createRegistryKey(buf.readResourceLocation());
-            Map<ResourceLocation, TagData> dataMap = TAG_DATA_MAP.getOrDefault(resourceKey, Collections.emptyMap());
-            var packet = new S2CTagDataPacket(uuid, dataMap);
-            NetworkManager.sendToPlayer((ServerPlayer) context.getPlayer(), packet);
-        });
+        NetworkManager.registerReceiver(
+            NetworkManager.c2s(),
+            REQUEST_TAGS_C2S_PACKET_TYPE,
+            C2STagDataPacket.STREAM_CODEC,
+            (C2STagDataPacket payload, NetworkManager.PacketContext context) -> {
+                ResourceKey<? extends Registry<?>> registryKey = ResourceKey.createRegistryKey(payload.registryName);
+                Map<ResourceLocation, TagData> dataMap = TAG_DATA_MAP.getOrDefault(registryKey, Collections.emptyMap());
+                var packet = new S2CTagDataPacket(payload.uuid, dataMap);
+                NetworkManager.sendToPlayer((ServerPlayer) context.getPlayer(), packet);
+            }
+        );
     }
-    
+
     @Environment(EnvType.CLIENT)
     public static void requestTagData(ResourceKey<? extends Registry<?>> resourceKey, Consumer<DataResult<Map<ResourceLocation, TagData>>> callback) {
         if (Minecraft.getInstance().getSingleplayerServer() != null) {
@@ -163,10 +167,8 @@ public class TagNodes {
             requestedTags.get(resourceKey).accept(callback);
             callback.accept(DataResult.success(TAG_DATA_MAP.getOrDefault(resourceKey, Collections.emptyMap())));
         } else {
-            RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), BasicDisplay.registryAccess());
             UUID uuid = UUID.randomUUID();
-            buf.writeUUID(uuid);
-            buf.writeResourceLocation(resourceKey.location());
+            var packet = new C2STagDataPacket(uuid, resourceKey.location());
             Client.nextUUID = uuid;
             Client.nextResourceKey = resourceKey;
             List<Consumer<DataResult<Map<ResourceLocation, TagData>>>> callbacks = new CopyOnWriteArrayList<>();
@@ -178,7 +180,7 @@ public class TagNodes {
                 }
             };
             requestedTags.put(resourceKey, callbacks::add);
-            NetworkManager.sendToServer(REQUEST_TAGS_C2S_PACKET_ID, buf);
+            NetworkManager.sendToServer(packet);
         }
     }
 
