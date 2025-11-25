@@ -68,7 +68,7 @@ public class TagNodes {
     public static final Map<String, Map<CollectionWrapper<?>, RawTagData>> RAW_TAG_DATA_MAP = new ConcurrentHashMap<>();
     public static final Map<ResourceKey<? extends Registry<?>>, Map<ResourceLocation, TagData>> TAG_DATA_MAP = new HashMap<>();
     public static Map<ResourceKey<? extends Registry<?>>, Consumer<Consumer<DataResult<Map<ResourceLocation, TagData>>>>> requestedTags = new HashMap<>();
-
+    
     public static class CollectionWrapper<T> {
         private final Collection<T> collection;
         
@@ -86,10 +86,10 @@ public class TagNodes {
             return System.identityHashCode(collection);
         }
     }
-
+    
     public record RawTagData(List<ResourceLocation> otherElements, List<ResourceLocation> otherTags) {
     }
-
+    
     public record TagData(IntList otherElements, List<ResourceLocation> otherTags) {
         public static final StreamCodec<RegistryFriendlyByteBuf, TagData> STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.collection(IntArrayList::new, ByteBufCodecs.VAR_INT), TagData::otherElements,
@@ -127,7 +127,7 @@ public class TagNodes {
             return REQUEST_TAGS_S2C_PACKET_TYPE;
         }
     }
-
+    
     public static void init() {
         EnvExecutor.runInEnv(Env.CLIENT, () -> Client::init);
         EnvExecutor.runInEnv(Env.SERVER, () -> Server::init);
@@ -144,7 +144,7 @@ public class TagNodes {
                 }
         );
     }
-
+    
     @Environment(EnvType.CLIENT)
     public static void requestTagData(ResourceKey<? extends Registry<?>> resourceKey, Consumer<DataResult<Map<ResourceLocation, TagData>>> callback) {
         if (Minecraft.getInstance().getSingleplayerServer() != null) {
