@@ -36,7 +36,7 @@ public class UUIDUtils {
             buf.writeLong(uuid.getMostSignificantBits());
             buf.writeLong(uuid.getLeastSignificantBits());
         }
-
+        
         @Override
         public @NotNull UUID decode(ByteBuf buf) {
             var mostSignificantBits = buf.readLong();

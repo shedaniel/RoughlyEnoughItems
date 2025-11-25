@@ -59,7 +59,7 @@ import java.util.function.Consumer;
 public class TagNodes {
     public static final ResourceLocation REQUEST_TAGS_C2S_PACKET_ID = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "request_tags_c2s");
     public static final ResourceLocation REQUEST_TAGS_S2C_PACKET_ID = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "request_tags_s2c");
-
+    
     public static final CustomPacketPayload.Type<C2STagDataPacket> REQUEST_TAGS_C2S_PACKET_TYPE = new CustomPacketPayload.Type<>(REQUEST_TAGS_C2S_PACKET_ID);
     public static final CustomPacketPayload.Type<S2CTagDataPacket> REQUEST_TAGS_S2C_PACKET_TYPE = new CustomPacketPayload.Type<>(REQUEST_TAGS_S2C_PACKET_ID);
     
@@ -97,20 +97,20 @@ public class TagNodes {
                 TagData::new
         );
     }
-
+    
     public record C2STagDataPacket(UUID uuid, ResourceLocation registryName) implements CustomPacketPayload {
         public static final StreamCodec<RegistryFriendlyByteBuf, C2STagDataPacket> STREAM_CODEC = StreamCodec.composite(
                 UUIDUtils.STREAM_CODEC, C2STagDataPacket::uuid,
                 ResourceLocation.STREAM_CODEC, C2STagDataPacket::registryName,
                 C2STagDataPacket::new
         );
-
+        
         @Override
         public @NotNull Type<? extends CustomPacketPayload> type() {
             return REQUEST_TAGS_C2S_PACKET_TYPE;
         }
     }
-
+    
     public record S2CTagDataPacket(UUID uuid, Map<ResourceLocation, TagData> map) implements CustomPacketPayload {
         public static final StreamCodec<RegistryFriendlyByteBuf, S2CTagDataPacket> STREAM_CODEC = StreamCodec.composite(
                 UUIDUtils.STREAM_CODEC, S2CTagDataPacket::uuid,
@@ -121,7 +121,7 @@ public class TagNodes {
                 ), S2CTagDataPacket::map,
                 S2CTagDataPacket::new
         );
-
+        
         @Override
         public @NotNull Type<? extends CustomPacketPayload> type() {
             return REQUEST_TAGS_S2C_PACKET_TYPE;
@@ -131,7 +131,7 @@ public class TagNodes {
     public static void init() {
         EnvExecutor.runInEnv(Env.CLIENT, () -> Client::init);
         EnvExecutor.runInEnv(Env.SERVER, () -> Server::init);
-
+        
         NetworkManager.registerReceiver(
                 NetworkManager.c2s(),
                 REQUEST_TAGS_C2S_PACKET_TYPE,
@@ -171,7 +171,7 @@ public class TagNodes {
             NetworkManager.sendToServer(packet);
         }
     }
-
+    
     private static class Server {
         private static void init() {
             NetworkManager.registerS2CPayloadType(REQUEST_TAGS_S2C_PACKET_TYPE, S2CTagDataPacket.STREAM_CODEC);
@@ -187,17 +187,17 @@ public class TagNodes {
             ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(world -> {
                 requestedTags.clear();
             });
-
+            
             NetworkManager.registerReceiver(
                     NetworkManager.s2c(),
                     REQUEST_TAGS_S2C_PACKET_TYPE,
                     S2CTagDataPacket.STREAM_CODEC,
                     (S2CTagDataPacket payload, NetworkManager.PacketContext context) -> {
                         if (!nextUUID.equals(payload.uuid)) return;
-
+                        
                         TAG_DATA_MAP.put(nextResourceKey, payload.map);
                         nextCallback.accept(DataResult.success(payload.map));
-
+                        
                         nextUUID = null;
                         nextResourceKey = null;
                         nextCallback = null;
