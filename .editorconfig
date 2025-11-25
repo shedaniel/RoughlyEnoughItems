@@ -1,0 +1,14 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+tab_width = 2
+ij_any_keep_indents_on_empty_lines = true
+
+[*.java]
+indent_size = 4
+tab_width = 4

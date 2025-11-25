@@ -124,7 +124,7 @@ public class TagNodes {
     
     public static void init() {
         EnvExecutor.runInEnv(Env.CLIENT, () -> Client::init);
-
+        
         // Fix for TagNodes not being loaded on the server
         // A bit hacky as it uses Architectury's internal API, but this class needs rewriting to use codecs due to the deprecation of the old serialization system anyway.
         if(Platform.getEnvironment() != Env.CLIENT) {
