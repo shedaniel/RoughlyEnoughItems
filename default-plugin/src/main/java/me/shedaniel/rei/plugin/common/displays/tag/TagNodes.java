@@ -129,14 +129,6 @@ public class TagNodes {
         }
     }
 
-    private static void writeResourceLocation(FriendlyByteBuf buf, ResourceLocation location) {
-        if (location.getNamespace().equals("minecraft")) {
-            buf.writeUtf(location.getPath());
-        } else {
-            buf.writeUtf(location.toString());
-        }
-    }
-
     public static void init() {
         EnvExecutor.runInEnv(Env.CLIENT, () -> Client::init);
         EnvExecutor.runInEnv(Env.SERVER, () -> Server::init);
