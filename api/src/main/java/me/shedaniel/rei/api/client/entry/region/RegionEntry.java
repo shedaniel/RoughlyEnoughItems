@@ -28,6 +28,7 @@ import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,7 +57,7 @@ public interface RegionEntry<T extends RegionEntry<T>> {
     
     UUID getUuid();
     
-    default boolean doAction(int button) {
+    default boolean doAction(MouseButtonEvent event) {
         return false;
     }
     

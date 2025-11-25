@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
@@ -100,7 +101,7 @@ public abstract class FavoriteEntry implements RegionEntry<FavoriteEntry> {
     public abstract Renderer getRenderer(boolean showcase);
     
     @Override
-    public abstract boolean doAction(int button);
+    public abstract boolean doAction(MouseButtonEvent event);
     
     @Override
     public Optional<Supplier<Collection<FavoriteMenuEntry>>> getMenuEntries() {

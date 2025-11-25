@@ -39,7 +39,7 @@ public class RoughlyEnoughItemsForge {
         if (!DatagenModLoader.isRunningDataGen()) {
             RoughlyEnoughItemsInitializer.onInitialize();
             
-            if (FMLEnvironment.dist == Dist.CLIENT) {
+            if (FMLEnvironment.getDist() == Dist.CLIENT) {
                 run(() -> RoughlyEnoughItemsInitializer::onInitializeClient);
             }
         }

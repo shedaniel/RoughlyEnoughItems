@@ -37,7 +37,7 @@ public class RoughlyEnoughItemsForgeServerComponent {
     public RoughlyEnoughItemsForgeServerComponent() {
         Logger logger = LogManager.getLogger(RoughlyEnoughItemsForgeServerComponent.class);
         if (!DatagenModLoader.isRunningDataGen()) {
-            if (FMLEnvironment.dist == Dist.CLIENT) {
+            if (FMLEnvironment.getDist() == Dist.CLIENT) {
                 logger.error("Roughly Enough Items Server Component is not compatible with the client!");
                 System.exit(1);
             } else if (ModList.get().isLoaded("roughlyenoughitems")) {

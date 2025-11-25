@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
@@ -84,18 +85,18 @@ public class ScrollableViewWidget {
             }
             
             @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                if (bounds.contains(mouseX, mouseY) && scrolling.updateDraggingState(mouseX, mouseY, button)) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+                if (bounds.contains(event.x(), event.y()) && scrolling.updateDraggingState(event.x(), event.y(), event.button())) {
                     return true;
                 }
-                return super.mouseClicked(mouseX, mouseY, button);
+                return super.mouseClicked(event, doubleClick);
             }
             
             @Override
-            public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-                if (scrolling.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+            public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+                if (scrolling.mouseDragged(event.x(), event.y(), event.button(), deltaX, deltaY))
                     return true;
-                return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+                return super.mouseDragged(event, deltaX, deltaY);
             }
             
             @Override

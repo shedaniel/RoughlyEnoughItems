@@ -62,7 +62,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -115,24 +117,24 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(keyCode, scanCode)) {
+    public boolean keyPressed(KeyEvent event) {
+        if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(event.key(), event.scancode())) {
             if (recipeNext.isEnabled())
                 recipeNext.onClick();
             return recipeNext.isEnabled();
-        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesKey(keyCode, scanCode)) {
+        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesKey(event.key(), event.scancode())) {
             if (recipeBack.isEnabled())
                 recipeBack.onClick();
             return recipeBack.isEnabled();
         }
         for (GuiEventListener element : children())
-            if (element.keyPressed(keyCode, scanCode, modifiers))
+            if (element.keyPressed(event))
                 return true;
-        if (keyCode == 256) {
+        if (event.isEscape()) {
             Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
     
     @Override
@@ -175,7 +177,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                     DefaultDisplayViewingScreen.this.init();
                 }).tooltipLine(Component.translatable("text.rei.previous_page")));
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), Component.empty(), label -> {
-            if (!Screen.hasShiftDown()) {
+            if (!Minecraft.getInstance().hasShiftDown()) {
                 page = 0;
                 DefaultDisplayViewingScreen.this.init();
             } else {
@@ -358,12 +360,12 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     }
     
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    public boolean keyReleased(KeyEvent event) {
         ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
-        if (export.matchesKey(keyCode, scanCode)) {
+        if (export.matchesKey(event.key(), event.scancode())) {
             if (checkExportDisplays()) return true;
         }
-        return super.keyReleased(keyCode, scanCode, modifiers);
+        return super.keyReleased(event);
     }
     
     public int getCurrentTotalPages() {
@@ -375,31 +377,31 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     }
     
     @Override
-    public boolean charTyped(char character, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         for (GuiEventListener listener : children())
-            if (listener.charTyped(character, modifiers))
+            if (listener.charTyped(event))
                 return true;
-        return super.charTyped(character, modifiers);
+        return super.charTyped(event);
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
         for (GuiEventListener entry : children())
-            if (entry.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+            if (entry.mouseDragged(event, deltaX, deltaY))
                 return true;
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(event, deltaX, deltaY);
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
-        if (export.matchesMouse(button)) {
+        if (export.matchesMouse(event.button())) {
             if (checkExportDisplays()) return true;
         }
         for (GuiEventListener entry : children())
-            if (entry.mouseReleased(mouseX, mouseY, button))
+            if (entry.mouseReleased(event))
                 return true;
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
     
     private boolean checkExportDisplays() {
@@ -471,16 +473,16 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (ConfigObject.getInstance().getNextPageKeybind().matchesMouse(button)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (ConfigObject.getInstance().getNextPageKeybind().matchesMouse(event.button())) {
             if (recipeNext.isEnabled())
                 recipeNext.onClick();
             return recipeNext.isEnabled();
-        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesMouse(button)) {
+        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesMouse(event.button())) {
             if (recipeBack.isEnabled())
                 recipeBack.onClick();
             return recipeBack.isEnabled();
-        } else if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesMouse(button)) {
+        } else if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesMouse(event.button())) {
             if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
                 minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
             } else {
@@ -488,7 +490,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             }
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
     
     @Override

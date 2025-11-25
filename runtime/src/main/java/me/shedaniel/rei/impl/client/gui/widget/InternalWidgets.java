@@ -43,7 +43,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -66,7 +67,7 @@ public final class InternalWidgets {
         Button autoCraftingButton = Widgets.createButton(rectangle, text)
                 .focusable(false)
                 .onClick(button -> {
-                    AutoCraftingEvaluator.evaluateAutoCrafting(true, Screen.hasShiftDown(), displaySupplier.get(), idsSupplier);
+                    AutoCraftingEvaluator.evaluateAutoCrafting(true, Minecraft.getInstance().hasShiftDown(), displaySupplier.get(), idsSupplier);
                 });
         return new DelegateWidget(autoCraftingButton) {
             final Supplier<AutoCraftingEvaluator.AutoCraftingResult> result = Suppliers.memoizeWithExpiration(
@@ -108,15 +109,15 @@ public final class InternalWidgets {
             }
             
             @Override
-            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(keyCode, scanCode) && containsMouse(PointHelper.ofMouse())) {
+            public boolean keyPressed(KeyEvent event) {
+                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(event.key(), event.scancode()) && containsMouse(PointHelper.ofMouse())) {
                     minecraft.keyboardHandler.setClipboard(displaySupplier.get().getDisplayLocation().get().toString());
                     if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
                         CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getDisplayLocation().get().toString()));
                     }
                     return true;
                 } else if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse())) {
-                    if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
+                    if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(event.key(), event.scancode())) {
                         FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
                         
                         if (favoritesListWidget != null) {
@@ -126,19 +127,19 @@ public final class InternalWidgets {
                     }
                 }
                 
-                return super.keyPressed(keyCode, scanCode, modifiers);
+                return super.keyPressed(event);
             }
             
             @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesMouse(button) && containsMouse(PointHelper.ofMouse())) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesMouse(event.button()) && containsMouse(PointHelper.ofMouse())) {
                     minecraft.keyboardHandler.setClipboard(displaySupplier.get().getDisplayLocation().get().toString());
                     if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
                         CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getDisplayLocation().get().toString()));
                     }
                     return true;
                 } else if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse())) {
-                    if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
+                    if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(event.button())) {
                         FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
                         
                         if (favoritesListWidget != null) {
@@ -148,7 +149,7 @@ public final class InternalWidgets {
                     }
                 }
                 
-                return super.mouseClicked(mouseX, mouseY, button);
+                return super.mouseClicked(event, doubleClick);
             }
         };
     }

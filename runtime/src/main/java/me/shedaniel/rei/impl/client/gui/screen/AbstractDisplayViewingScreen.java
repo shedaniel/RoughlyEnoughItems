@@ -64,6 +64,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -458,29 +461,29 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        Optional<GuiEventListener> hovered = this.getChildAt(mouseX, mouseY);
-        if (hovered.isPresent() && hovered.get().mouseClicked(mouseX, mouseY, button)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        Optional<GuiEventListener> hovered = this.getChildAt(event.x(), event.y());
+        if (hovered.isPresent() && hovered.get().mouseClicked(event, doubleClick)) {
             this.setFocused(hovered.get());
-            if (button == 0) {
+            if (event.button() == 0) {
                 this.setDragging(true);
             }
             
-            if (getOverlay().mouseClicked(mouseX, mouseY, button)) handleFocuses(button);
+            if (getOverlay().mouseClicked(event, doubleClick)) handleFocuses(event.button());
             return true;
         }
         
-        return getOverlay().mouseClicked(mouseX, mouseY, button) && handleFocuses(button);
+        return getOverlay().mouseClicked(event, doubleClick) && handleFocuses(event.button());
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return super.mouseReleased(mouseX, mouseY, button) || (getOverlay().mouseReleased(mouseX, mouseY, button) && handleFocuses());
+    public boolean mouseReleased(MouseButtonEvent event) {
+        return super.mouseReleased(event) || (getOverlay().mouseReleased(event) && handleFocuses(event.button()));
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || (getOverlay().mouseDragged(mouseX, mouseY, button, deltaX, deltaY) && handleFocuses());
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        return super.mouseDragged(event, deltaX, deltaY) || (getOverlay().mouseDragged(event, deltaX, deltaY) && handleFocuses(event.button()));
     }
     
     @Override
@@ -489,10 +492,10 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers) || (getOverlay().keyPressed(keyCode, scanCode, modifiers) && handleFocuses()))
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event) || (getOverlay().keyPressed(event) && handleFocuses()))
             return true;
-        if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(keyCode, scanCode)) {
+        if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(event.key(), event.scancode())) {
             if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
                 minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
             } else {
@@ -500,7 +503,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             }
             return true;
         }
-        if (this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+        if (this.minecraft.options.keyInventory.matches(event)) {
             Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
             return true;
         }
@@ -508,13 +511,13 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     }
     
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        return super.keyReleased(keyCode, scanCode, modifiers) || (getOverlay().keyReleased(keyCode, scanCode, modifiers) && handleFocuses());
+    public boolean keyReleased(KeyEvent event) {
+        return super.keyReleased(event) || (getOverlay().keyReleased(event) && handleFocuses());
     }
     
     @Override
-    public boolean charTyped(char character, int modifiers) {
-        return super.charTyped(character, modifiers) || (getOverlay().charTyped(character, modifiers) && handleFocuses());
+    public boolean charTyped(CharacterEvent event) {
+        return super.charTyped(event) || (getOverlay().charTyped(event) && handleFocuses());
     }
     
     private interface Limiter<T> {

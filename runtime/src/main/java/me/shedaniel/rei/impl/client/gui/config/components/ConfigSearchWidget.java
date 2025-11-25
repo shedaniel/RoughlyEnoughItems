@@ -37,6 +37,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
@@ -73,7 +74,7 @@ public class ConfigSearchWidget {
                     }
                     
                     @Override
-                    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+                    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
                         Widgets.produceClickSound();
                         ((REIConfigScreen) Minecraft.getInstance().screen).setSearching(true);
                         return true;
@@ -115,7 +116,7 @@ public class ConfigSearchWidget {
                     }
                     
                     @Override
-                    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+                    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
                         Widgets.produceClickSound();
                         ((REIConfigScreen) Minecraft.getInstance().screen).setSearching(true);
                         return true;

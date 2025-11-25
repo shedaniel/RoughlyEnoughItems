@@ -41,6 +41,7 @@ import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconPaymentDispla
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
@@ -136,17 +137,17 @@ public class DefaultBeaconPaymentCategory implements DisplayCategory<DefaultBeac
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (scrolling.updateDraggingState(mouseX, mouseY, button))
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+            if (scrolling.updateDraggingState(event.x(), event.y(), event.button()))
                 return true;
-            return super.mouseClicked(mouseX, mouseY, button);
+            return super.mouseClicked(event, doubleClick);
         }
         
         @Override
-        public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-            if (scrolling.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+        public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+            if (scrolling.mouseDragged(event.x(), event.y(), event.button(), deltaX, deltaY))
                 return true;
-            return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+            return super.mouseDragged(event, deltaX, deltaY);
         }
         
         @Override

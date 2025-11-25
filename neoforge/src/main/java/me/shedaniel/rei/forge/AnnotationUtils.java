@@ -66,15 +66,15 @@ public class AnnotationUtils {
                     boolean enabled;
                     
                     if (value instanceof Dist[]) {
-                        enabled = Arrays.asList((Dist[]) value).contains(FMLEnvironment.dist);
+                        enabled = Arrays.asList((Dist[]) value).contains(FMLEnvironment.getDist());
                     } else if (value instanceof ModAnnotation.EnumHolder) {
-                        enabled = Objects.equals(((ModAnnotation.EnumHolder) value).value(), FMLEnvironment.dist.name());
+                        enabled = Objects.equals(((ModAnnotation.EnumHolder) value).value(), FMLEnvironment.getDist().name());
                     } else if (value instanceof List) {
                         List<ModAnnotation.EnumHolder> holders = ((List<?>) value).stream().filter(o -> o instanceof ModAnnotation.EnumHolder)
                                 .map(o -> (ModAnnotation.EnumHolder) o).toList();
                         if (!holders.isEmpty()) {
                             enabled = holders.stream()
-                                    .anyMatch(o -> Objects.equals(o.value(), FMLEnvironment.dist.name()));
+                                    .anyMatch(o -> Objects.equals(o.value(), FMLEnvironment.getDist().name()));
                         } else {
                             enabled = true;
                         }

@@ -46,8 +46,8 @@ import me.shedaniel.rei.impl.client.gui.widget.EntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -218,7 +218,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.ARROW_RIGHT_TEXTURE, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
         }));
         this.additionalWidgets.add(Widgets.createClickableLabel(new Point(overlayBounds.x + (overlayBounds.width / 2), overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), Component.empty(), label -> {
-            if (!Screen.hasShiftDown()) {
+            if (!Minecraft.getInstance().hasShiftDown()) {
                 setPage(0);
                 updateEntriesPosition();
             } else {
@@ -236,7 +236,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
         if (super.mouseScrolled(mouseX, mouseY, amountX, amountY)) return true;
-        if (!Screen.hasControlDown()) {
+        if (!Minecraft.getInstance().hasControlDown()) {
             if (amountY > 0 && leftButton.isEnabled())
                 leftButton.onClick();
             else if (amountY < 0 && rightButton.isEnabled())

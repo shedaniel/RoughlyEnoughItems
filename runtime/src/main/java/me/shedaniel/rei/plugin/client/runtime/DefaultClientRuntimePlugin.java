@@ -79,6 +79,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -246,7 +247,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         }
         
         @Override
-        public boolean doAction(int button) {
+        public boolean doAction(MouseButtonEvent event) {
             return false;
         }
         
@@ -387,11 +388,11 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         }
         
         @Override
-        public boolean doAction(int button) {
+        public boolean doAction(MouseButtonEvent event) {
             Widgets.produceClickSound();
             
-            if (!(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
-                AutoCraftingEvaluator.evaluateAutoCrafting(true, Screen.hasShiftDown(), display, Collections::emptyList);
+            if (!(Minecraft.getInstance().screen instanceof DisplayScreen) && event.hasControlDown()) {
+                AutoCraftingEvaluator.evaluateAutoCrafting(true, event.hasShiftDown(), display, Collections::emptyList);
                 return true;
             }
             

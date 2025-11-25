@@ -45,6 +45,7 @@ import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
@@ -83,8 +84,8 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return button == 0 && containsMouse(mouseX, mouseY) && onClick != null && onClick.test(this);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        return event.button() == 0 && containsMouse(event.x(), event.y()) && onClick != null && onClick.test(this);
     }
     
     public void setRenderer(DisplayCategory<?> category, Renderer renderer, Component categoryName, boolean selected) {

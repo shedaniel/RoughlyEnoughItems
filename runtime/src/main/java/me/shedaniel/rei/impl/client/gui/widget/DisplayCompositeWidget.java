@@ -42,6 +42,8 @@ import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -77,13 +79,13 @@ public class DisplayCompositeWidget extends DelegateWidgetWithBounds implements 
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event)) {
             return true;
         }
         
         if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(mouse())) {
-            if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
+            if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(event.key(), event.scancode())) {
                 FavoriteEntry favoriteEntry = FavoriteEntryType.registry().get(FavoriteEntryType.DISPLAY)
                         .fromArgs(display.provideInternalDisplay())
                         .result()
@@ -99,13 +101,13 @@ public class DisplayCompositeWidget extends DelegateWidgetWithBounds implements 
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (super.mouseReleased(mouseX, mouseY, button)) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (super.mouseReleased(event)) {
             return true;
         }
         
-        if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(mouseX, mouseY)) {
-            if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
+        if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(event.x(), event.y())) {
+            if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(event.button())) {
                 FavoriteEntry favoriteEntry = FavoriteEntryType.registry().get(FavoriteEntryType.DISPLAY)
                         .fromArgs(display.provideInternalDisplay())
                         .result()

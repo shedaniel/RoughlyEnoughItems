@@ -64,7 +64,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.crafting.Ingredient;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.ApiStatus;
@@ -156,7 +155,7 @@ public class RoughlyEnoughItemsCore {
             LifecycleEvent.SERVER_STARTED.register(server -> {
                 ReloadManagerImpl.reloadPlugins(null, ReloadInterruptionContext.ofNever());
             });
-            ReloadListenerRegistry.register(PackType.SERVER_DATA, (preparationBarrier, resourceManager, executor, executor2) -> {
+            ReloadListenerRegistry.register(PackType.SERVER_DATA, (sharedState, executor, preparationBarrier, executor2) -> {
                 return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(() -> {
                     if (GameInstance.getServer() == null) return;
                     ReloadManagerImpl.reloadPlugins(null, ReloadInterruptionContext.ofNever());

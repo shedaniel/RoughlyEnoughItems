@@ -41,7 +41,8 @@ import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -219,10 +220,10 @@ public class DisplayEntry extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (containsMouse(mouseX + xOffset, mouseY)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (containsMouse(event.x() + xOffset, event.y())) {
             for (Widget widget : widgets.get()) {
-                if (widget.mouseClicked(transformMouseX(mouseX), transformMouseY(mouseY), button)) {
+                if (widget.mouseClicked(new MouseButtonEvent(transformMouseX(event.x()), transformMouseY(event.y()), event.buttonInfo()), doubleClick)) {
                     return true;
                 }
             }
@@ -234,16 +235,16 @@ public class DisplayEntry extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (containsMouse(mouseX + xOffset, mouseY)) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (containsMouse(event.x() + xOffset, event.y())) {
             for (Widget widget : widgets.get()) {
-                if (widget.mouseReleased(transformMouseX(mouseX), transformMouseY(mouseY), button)) {
+                if (widget.mouseReleased(new MouseButtonEvent(transformMouseX(event.x()), transformMouseY(event.y()), event.buttonInfo()))) {
                     return true;
                 }
             }
             
-            if (button == 0 && plusButton.containsMouse(mouseX + xOffset, mouseY)) {
-                AutoCraftingEvaluator.evaluateAutoCrafting(true, Screen.hasShiftDown(), display, display::provideInternalDisplayIds);
+            if (event.button() == 0 && plusButton.containsMouse(event.x() + xOffset, event.y())) {
+                AutoCraftingEvaluator.evaluateAutoCrafting(true, event.hasShiftDown(), display, display::provideInternalDisplayIds);
                 Widgets.produceClickSound();
                 return true;
             }
@@ -255,15 +256,15 @@ public class DisplayEntry extends WidgetWithBounds {
             return true;
         }
         
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         try {
             Widget.pushMouse(new Point(transformMouseX(mouse().x), transformMouseY(mouse().y)));
             for (Widget widget : widgets.get()) {
-                if (widget.keyPressed(keyCode, scanCode, modifiers)) {
+                if (widget.keyPressed(event)) {
                     return true;
                 }
             }
@@ -271,7 +272,7 @@ public class DisplayEntry extends WidgetWithBounds {
             Widget.popMouse();
         }
         
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
     
     private float xOffset() {

@@ -61,7 +61,7 @@ public class ConfigButtonWidget {
         MenuAccess access = overlay.menuAccess();
         Button configButton = Widgets.createButton(bounds, Component.empty())
                 .onClick(button -> {
-                    if (Screen.hasShiftDown() || Screen.hasControlDown()) {
+                    if (Minecraft.getInstance().hasShiftDown() || Minecraft.getInstance().hasControlDown()) {
                         ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());
                         return;
                     }

@@ -17,7 +17,6 @@ accessible field net/minecraft/world/item/alchemy/PotionBrewing containerMixes L
 accessible field net/minecraft/world/item/alchemy/PotionBrewing potionMixes Ljava/util/List;
 accessible    method net/minecraft/client/gui/screens/Screen                                   init                    ()V
 accessible    method net/minecraft/client/gui/screens/Screen                                   insertText              (Ljava/lang/String;Z)V
-accessible    method net/minecraft/client/gui/screens/Screen                                   isValidCharacterForName (Ljava/lang/String;CI)Z
 accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        draggingItem            Lnet/minecraft/world/item/ItemStack;
 mutable       field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        draggingItem            Lnet/minecraft/world/item/ItemStack;
 extendable    method net/minecraft/client/gui/screens/Screen                                   init                    (Lnet/minecraft/client/Minecraft;II)V

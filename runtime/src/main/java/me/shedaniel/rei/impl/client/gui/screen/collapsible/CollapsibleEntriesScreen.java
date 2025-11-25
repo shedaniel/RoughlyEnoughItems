@@ -50,6 +50,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -178,7 +179,7 @@ public class CollapsibleEntriesScreen extends Screen {
         graphics.drawString(this.font, this.title, this.width / 2 - this.font.width(this.title) / 2, 12, -1);
         
         if (ConfigObject.getInstance().doDebugRenderTimeRequired()) {
-            Component debugText = Component.literal(String.format("%s fps", minecraft.fpsString.split(" ")[0]));
+            Component debugText = Component.literal(String.format("%s fps", minecraft.getFps()));
             int stringWidth = font.width(debugText);
             graphics.fillGradient(minecraft.screen.width - stringWidth - 2, 32, minecraft.screen.width, 32 + font.lineHeight + 2, -16777216, -16777216);
             graphics.pose().pushMatrix();
@@ -199,13 +200,13 @@ public class CollapsibleEntriesScreen extends Screen {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return this.listWidget.mouseClicked(mouseX, mouseY, button) || super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        return this.listWidget.mouseClicked(event, doubleClick) || super.mouseClicked(event, doubleClick);
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return this.listWidget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        return this.listWidget.mouseDragged(event, deltaX, deltaY) || super.mouseDragged(event, deltaX, deltaY);
     }
     
     @Override
@@ -293,13 +294,13 @@ public class CollapsibleEntriesScreen extends Screen {
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            return this.scroller.updateDraggingState(mouseX, mouseY, button) || super.mouseClicked(mouseX, mouseY, button);
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+            return this.scroller.updateDraggingState(event.x(), event.y(), event.button()) || super.mouseClicked(event, doubleClick);
         }
         
         @Override
-        public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-            return this.scroller.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+            return this.scroller.mouseDragged(event.x(), event.y(), event.button(), deltaX, deltaY) || super.mouseDragged(event, deltaX, deltaY);
         }
         
         public void clear() {

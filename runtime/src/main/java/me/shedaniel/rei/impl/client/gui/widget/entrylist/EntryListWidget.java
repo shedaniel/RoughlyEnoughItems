@@ -57,6 +57,8 @@ import me.shedaniel.rei.impl.client.gui.widget.region.RegionRenderingDebugger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -169,7 +171,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
         if (containsChecked(mouseX, mouseY, false) && amountY != 0) {
-            if (Screen.hasControlDown()) {
+            if (Minecraft.getInstance().hasControlDown()) {
                 ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
                 scaleIndicator.setAs(10.0D);
                 if (config.setEntrySize(config.getEntrySize() + Double.compare(amountY, 0) * 0.05)) {
@@ -226,10 +228,10 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     protected abstract void renderEntries(GuiGraphics graphics, int mouseX, int mouseY, float delta);
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (containsChecked(mouse(), false))
             for (Widget widget : getEntryWidgets())
-                if (widget.keyPressed(keyCode, scanCode, modifiers))
+                if (widget.keyPressed(event))
                     return true;
         return false;
     }
@@ -290,17 +292,17 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (!hasSpace()) return false;
         for (Widget widget : children())
-            if (widget.mouseClicked(mouseX, mouseY, button))
+            if (widget.mouseClicked(event, doubleClick))
                 return true;
         return false;
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (containsChecked(mouseX, mouseY, false)) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (containsChecked(event.x(), event.y(), false)) {
             LocalPlayer player = minecraft.player;
             if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && player != null && player.containerMenu != null && !player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
                 EntryStack<?> stack = EntryStacks.of(minecraft.player.containerMenu.getCarried().copy());
@@ -311,7 +313,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
                 boolean canDelete = true;
                 
                 for (Widget child : children()) {
-                    if (child.containsMouse(mouseX, mouseY) && child instanceof EntryWidget widget) {
+                    if (child.containsMouse(event.x(), event.y()) && child instanceof EntryWidget widget) {
                         if (widget.cancelDeleteItems(stack)) {
                             canDelete = false;
                             break;
@@ -325,7 +327,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
                 }
             }
             for (Widget widget : children())
-                if (widget.mouseReleased(mouseX, mouseY, button))
+                if (widget.mouseReleased(event))
                     return true;
         }
         return false;

@@ -75,11 +75,11 @@ public class PluginDetectorImpl implements PluginDetector {
     
     static {
         Supplier<List<Map.Entry<REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>, List<String>>>> dist;
-        if (FMLEnvironment.dist == Dist.CLIENT) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             dist = Suppliers.memoize(() -> getPluginsLoader(REIPluginLoaderClient.class));
-        } else if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
+        } else if (FMLEnvironment.getDist() == Dist.DEDICATED_SERVER) {
             dist = Suppliers.memoize(() -> getPluginsLoader(REIPluginLoaderDedicatedServer.class));
-        } else throw new IllegalStateException("Unknown environment: " + FMLEnvironment.dist);
+        } else throw new IllegalStateException("Unknown environment: " + FMLEnvironment.getDist());
         loaderProvidedDist = dist;
     }
     
@@ -112,11 +112,11 @@ public class PluginDetectorImpl implements PluginDetector {
         });
         
         // Dist plugins
-        if (FMLEnvironment.dist == Dist.CLIENT) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             AnnotationUtils.<REIPluginClient, REICommonPlugin>scanAnnotation(REIPluginClient.class, REICommonPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
                 PluginView.getInstance().registerPlugin(wrapPlugin(modId, plugin.get()));
             });
-        } else if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
+        } else if (FMLEnvironment.getDist() == Dist.DEDICATED_SERVER) {
             AnnotationUtils.<REIPluginDedicatedServer, REICommonPlugin>scanAnnotation(REIPluginDedicatedServer.class, REICommonPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
                 PluginView.getInstance().registerPlugin(wrapPlugin(modId, plugin.get()));
             });

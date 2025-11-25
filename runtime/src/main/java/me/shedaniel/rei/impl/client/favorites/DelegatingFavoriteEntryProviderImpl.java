@@ -29,6 +29,7 @@ import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -80,8 +81,8 @@ public class DelegatingFavoriteEntryProviderImpl extends FavoriteEntry {
     }
     
     @Override
-    public boolean doAction(int button) {
-        return getUnwrapped().doAction(button);
+    public boolean doAction(MouseButtonEvent event) {
+        return getUnwrapped().doAction(event);
     }
     
     @Override

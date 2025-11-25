@@ -34,7 +34,8 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.world.item.ItemStack;
 
 public abstract class DisplayedEntryWidget extends EntryWidget {
@@ -61,8 +62,8 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
     }
     
     @Override
-    protected boolean doAction(double mouseX, double mouseY, int button) {
-        if (ClientHelper.getInstance().isCheating() && !Screen.hasControlDown() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+    protected boolean doAction(MouseButtonEvent event) {
+        if (ClientHelper.getInstance().isCheating() && !event.hasControlDown() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
             EntryStack<?> entry = getCurrentEntry().copy();
             if (!entry.isEmpty()) {
                 if (entry.getType() != VanillaEntryTypes.ITEM) {
@@ -72,9 +73,9 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
                 if (entry.getValueType() == ItemStack.class) {
                     boolean all;
                     if (ConfigObject.getInstance().getItemCheatingMode() == ItemCheatingMode.REI_LIKE) {
-                        all = button == 1 || Screen.hasShiftDown();
+                        all = event.button() == 1 || event.hasShiftDown();
                     } else {
-                        all = button != 1 || Screen.hasShiftDown();
+                        all = event.button() != 1 || event.hasShiftDown();
                     }
                     entry.<ItemStack>castValue().setCount(!all ? 1 : entry.<ItemStack>castValue().getMaxStackSize());
                 }
@@ -82,14 +83,14 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
             }
         }
         
-        return super.doAction(mouseX, mouseY, button);
+        return super.doAction(event);
     }
     
     @Override
     public boolean cancelDeleteItems(EntryStack<?> stack) {
         if (!interactable || !ConfigObject.getInstance().isGrabbingItems())
             return super.cancelDeleteItems(stack);
-        if (ClientHelper.getInstance().isCheating() && !Screen.hasControlDown() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+        if (ClientHelper.getInstance().isCheating() && !Minecraft.getInstance().hasControlDown() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
             EntryStack<?> entry = getCurrentEntry().copy();
             if (!entry.isEmpty()) {
                 if (entry.getType() != VanillaEntryTypes.ITEM) {
@@ -103,7 +104,7 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
     }
     
     @Override
-    public boolean keyPressedIgnoreContains(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressedIgnoreContains(KeyEvent event) {
         if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
             EntryStack<?> entry = getCurrentEntry().copy();
             if (!entry.isEmpty()) {
@@ -116,7 +117,7 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
                     
                     KeyMapping[] keyHotbarSlots = Minecraft.getInstance().options.keyHotbarSlots;
                     for (int i = 0; i < keyHotbarSlots.length; i++) {
-                        if (keyHotbarSlots[i].matches(keyCode, scanCode)) {
+                        if (keyHotbarSlots[i].matches(event)) {
                             return ClientHelper.getInstance().tryCheatingEntryTo(entry, i);
                         }
                     }
@@ -124,6 +125,6 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
             }
         }
         
-        return super.keyPressedIgnoreContains(keyCode, scanCode, modifiers);
+        return super.keyPressedIgnoreContains(event);
     }
 }
