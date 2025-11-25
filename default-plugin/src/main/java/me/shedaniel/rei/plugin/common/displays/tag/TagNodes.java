@@ -26,10 +26,8 @@ package me.shedaniel.rei.plugin.common.displays.tag;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.DataResult;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
-import dev.architectury.impl.NetworkAggregator;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.transformers.SplitPacketTransformer;
-import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import io.netty.buffer.Unpooled;
@@ -66,6 +64,7 @@ public class TagNodes {
     public static final ResourceLocation REQUEST_TAGS_C2S_PACKET_ID = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "request_tags_c2s");
     public static final ResourceLocation REQUEST_TAGS_S2C_PACKET_ID = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "request_tags_s2c");
 
+    public static final CustomPacketPayload.Type<C2STagDataPacket> REQUEST_TAGS_C2S_PACKET_TYPE = new CustomPacketPayload.Type<>(REQUEST_TAGS_C2S_PACKET_ID);
     public static final CustomPacketPayload.Type<S2CTagDataPacket> REQUEST_TAGS_S2C_PACKET_TYPE = new CustomPacketPayload.Type<>(REQUEST_TAGS_S2C_PACKET_ID);
     
     public static final Map<String, ResourceKey<? extends Registry<?>>> TAG_DIR_MAP = new HashMap<>();
@@ -101,6 +100,19 @@ public class TagNodes {
                 ByteBufCodecs.collection(ArrayList::new, ResourceLocation.STREAM_CODEC), TagData::otherTags,
                 TagData::new
         );
+    }
+
+    public record C2STagDataPacket(UUID uuid, ResourceLocation registryName) implements CustomPacketPayload {
+        public static final StreamCodec<RegistryFriendlyByteBuf, C2STagDataPacket> STREAM_CODEC = StreamCodec.composite(
+            Uuids.STREAM_CODEC, C2STagDataPacket::uuid,
+            ResourceLocation.STREAM_CODEC, C2STagDataPacket::registryName,
+            C2STagDataPacket::new
+        );
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return REQUEST_TAGS_C2S_PACKET_TYPE;
+        }
     }
 
     public record S2CTagDataPacket(UUID uuid, Map<ResourceLocation, TagData> map) implements CustomPacketPayload {
