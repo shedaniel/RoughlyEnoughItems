@@ -54,7 +54,7 @@ import java.util.*;
 import java.util.function.Function;
 
 public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommonPlugin, ServerDisplayRegistryImpl.ServerDisplaysHolder> implements ServerDisplayRegistry, DisplayConsumerImpl {
-    private static final Comparator<RecipeHolder<?>> RECIPE_COMPARATOR = Comparator.comparing((RecipeHolder<?> o) -> o.id().location().getNamespace()).thenComparing(o -> o.id().location().getPath());
+    private static final Comparator<RecipeHolder<?>> RECIPE_COMPARATOR = Comparator.comparing((RecipeHolder<?> o) -> o.id().identifier().getNamespace()).thenComparing(o -> o.id().identifier().getPath());
     private final Object2LongMap<UUID> playerVersionMap = new Object2LongOpenHashMap<>();
     private int reloadVersionHash = UUID.randomUUID().hashCode();
     

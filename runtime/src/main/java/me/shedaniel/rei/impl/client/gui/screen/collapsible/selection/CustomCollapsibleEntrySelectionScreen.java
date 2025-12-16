@@ -119,6 +119,8 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
                 this.points.clear();
                 this.points.add(new PointPair(new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2), new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2)));
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             };
         }
         {
@@ -126,6 +128,8 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
             this.selectNoneButton = new Button(0, 0, Minecraft.getInstance().font.width(selectNoneText) + 10, 20, selectNoneText, button -> {
                 this.points.clear();
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             };
         }
         {
@@ -141,6 +145,8 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
                     }
                 }
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             };
         }
         {
@@ -155,6 +161,8 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
                     }
                 }
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             };
         }
         {
@@ -163,6 +171,8 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
                 minecraft.setScreen(parent);
                 this.parent = null;
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             };
         }
         this.searchField.isMain = false;

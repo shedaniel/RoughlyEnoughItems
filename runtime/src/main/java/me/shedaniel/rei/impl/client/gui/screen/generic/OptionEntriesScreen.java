@@ -73,6 +73,8 @@ public abstract class OptionEntriesScreen extends Screen {
                 save();
                 minecraft.setScreen(parent);
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             });
         }
         listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height));
@@ -227,6 +229,8 @@ public abstract class OptionEntriesScreen extends Screen {
                 buttonConsumer.accept(this, button);
                 button.setMessage(textFunction.apply(this));
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             };
         }
         

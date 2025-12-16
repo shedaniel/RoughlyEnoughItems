@@ -103,6 +103,8 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
                 this.configObject.disabledGroups.add(this.id);
             }
         }, Supplier::get) {
+            @Override
+            protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
         };
         this.toggleButton.setWidth(this.font.width(toggleButton.getMessage()) + 8);
         if (this.custom) {
@@ -110,14 +112,15 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
                 this.configObject.customGroups.removeIf(customEntry -> customEntry.id.equals(this.id));
                 markDirty.run();
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             };
             this.deleteButton.setWidth(this.font.width(deleteButton.getMessage()) + 8);
             this.configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
                 CollapsibleEntriesScreen.setupCustom(this.id, this.component.getString(), new ArrayList<>(stacks), this.configObject, markDirty);
             }, Supplier::get) {
                 @Override
-                protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-                    super.renderWidget(graphics, mouseX, mouseY, delta);
+                protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
                     graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, getX() + 3, getY() + 3, 0, 0, 14, 14, 256, 256);
                 }
             };

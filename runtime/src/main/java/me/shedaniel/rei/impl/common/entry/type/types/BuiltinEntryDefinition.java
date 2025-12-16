@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.impl.common.entry.type.types;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.*;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
@@ -133,7 +133,7 @@ public class BuiltinEntryDefinition<T> implements EntryDefinition<T>, EntrySeria
     
     @Override
     public Codec<T> codec() {
-        return Codec.unit(defaultValue.get());
+        return MapCodec.unit(defaultValue.get()).codec();
     }
     
     @Override

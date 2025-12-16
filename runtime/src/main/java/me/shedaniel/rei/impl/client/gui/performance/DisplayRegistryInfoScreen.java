@@ -66,6 +66,8 @@ public class DisplayRegistryInfoScreen extends ScreenWithMenu {
                 this.onClose.run();
                 this.onClose = null;
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             });
         }
         {
@@ -76,10 +78,12 @@ public class DisplayRegistryInfoScreen extends ScreenWithMenu {
                     return ToggleMenuEntry.of(Component.translatable("text.rei.sort.by", type.name().toLowerCase(Locale.ROOT)), () -> false, o -> {
                         this.closeMenu();
                         this.sortType = type;
-                        this.init(this.minecraft, this.width, this.height);
+                        this.init(this.width, this.height);
                     });
                 }), false));
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             });
         }
         list = new ListWidget();

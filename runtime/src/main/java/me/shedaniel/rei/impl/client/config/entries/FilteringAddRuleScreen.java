@@ -62,6 +62,8 @@ public class FilteringAddRuleScreen extends Screen {
                 minecraft.setScreen(parent);
                 this.parent = null;
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             });
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height));
@@ -140,6 +142,8 @@ public class FilteringAddRuleScreen extends Screen {
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(parent));
                 rules.add(0, rule);
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             };
             addButton.active = this.screenFunction != null;
         }

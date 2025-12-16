@@ -89,6 +89,8 @@ public class ConfigureCategoriesScreen extends Screen {
                 minecraft.setScreen(parent);
                 this.parent = null;
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             });
         }
         listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height));
@@ -227,6 +229,8 @@ public class ConfigureCategoriesScreen extends Screen {
                         resetListEntries();
                     }
                 }, Supplier::get) {
+                    @Override
+                    protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
                 };
                 this.downButton = new Button(0, 0, 20, 20, Component.literal("↓"), button -> {
                     int index = categoryOrdering.indexOf(configuration.getCategoryIdentifier());
@@ -237,6 +241,8 @@ public class ConfigureCategoriesScreen extends Screen {
                         resetListEntries();
                     }
                 }, Supplier::get) {
+                    @Override
+                    protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
                 };
                 this.upButton.active = categoryOrdering.indexOf(configuration.getCategoryIdentifier()) > 0;
                 this.downButton.active = categoryOrdering.indexOf(configuration.getCategoryIdentifier()) < categoryOrdering.size() - 1;

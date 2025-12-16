@@ -110,6 +110,8 @@ public class CollapsibleEntriesScreen extends Screen {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             addRenderableWidget(new Button(4, 4, font.width(backText) + 10, 20, backText,
                     button -> this.onClose(), Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             });
         }
         {
@@ -120,6 +122,8 @@ public class CollapsibleEntriesScreen extends Screen {
                     this.dirty = true;
                 });
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             });
         }
         

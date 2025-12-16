@@ -80,6 +80,8 @@ public class FilteringRulesScreen extends Screen {
                 minecraft.setScreen(parent);
                 this.parent = null;
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             });
         }
         {
@@ -89,6 +91,8 @@ public class FilteringRulesScreen extends Screen {
                 screen.parent = this;
                 minecraft.setScreen(screen);
             }, Supplier::get) {
+                @Override
+                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
             });
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height));
@@ -188,8 +192,7 @@ public class FilteringRulesScreen extends Screen {
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(Minecraft.getInstance().screen));
             }, Supplier::get) {
                 @Override
-                public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-                    super.renderWidget(graphics, mouseX, mouseY, delta);
+                public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
                     graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, getX() + 3, getY() + 3, 0, 0, 14, 14, 256, 256);
                 }
             };
@@ -198,8 +201,10 @@ public class FilteringRulesScreen extends Screen {
                 deleteButton = new Button(0, 0, Minecraft.getInstance().font.width(deleteText) + 10, 20, deleteText, button -> {
                     final Screen screen = Minecraft.getInstance().screen;
                     rules.remove(rule);
-                    screen.init(Minecraft.getInstance(), screen.width, screen.height);
+                    screen.init(screen.width, screen.height);
                 }, Supplier::get) {
+                    @Override
+                    protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
                 };
             }
             configureButton.active = this.screenFunction != null;
