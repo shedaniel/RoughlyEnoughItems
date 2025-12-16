@@ -333,7 +333,9 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
             if (event.button() == 0) {
                 Style style = this.getTextAt(event.x(), event.y());
                 if (style != null && style.getClickEvent() != null) {
-                    Minecraft.getInstance().screen.handleComponentClicked(style);
+
+
+                    Screen.defaultHandleGameClickEvent(style.getClickEvent(), Minecraft.getInstance(), Minecraft.getInstance().screen);
                     return true;
                 }
             }
