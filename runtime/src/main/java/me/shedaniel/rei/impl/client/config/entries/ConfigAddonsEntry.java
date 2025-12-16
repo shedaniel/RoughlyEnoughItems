@@ -48,6 +48,8 @@ public class ConfigAddonsEntry extends AbstractConfigListEntry<Unit> {
     private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.empty(), button -> {
         Minecraft.getInstance().setScreen(new ConfigAddonsScreen(Minecraft.getInstance().screen));
     }, Supplier::get) {
+        @Override
+        protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
     };
     private List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     

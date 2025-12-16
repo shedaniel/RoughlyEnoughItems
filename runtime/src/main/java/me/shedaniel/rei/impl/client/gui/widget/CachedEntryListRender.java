@@ -193,7 +193,7 @@ public class CachedEntryListRender {
     }
 }*/
 
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.*;
 import net.minecraft.resources.Identifier;
 
 import java.util.function.Supplier;

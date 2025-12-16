@@ -33,7 +33,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.util.ThreadCreator;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;

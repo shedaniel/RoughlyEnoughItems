@@ -36,7 +36,7 @@ import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.registry.displays.DisplayKey;
 import me.shedaniel.rei.impl.common.registry.displays.DisplaysHolder;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
