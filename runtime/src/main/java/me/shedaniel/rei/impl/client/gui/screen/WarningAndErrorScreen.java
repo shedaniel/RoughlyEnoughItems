@@ -123,7 +123,7 @@ public class WarningAndErrorScreen extends Screen {
         for (StringItem child : listWidget.children()) {
             listWidget.max = Math.max(listWidget.max, child.getWidth());
         }
-        addRenderableWidget(buttonExit = new Button(width / 2 - 100, height - 26, 200, 20,
+        addRenderableWidget(buttonExit = new Button.Plain(width / 2 - 100, height - 26, 200, 20,
                 Component.literal(errors.isEmpty() ? "Continue" : "Exit"),
                 button -> onContinue.accept(parent), Supplier::get) {});
     }

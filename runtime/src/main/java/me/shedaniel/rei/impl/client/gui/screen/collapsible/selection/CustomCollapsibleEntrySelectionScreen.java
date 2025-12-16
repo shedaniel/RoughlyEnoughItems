@@ -115,26 +115,20 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         this.searchField = new OverlaySearchField(0, 0, 0, 0);
         {
             Component selectAllText = Component.translatable("config.roughlyenoughitems.filteredEntries.selectAll");
-            this.selectAllButton = new Button(0, 0, Minecraft.getInstance().font.width(selectAllText) + 10, 20, selectAllText, button -> {
+            this.selectAllButton = new Button.Plain(0, 0, Minecraft.getInstance().font.width(selectAllText) + 10, 20, selectAllText, button -> {
                 this.points.clear();
                 this.points.add(new PointPair(new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2), new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2)));
-            }, Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            };
+            }, Supplier::get) {};
         }
         {
             Component selectNoneText = Component.translatable("config.roughlyenoughitems.filteredEntries.selectNone");
-            this.selectNoneButton = new Button(0, 0, Minecraft.getInstance().font.width(selectNoneText) + 10, 20, selectNoneText, button -> {
+            this.selectNoneButton = new Button.Plain(0, 0, Minecraft.getInstance().font.width(selectNoneText) + 10, 20, selectNoneText, button -> {
                 this.points.clear();
-            }, Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            };
+            }, Supplier::get) {};
         }
         {
             Component addText = Component.translatable("text.rei.collapsible.entries.custom.select.add");
-            this.addButton = new Button(0, 0, Minecraft.getInstance().font.width(addText) + 10, 20, addText, button -> {
+            this.addButton = new Button.Plain(0, 0, Minecraft.getInstance().font.width(addText) + 10, 20, addText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack<?> stack = entryStacks.get(i);
                     InnerStackEntry entry = entries.get(i);
@@ -144,14 +138,11 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
                         entry.dirty = true;
                     }
                 }
-            }, Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            };
+            }, Supplier::get) {};
         }
         {
             Component removeText = Component.translatable("text.rei.collapsible.entries.custom.select.remove");
-            this.removeButton = new Button(0, 0, Minecraft.getInstance().font.width(removeText) + 10, 20, removeText, button -> {
+            this.removeButton = new Button.Plain(0, 0, Minecraft.getInstance().font.width(removeText) + 10, 20, removeText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack<?> stack = entryStacks.get(i);
                     InnerStackEntry entry = entries.get(i);
@@ -160,20 +151,14 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
                         entry.dirty = true;
                     }
                 }
-            }, Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            };
+            }, Supplier::get) {};
         }
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
-            this.backButton = new Button(0, 0, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+            this.backButton = new Button.Plain(0, 0, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            }, Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            };
+            }, Supplier::get) {};
         }
         this.searchField.isMain = false;
     }

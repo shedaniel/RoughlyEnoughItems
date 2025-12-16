@@ -141,7 +141,7 @@ public class UncertainDisplayViewingScreen extends Screen {
         }
         int k = 10, l = 44, m = width - 20, n = height - l - 10 - 5;
         graphics.fill( k + 1, l, k + m, l + n, -16777216);
-        graphics.submitOutline(k, l, m, n, -1);
+        graphics.submit(k, l, m, n, -1);
         for (Widget widget : widgets) {
             widget.render(graphics, int_1, int_2, float_1);
         }

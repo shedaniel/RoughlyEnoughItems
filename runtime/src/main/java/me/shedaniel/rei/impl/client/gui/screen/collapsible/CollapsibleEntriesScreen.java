@@ -108,23 +108,17 @@ public class CollapsibleEntriesScreen extends Screen {
         super.init();
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
-            addRenderableWidget(new Button(4, 4, font.width(backText) + 10, 20, backText,
-                    button -> this.onClose(), Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            });
+            addRenderableWidget(new Button.Plain(4, 4, font.width(backText) + 10, 20, backText,
+                    button -> this.onClose(), Supplier::get) {});
         }
         {
             Component addText = Component.literal(" + ");
-            addRenderableWidget(new Button(width - 4 - 20, 4, 20, 20, addText, $ -> {
+            addRenderableWidget(new Button.Plain(width - 4 - 20, 4, 20, 20, addText, $ -> {
                 setupCustom(Identifier.parse("custom:" + UUID.randomUUID()), "", new ArrayList<>(), this.configObject, () -> {
                     this.prepareWidgets(configObject);
                     this.dirty = true;
                 });
-            }, Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            });
+            }, Supplier::get) {});
         }
         
         this.listWidget = new ListWidget(width, height, 30);

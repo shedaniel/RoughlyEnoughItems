@@ -69,13 +69,10 @@ public abstract class OptionEntriesScreen extends Screen {
         {
             Component doneText = Component.translatable("gui.done");
             int width = Minecraft.getInstance().font.width(doneText);
-            addRenderableWidget(new Button(this.width - 4 - width - 10, 4, width + 10, 20, doneText, button -> {
+            addRenderableWidget(new Button.Plain(this.width - 4 - width - 10, 4, width + 10, 20, doneText, button -> {
                 save();
                 minecraft.setScreen(parent);
-            }, Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            });
+            }, Supplier::get) {});
         }
         listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height));
         addEntries(ruleEntry -> listWidget.addItem(ruleEntry));
@@ -225,13 +222,10 @@ public abstract class OptionEntriesScreen extends Screen {
         private final Button widget;
         
         public ButtonListEntry(int width, Function<ButtonListEntry, Component> textFunction, BiConsumer<ButtonListEntry, Button> buttonConsumer) {
-            this.widget = new Button(0, 0, 100, 20, textFunction.apply(this), button -> {
+            this.widget = new Button.Plain(0, 0, 100, 20, textFunction.apply(this), button -> {
                 buttonConsumer.accept(this, button);
                 button.setMessage(textFunction.apply(this));
-            }, Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            };
+            }, Supplier::get) {};
         }
         
         @Override

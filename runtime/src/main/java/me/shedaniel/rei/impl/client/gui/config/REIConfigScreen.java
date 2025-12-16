@@ -468,7 +468,7 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     
     public void setSearching(boolean searching) {
         this.searching = searching;
-        this.init(this.minecraft, this.width, this.height);
+        this.init(this.width, this.height);
     }
     
     public boolean isSearching() {

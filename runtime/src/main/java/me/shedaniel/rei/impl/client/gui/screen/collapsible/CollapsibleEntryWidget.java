@@ -96,27 +96,21 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
         this.stacks = CollectionUtils.map(stacks, stack -> Widgets.createSlot(new Rectangle(0, 0, 16, 16))
                 .entry(stack).disableBackground());
         this.configObject = configObject;
-        this.toggleButton = new Button(0, 0, 20, 20, Component.translatable("text.rei.collapsible.entries.toggle"), button -> {
+        this.toggleButton = new Button.Plain(0, 0, 20, 20, Component.translatable("text.rei.collapsible.entries.toggle"), button -> {
             if (this.configObject.disabledGroups.contains(this.id)) {
                 this.configObject.disabledGroups.remove(this.id);
             } else {
                 this.configObject.disabledGroups.add(this.id);
             }
-        }, Supplier::get) {
-            @Override
-            protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-        };
+        }, Supplier::get) {};
         this.toggleButton.setWidth(this.font.width(toggleButton.getMessage()) + 8);
         if (this.custom) {
-            this.deleteButton = new Button(0, 0, 20, 20, Component.translatable("text.rei.collapsible.entries.delete"), button -> {
+            this.deleteButton = new Button.Plain(0, 0, 20, 20, Component.translatable("text.rei.collapsible.entries.delete"), button -> {
                 this.configObject.customGroups.removeIf(customEntry -> customEntry.id.equals(this.id));
                 markDirty.run();
-            }, Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            };
+            }, Supplier::get) {};
             this.deleteButton.setWidth(this.font.width(deleteButton.getMessage()) + 8);
-            this.configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
+            this.configureButton = new Button.Plain(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
                 CollapsibleEntriesScreen.setupCustom(this.id, this.component.getString(), new ArrayList<>(stacks), this.configObject, markDirty);
             }, Supplier::get) {
                 @Override

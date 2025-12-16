@@ -124,7 +124,7 @@ public class ConfigAddonsScreen extends Screen {
         
         public DefaultAddonEntry(Screen parent, ConfigAddon addon) {
             this.addon = addon;
-            this.configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
+            this.configureButton = new Button.Plain(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
                 Minecraft.getInstance().setScreen(this.addon.createScreen(Minecraft.getInstance().screen));
             }, Supplier::get) {
                 @Override

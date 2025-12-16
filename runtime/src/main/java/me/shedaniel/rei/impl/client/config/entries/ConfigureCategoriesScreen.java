@@ -85,13 +85,10 @@ public class ConfigureCategoriesScreen extends Screen {
         super.init();
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
-            addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+            addRenderableWidget(new Button.Plain(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            }, Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            });
+            }, Supplier::get) {});
         }
         listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height));
         this.resetListEntries();
@@ -220,7 +217,7 @@ public class ConfigureCategoriesScreen extends Screen {
                 }).leftAligned();
             }
             {
-                this.upButton = new Button(0, 0, 20, 20, Component.literal("↑"), button -> {
+                this.upButton = new Button.Plain(0, 0, 20, 20, Component.literal("↑"), button -> {
                     int index = categoryOrdering.indexOf(configuration.getCategoryIdentifier());
                     if (index > 0) {
                         categoryOrdering.remove(index);
@@ -228,11 +225,8 @@ public class ConfigureCategoriesScreen extends Screen {
                         editedSink.run();
                         resetListEntries();
                     }
-                }, Supplier::get) {
-                    @Override
-                    protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-                };
-                this.downButton = new Button(0, 0, 20, 20, Component.literal("↓"), button -> {
+                }, Supplier::get) {};
+                this.downButton = new Button.Plain(0, 0, 20, 20, Component.literal("↓"), button -> {
                     int index = categoryOrdering.indexOf(configuration.getCategoryIdentifier());
                     if (index < categoryOrdering.size() - 1) {
                         categoryOrdering.remove(index);
@@ -240,10 +234,7 @@ public class ConfigureCategoriesScreen extends Screen {
                         editedSink.run();
                         resetListEntries();
                     }
-                }, Supplier::get) {
-                    @Override
-                    protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-                };
+                }, Supplier::get) {};
                 this.upButton.active = categoryOrdering.indexOf(configuration.getCategoryIdentifier()) > 0;
                 this.downButton.active = categoryOrdering.indexOf(configuration.getCategoryIdentifier()) < categoryOrdering.size() - 1;
             }

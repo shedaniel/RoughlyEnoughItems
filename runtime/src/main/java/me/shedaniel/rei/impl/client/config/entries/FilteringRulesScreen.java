@@ -76,24 +76,18 @@ public class FilteringRulesScreen extends Screen {
         super.init();
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
-            addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+            addRenderableWidget(new Button.Plain(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            }, Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            });
+            }, Supplier::get) {});
         }
         {
             Component addText = Component.literal(" + ");
-            addRenderableWidget(new Button(width - 4 - 20, 4, 20, 20, addText, button -> {
+            addRenderableWidget(new Button.Plain(width - 4 - 20, 4, 20, 20, addText, button -> {
                 FilteringAddRuleScreen screen = new FilteringAddRuleScreen(rules);
                 screen.parent = this;
                 minecraft.setScreen(screen);
-            }, Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            });
+            }, Supplier::get) {});
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height));
         for (int i = rules.size() - 1; i >= 0; i--) {
@@ -188,7 +182,7 @@ public class FilteringRulesScreen extends Screen {
         public DefaultRuleEntry(FilteringRule<?> rule, List<FilteringRule<?>> rules, Function<Screen, Screen> screenFunction) {
             super(rule);
             this.screenFunction = Objects.requireNonNullElseGet(screenFunction == null ? ((FilteringRuleType<FilteringRule<?>>) rule.getType()).createEntryScreen(rule) : screenFunction, () -> placeholderScreen(rule));
-            configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
+            configureButton = new Button.Plain(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(Minecraft.getInstance().screen));
             }, Supplier::get) {
                 @Override
@@ -198,14 +192,11 @@ public class FilteringRulesScreen extends Screen {
             };
             {
                 Component deleteText = Component.translatable("config.roughlyenoughitems.filteringRulesScreen.delete");
-                deleteButton = new Button(0, 0, Minecraft.getInstance().font.width(deleteText) + 10, 20, deleteText, button -> {
+                deleteButton = new Button.Plain(0, 0, Minecraft.getInstance().font.width(deleteText) + 10, 20, deleteText, button -> {
                     final Screen screen = Minecraft.getInstance().screen;
                     rules.remove(rule);
                     screen.init(screen.width, screen.height);
-                }, Supplier::get) {
-                    @Override
-                    protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-                };
+                }, Supplier::get) {};
             }
             configureButton.active = this.screenFunction != null;
             deleteButton.active = !rule.getType().isSingular();

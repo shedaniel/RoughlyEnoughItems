@@ -58,13 +58,10 @@ public class FilteringAddRuleScreen extends Screen {
         super.init();
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
-            addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+            addRenderableWidget(new Button.Plain(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            }, Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            });
+            }, Supplier::get) {});
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height));
         for (FilteringRuleType<?> rule : FilteringRuleTypeRegistry.getInstance()) {
@@ -138,13 +135,10 @@ public class FilteringAddRuleScreen extends Screen {
         public DefaultRuleEntry(Screen parent, List<FilteringRule<?>> rules, FilteringRule<?> rule, Function<Screen, Screen> screenFunction) {
             super(rule);
             this.screenFunction = (screenFunction == null ? ((FilteringRuleType<FilteringRule<?>>) rule.getType()).createEntryScreen(rule) : screenFunction);
-            addButton = new Button(0, 0, 20, 20, Component.nullToEmpty(" + "), button -> {
+            addButton = new Button.Plain(0, 0, 20, 20, Component.nullToEmpty(" + "), button -> {
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(parent));
                 rules.add(0, rule);
-            }, Supplier::get) {
-                @Override
-                protected void renderContents(GuiGraphics guiGraphics, int i, int j, float f) {}
-            };
+            }, Supplier::get) {};
             addButton.active = this.screenFunction != null;
         }
         
