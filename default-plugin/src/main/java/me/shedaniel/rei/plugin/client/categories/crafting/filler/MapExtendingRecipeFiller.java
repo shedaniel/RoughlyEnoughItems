@@ -39,7 +39,7 @@ public class MapExtendingRecipeFiller implements CraftingRecipeFiller<MapExtendi
         List<Display> displays = new ArrayList<>();
         
         for (int i = 0; i < 4; i++) {
-            displays.add(new MapExtendingCraftingDisplay(i, Optional.of(recipe.id().location())));
+            displays.add(new MapExtendingCraftingDisplay(i, Optional.of(recipe.id().identifier())));
         }
         
         return displays;

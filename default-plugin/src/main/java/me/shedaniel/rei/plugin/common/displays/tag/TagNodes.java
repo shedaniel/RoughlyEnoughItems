@@ -156,7 +156,7 @@ public class TagNodes {
             callback.accept(DataResult.success(TAG_DATA_MAP.getOrDefault(resourceKey, Collections.emptyMap())));
         } else {
             UUID uuid = UUID.randomUUID();
-            var packet = new C2STagDataPacket(uuid, resourceKey.location());
+            var packet = new C2STagDataPacket(uuid, resourceKey.identifier());
             Client.nextUUID = uuid;
             Client.nextResourceKey = resourceKey;
             List<Consumer<DataResult<Map<Identifier, TagData>>>> callbacks = new CopyOnWriteArrayList<>();

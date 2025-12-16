@@ -61,7 +61,7 @@ public class ArmorDyeRecipeFiller implements CraftingRecipeFiller<ArmorDyeRecipe
                         List.of(EntryIngredient.of(armor.copy()),
                                 EntryIngredients.of(dyeItem)),
                         List.of(EntryIngredients.of(output)),
-                        Optional.of(recipe.id().location())));
+                        Optional.of(recipe.id().identifier())));
             }
             
             for (int i = 0; i < 9; i++) {
@@ -79,7 +79,7 @@ public class ArmorDyeRecipeFiller implements CraftingRecipeFiller<ArmorDyeRecipe
                 output = DyedItemColor.applyDyes(output, dyeItems);
                 displays.add(new DefaultCustomShapelessDisplay(
                         inputs, List.of(EntryIngredients.of(output)),
-                        Optional.of(recipe.id().location())));
+                        Optional.of(recipe.id().identifier())));
             }
         }
         

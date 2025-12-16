@@ -93,7 +93,7 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
                 ),
                 List.of(EntryIngredients.ofSlotDisplay(recipe.value().result.display())),
                 Optional.of(SmithingRecipeType.TRANSFORM),
-                Optional.of(recipe.id().location())
+                Optional.of(recipe.id().identifier())
         );
     }
     
@@ -112,7 +112,7 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
                     recipe.value().templateIngredient().map(EntryIngredients::ofIngredient).orElse(EntryIngredient.empty()),
                     baseIngredient,
                     EntryIngredients.ofItemHolder(additionStack)
-            ), List.of(baseIngredient), Optional.of(SmithingRecipeType.TRIM), Optional.of(recipe.id().location()), recipe.value().pattern));
+            ), List.of(baseIngredient), Optional.of(SmithingRecipeType.TRIM), Optional.of(recipe.id().identifier()), recipe.value().pattern));
         }
         return displays;
     }

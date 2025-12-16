@@ -55,7 +55,7 @@ public class TippedArrowRecipeFiller implements CraftingRecipeFiller<TippedArrow
                 .map(reference -> PotionContents.createItemStack(Items.LINGERING_POTION, reference))
                 .forEach(itemStack -> {
                     PotionContents potion = itemStack.get(DataComponents.POTION_CONTENTS);
-                    if (potion.potion().isPresent() && potion.potion().get().unwrapKey().isPresent() && registeredPotions.add(potion.potion().get().unwrapKey().get().location())) {
+                    if (potion.potion().isPresent() && potion.potion().get().unwrapKey().isPresent() && registeredPotions.add(potion.potion().get().unwrapKey().get().identifier())) {
                         List<EntryIngredient> input = new ArrayList<>();
                         for (int i = 0; i < 4; i++)
                             input.add(arrowStack);
@@ -64,7 +64,7 @@ public class TippedArrowRecipeFiller implements CraftingRecipeFiller<TippedArrow
                             input.add(arrowStack);
                         ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
                         outputStack.set(DataComponents.POTION_CONTENTS, potion);
-                        displays.add(new DefaultCustomDisplay(input, List.of(EntryIngredients.of(outputStack)), Optional.of(recipe.id().location())));
+                        displays.add(new DefaultCustomDisplay(input, List.of(EntryIngredients.of(outputStack)), Optional.of(recipe.id().identifier())));
                     }
                 });
         

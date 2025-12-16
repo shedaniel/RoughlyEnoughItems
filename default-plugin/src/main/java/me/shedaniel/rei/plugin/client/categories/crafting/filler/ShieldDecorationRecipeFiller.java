@@ -94,11 +94,11 @@ public class ShieldDecorationRecipeFiller implements CraftingRecipeFiller<Shield
         displays.add(new DefaultCustomShapelessDisplay(
                 List.of(inputs, shield),
                 List.of(outputs),
-                Optional.of(recipe.id().location())));
+                Optional.of(recipe.id().identifier())));
         
         return displays;
     }
-    
+
     private static EntryStack<ItemStack> createOutput(DyeColor color, ItemStack banner) {
         ItemStack output = new ItemStack(Items.SHIELD);
         output.set(DataComponents.BANNER_PATTERNS, banner.get(DataComponents.BANNER_PATTERNS));

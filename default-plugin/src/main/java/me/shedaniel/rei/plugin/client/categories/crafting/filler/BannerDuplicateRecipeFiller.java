@@ -59,7 +59,7 @@ public class BannerDuplicateRecipeFiller implements CraftingRecipeFiller<BannerD
             displays.add(new DefaultCustomShapelessDisplay(
                     List.of(inputsFirst, EntryIngredient.of(inputsSecond)),
                     List.of(inputsFirst),
-                    Optional.of(recipe.id().location())));
+                    Optional.of(recipe.id().identifier())));
         }
         
         return displays;
