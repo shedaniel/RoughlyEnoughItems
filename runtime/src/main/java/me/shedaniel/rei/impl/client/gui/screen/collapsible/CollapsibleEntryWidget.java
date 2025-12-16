@@ -47,7 +47,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
@@ -60,7 +60,7 @@ import java.util.function.Supplier;
 @SuppressWarnings("UnstableApiUsage")
 public class CollapsibleEntryWidget extends WidgetWithBounds {
     private final boolean custom;
-    private final ResourceLocation id;
+    private final Identifier id;
     private final Component component;
     private final Collection<Slot> stacks;
     private final CollapsibleConfigManager.CollapsibleConfigObject configObject;
@@ -88,7 +88,7 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
     private int height;
     private int rowSize;
     
-    public CollapsibleEntryWidget(boolean custom, ResourceLocation id, Component component, Collection<EntryStack<?>> stacks,
+    public CollapsibleEntryWidget(boolean custom, Identifier id, Component component, Collection<EntryStack<?>> stacks,
                                   CollapsibleConfigManager.CollapsibleConfigObject configObject, Runnable markDirty) {
         this.custom = custom;
         this.id = id;

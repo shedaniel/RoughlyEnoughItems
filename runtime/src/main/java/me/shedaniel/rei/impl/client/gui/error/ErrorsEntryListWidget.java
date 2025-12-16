@@ -42,7 +42,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -383,11 +383,11 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
     
     public static class ImageEntry extends Entry {
         private DynamicTexture texture;
-        private ResourceLocation id;
+        private Identifier id;
         private int width;
         private int height;
         
-        public ImageEntry(int width, DynamicTexture texture, ResourceLocation id) {
+        public ImageEntry(int width, DynamicTexture texture, Identifier id) {
             this.id = id;
             this.texture = texture;
             this.width = (width - 6) / 2;

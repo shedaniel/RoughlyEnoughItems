@@ -45,7 +45,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
@@ -180,12 +180,12 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
         widgets.add(new DelegateWidget(Widgets.noOp()) {
             @Override
             protected Widget delegate() {
-                ResourceLocation expandTexture = !expanded[0] ? ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/expand.png")
-                        : ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/shrink.png");
+                Identifier expandTexture = !expanded[0] ? Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/expand.png")
+                        : Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/shrink.png");
                 return Widgets.concat(
                         Widgets.createTexturedWidget(expandTexture,
                                 new Rectangle(recipeBounds.x + 5 + 2, recipeBounds.y + 6 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9),
-                        Widgets.createTexturedWidget(ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/clipboard.png"),
+                        Widgets.createTexturedWidget(Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/clipboard.png"),
                                 new Rectangle(recipeBounds.x + 5 + 2, recipeBounds.getMaxY() - 6 - 13 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9)
                 );
             }

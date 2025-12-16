@@ -38,7 +38,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.ApiStatus;
@@ -50,7 +50,7 @@ import java.util.Map;
 
 @ApiStatus.Internal
 public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry {
-    private final BiMap<ResourceLocation, FavoriteEntryType<?>> registry = HashBiMap.create();
+    private final BiMap<Identifier, FavoriteEntryType<?>> registry = HashBiMap.create();
     private final List<Triple<SystemFavoriteEntryProvider<?>, MutableLong, List<FavoriteEntry>>> systemFavorites = Lists.newArrayList();
     private final Map<Component, FavoriteEntryType.Section> sections = Maps.newConcurrentMap();
     private final List<FavoriteEntryType.Section> sectionsList = Lists.newCopyOnWriteArrayList();
@@ -66,19 +66,19 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
     }
     
     @Override
-    public void register(ResourceLocation id, FavoriteEntryType<?> type) {
+    public void register(Identifier id, FavoriteEntryType<?> type) {
         this.registry.put(id, type);
         InternalLogger.getInstance().debug("Added favorite entry type [%s]: %s", id, type);
     }
     
     @Override
-    public <A extends FavoriteEntry> @Nullable FavoriteEntryType<A> get(ResourceLocation id) {
+    public <A extends FavoriteEntry> @Nullable FavoriteEntryType<A> get(Identifier id) {
         return (FavoriteEntryType<A>) this.registry.get(id);
     }
     
     @Override
     @Nullable
-    public ResourceLocation getId(FavoriteEntryType<?> type) {
+    public Identifier getId(FavoriteEntryType<?> type) {
         return this.registry.inverse().get(type);
     }
     

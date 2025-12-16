@@ -37,7 +37,8 @@ import me.shedaniel.rei.api.common.util.Identifiable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.*;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -177,7 +178,7 @@ public interface DisplayCategory<T extends Display> extends DisplayCategoryView<
      * {@inheritDoc}
      */
     @Override
-    default ResourceLocation getIdentifier() {
+    default Identifier getIdentifier() {
         return getCategoryIdentifier().getIdentifier();
     }
 }

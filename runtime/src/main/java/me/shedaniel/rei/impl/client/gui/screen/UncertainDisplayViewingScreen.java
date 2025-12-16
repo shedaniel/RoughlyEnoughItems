@@ -45,7 +45,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
@@ -55,8 +55,8 @@ import java.util.List;
 
 @ApiStatus.Internal
 public class UncertainDisplayViewingScreen extends Screen {
-    private static final ResourceLocation DEFAULT = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/screenshot_default.png");
-    private static final ResourceLocation COMPOSITE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/screenshot_composite.png");
+    private static final Identifier DEFAULT = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/screenshot_default.png");
+    private static final Identifier COMPOSITE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/screenshot_composite.png");
     private final List<Widget> widgets;
     protected long start;
     protected long duration;

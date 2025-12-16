@@ -41,7 +41,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -56,10 +56,10 @@ import java.util.Iterator;
 @Environment(EnvType.CLIENT)
 @ApiStatus.Internal
 public class HideIngredientsFromTagsPlugin implements REIClientPlugin {
-    private static final ResourceLocation HIDDEN_TAG = ResourceLocation.fromNamespaceAndPath("c", "hidden_from_recipe_viewers");
+    private static final Identifier HIDDEN_TAG = Identifier.fromNamespaceAndPath("c", "hidden_from_recipe_viewers");
     
     static {
-        FilteringRuleTypeRegistry.getInstance().register(ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "hidden_from_recipe_viewers"), HideTagsFilteringRuleType.INSTANCE);
+        FilteringRuleTypeRegistry.getInstance().register(Identifier.fromNamespaceAndPath("roughlyenoughitems", "hidden_from_recipe_viewers"), HideTagsFilteringRuleType.INSTANCE);
         RoughlyEnoughItemsCoreClient.POST_UPDATE_TAGS.register(HideTagsFilteringRule.INSTANCE::markDirty);
     }
     

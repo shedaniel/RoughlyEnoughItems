@@ -33,7 +33,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
@@ -46,7 +46,7 @@ public class TippedArrowRecipeFiller implements CraftingRecipeFiller<TippedArrow
     @Override
     public Collection<Display> apply(RecipeHolder<TippedArrowRecipe> recipe) {
         EntryIngredient arrowStack = EntryIngredient.of(EntryStacks.of(Items.ARROW));
-        Set<ResourceLocation> registeredPotions = new HashSet<>();
+        Set<Identifier> registeredPotions = new HashSet<>();
         List<Display> displays = new ArrayList<>();
         
         RegistryAccess registryAccess = BasicDisplay.registryAccess();

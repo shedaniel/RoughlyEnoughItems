@@ -37,7 +37,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -48,7 +48,7 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class SubCategoryListEntry extends PerformanceScreen.PerformanceEntry implements Expandable {
-    private static final ResourceLocation CONFIG_TEX = ResourceLocation.fromNamespaceAndPath("cloth-config2", "textures/gui/cloth_config.png");
+    private static final Identifier CONFIG_TEX = Identifier.fromNamespaceAndPath("cloth-config2", "textures/gui/cloth_config.png");
     private final List<PerformanceScreen.PerformanceEntry> entries;
     private final CategoryLabelWidget widget;
     private final List<GuiEventListener> children;

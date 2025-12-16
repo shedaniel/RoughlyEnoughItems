@@ -36,7 +36,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.ShieldDecorationRecipe;
@@ -52,7 +52,7 @@ public class ShieldDecorationRecipeFiller implements CraftingRecipeFiller<Shield
         Random random = new Random();
         
         for (DyeColor color : colors) {
-            Optional<Item> bannerOptional = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(color.getName() + "_banner"));
+            Optional<Item> bannerOptional = BuiltInRegistries.ITEM.getOptional(Identifier.parse(color.getName() + "_banner"));
             if (bannerOptional.isEmpty()) continue;
             out.add(Pair.of(color, new ItemStack(bannerOptional.get())));
             

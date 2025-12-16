@@ -37,7 +37,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -81,7 +81,7 @@ public class BuiltinEntryDefinition<T> implements EntryDefinition<T>, EntrySeria
     
     @Override
     @Nullable
-    public ResourceLocation getIdentifier(EntryStack<T> entry, T value) {
+    public Identifier getIdentifier(EntryStack<T> entry, T value) {
         return null;
     }
     

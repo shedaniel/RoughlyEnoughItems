@@ -32,7 +32,7 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
@@ -50,11 +50,11 @@ public abstract class DefaultCookingDisplay extends BasicDisplay implements Cook
                 Optional.of(recipe.id().location()), recipe.value().experience(), recipe.value().cookingTime());
     }
     
-    public DefaultCookingDisplay(List<EntryIngredient> input, List<EntryIngredient> output, Optional<ResourceLocation> id, CompoundTag tag) {
+    public DefaultCookingDisplay(List<EntryIngredient> input, List<EntryIngredient> output, Optional<Identifier> id, CompoundTag tag) {
         this(input, output, id, tag.getFloat("xp").orElseThrow(), tag.getDouble("cookTime").orElseThrow());
     }
     
-    public DefaultCookingDisplay(List<EntryIngredient> input, List<EntryIngredient> output, Optional<ResourceLocation> id, float xp, double cookTime) {
+    public DefaultCookingDisplay(List<EntryIngredient> input, List<EntryIngredient> output, Optional<Identifier> id, float xp, double cookTime) {
         super(input, output, id);
         this.xp = xp;
         this.cookTime = cookTime;
@@ -75,7 +75,7 @@ public abstract class DefaultCookingDisplay extends BasicDisplay implements Cook
                 RecordCodecBuilder.mapCodec(instance -> instance.group(
                         EntryIngredient.codec().listOf().fieldOf("inputs").forGetter(D::getInputEntries),
                         EntryIngredient.codec().listOf().fieldOf("outputs").forGetter(D::getOutputEntries),
-                        ResourceLocation.CODEC.optionalFieldOf("location").forGetter(D::getDisplayLocation),
+                        Identifier.CODEC.optionalFieldOf("location").forGetter(D::getDisplayLocation),
                         Codec.FLOAT.fieldOf("xp").forGetter(display -> display.xp),
                         Codec.DOUBLE.fieldOf("cookTime").forGetter(display -> display.cookTime)
                 ).apply(instance, constructor::create)),
@@ -84,7 +84,7 @@ public abstract class DefaultCookingDisplay extends BasicDisplay implements Cook
                         D::getInputEntries,
                         EntryIngredient.streamCodec().apply(ByteBufCodecs.list()),
                         D::getOutputEntries,
-                        ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC),
+                        ByteBufCodecs.optional(Identifier.STREAM_CODEC),
                         D::getDisplayLocation,
                         ByteBufCodecs.FLOAT,
                         display -> display.xp,
@@ -95,6 +95,6 @@ public abstract class DefaultCookingDisplay extends BasicDisplay implements Cook
     }
     
     protected interface Constructor<T extends DefaultCookingDisplay> {
-        T create(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location, float xp, double cookTime);
+        T create(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<Identifier> location, float xp, double cookTime);
     }
 }

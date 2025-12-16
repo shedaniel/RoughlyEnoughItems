@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl.common.registry.displays;
 
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Collections;
 import java.util.Map;
@@ -33,14 +33,14 @@ import java.util.Map;
 public class DisplayKey {
     private static final Map<String, DisplayKey> VALUES = Collections.synchronizedMap(Maps.newIdentityHashMap());
     private final CategoryIdentifier<?> categoryIdentifier;
-    private final ResourceLocation location;
+    private final Identifier location;
     
-    public static DisplayKey create(CategoryIdentifier<?> categoryIdentifier, ResourceLocation location) {
+    public static DisplayKey create(CategoryIdentifier<?> categoryIdentifier, Identifier location) {
         String string = (categoryIdentifier + ":" + location).intern();
         return VALUES.computeIfAbsent(string, $ -> new DisplayKey(categoryIdentifier, location));
     }
     
-    private DisplayKey(CategoryIdentifier<?> categoryIdentifier, ResourceLocation location) {
+    private DisplayKey(CategoryIdentifier<?> categoryIdentifier, Identifier location) {
         this.categoryIdentifier = categoryIdentifier;
         this.location = location;
     }
@@ -54,7 +54,7 @@ public class DisplayKey {
         return this.categoryIdentifier;
     }
     
-    public ResourceLocation location() {
+    public Identifier location() {
         return this.location;
     }
 }

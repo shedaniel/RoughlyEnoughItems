@@ -27,7 +27,7 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REICommonPlugin;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
@@ -44,10 +44,10 @@ public interface SlotAccessorRegistry extends Reloadable<REICommonPlugin> {
         return PluginManager.getInstance().get(SlotAccessorRegistry.class);
     }
     
-    void register(ResourceLocation id, Predicate<SlotAccessor> accessorPredicate, Serializer serializer);
+    void register(Identifier id, Predicate<SlotAccessor> accessorPredicate, Serializer serializer);
     
     @Nullable
-    Serializer get(ResourceLocation id);
+    Serializer get(Identifier id);
     
     CompoundTag save(AbstractContainerMenu menu, Player player, SlotAccessor accessor);
     

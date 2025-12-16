@@ -46,7 +46,7 @@ import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.*;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -181,7 +181,7 @@ public class DefaultPlugin implements BuiltinPlugin, REICommonPlugin {
         return -100;
     }
     
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.parse(path);
+    private static Identifier id(String path) {
+        return Identifier.parse(path);
     }
 }

@@ -35,7 +35,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagLoader;
@@ -61,21 +61,21 @@ public class MixinTagLoader<T> {
     }
     
     @Inject(method = "build(Ljava/util/Map;)Ljava/util/Map;", at = @At("HEAD"))
-    private void load(Map<ResourceLocation, TagLoader.EntryWithSource> map, CallbackInfoReturnable<Map<ResourceLocation, Collection<T>>> cir) {
+    private void load(Map<Identifier, TagLoader.EntryWithSource> map, CallbackInfoReturnable<Map<Identifier, Collection<T>>> cir) {
         TagNodes.RAW_TAG_DATA_MAP.put(directory, new HashMap<>());
         TagNodes.CURRENT_TAG_DIR.set(directory);
     }
     
     @Inject(method = "build(Ljava/util/Map;)Ljava/util/Map;", at = @At("RETURN"))
-    private void loadPost(Map<ResourceLocation, TagLoader.EntryWithSource> map, CallbackInfoReturnable<Map<ResourceLocation, Collection<T>>> cir) {
-        Map<TagNodes.CollectionWrapper<T>, ResourceLocation> inverseMap = new HashMap<>(cir.getReturnValue().size());
-        for (Map.Entry<ResourceLocation, Collection<T>> entry : cir.getReturnValue().entrySet()) {
+    private void loadPost(Map<Identifier, TagLoader.EntryWithSource> map, CallbackInfoReturnable<Map<Identifier, Collection<T>>> cir) {
+        Map<TagNodes.CollectionWrapper<T>, Identifier> inverseMap = new HashMap<>(cir.getReturnValue().size());
+        for (Map.Entry<Identifier, Collection<T>> entry : cir.getReturnValue().entrySet()) {
             inverseMap.put(new TagNodes.CollectionWrapper<>(entry.getValue()), entry.getKey());
         }
         ResourceKey<? extends Registry<?>> resourceKey = TagNodes.TAG_DIR_MAP.get(directory);
         if (resourceKey == null) return;
         TagNodes.TAG_DATA_MAP.put(resourceKey, new HashMap<>());
-        Map<ResourceLocation, TagNodes.TagData> tagDataMap = TagNodes.TAG_DATA_MAP.get(resourceKey);
+        Map<Identifier, TagNodes.TagData> tagDataMap = TagNodes.TAG_DATA_MAP.get(resourceKey);
         if (tagDataMap == null) return;
         Registry<T> registry = ((Registry<Registry<T>>) BuiltInRegistries.REGISTRY).getValue((ResourceKey<Registry<T>>) resourceKey);
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -91,12 +91,12 @@ public class MixinTagLoader<T> {
             entryIterator.remove();
             
             if (registry != null) {
-                ResourceLocation tagLoc = inverseMap.get(tag);
+                Identifier tagLoc = inverseMap.get(tag);
                 
                 if (tagLoc != null) {
                     TagNodes.RawTagData rawTagData = entry.getValue();
                     IntList elements = new IntArrayList();
-                    for (ResourceLocation element : rawTagData.otherElements()) {
+                    for (Identifier element : rawTagData.otherElements()) {
                         T t = registry.getValue(element);
                         if (t != null) {
                             elements.add(registry.getId(t));
@@ -120,8 +120,8 @@ public class MixinTagLoader<T> {
             if (resourceKey == null) return;
             Map<TagNodes.CollectionWrapper<?>, TagNodes.RawTagData> dataMap = TagNodes.RAW_TAG_DATA_MAP.get(currentTagDirectory);
             if (dataMap == null) return;
-            List<ResourceLocation> otherElements = new ArrayList<>();
-            List<ResourceLocation> otherTags = new ArrayList<>();
+            List<Identifier> otherElements = new ArrayList<>();
+            List<Identifier> otherTags = new ArrayList<>();
             
             for (TagLoader.EntryWithSource builderEntry : entries) {
                 TagEntry entry = builderEntry.entry();

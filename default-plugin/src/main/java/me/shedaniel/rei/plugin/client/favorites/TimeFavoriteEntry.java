@@ -46,7 +46,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -57,9 +57,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class TimeFavoriteEntry extends FavoriteEntry {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "time");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath("roughlyenoughitems", "time");
     public static final String TRANSLATION_KEY = "favorite.section.time";
-    private static final ResourceLocation CHEST_GUI_TEXTURE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    private static final Identifier CHEST_GUI_TEXTURE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final String KEY = "mode";
     @Nullable
     private final Time time;
@@ -209,7 +209,7 @@ public class TimeFavoriteEntry extends FavoriteEntry {
     }
     
     @Override
-    public ResourceLocation getType() {
+    public Identifier getType() {
         return ID;
     }
     

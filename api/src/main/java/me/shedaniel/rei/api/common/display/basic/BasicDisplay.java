@@ -27,7 +27,7 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -40,13 +40,13 @@ import java.util.Optional;
 public abstract class BasicDisplay implements Display {
     protected List<EntryIngredient> inputs;
     protected List<EntryIngredient> outputs;
-    protected Optional<ResourceLocation> location;
+    protected Optional<Identifier> location;
     
     public BasicDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs) {
         this(inputs, outputs, Optional.empty());
     }
     
-    public BasicDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location) {
+    public BasicDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<Identifier> location) {
         this.inputs = inputs;
         this.outputs = outputs;
         this.location = location;
@@ -77,7 +77,7 @@ public abstract class BasicDisplay implements Display {
      * {@inheritDoc}
      */
     @Override
-    public Optional<ResourceLocation> getDisplayLocation() {
+    public Optional<Identifier> getDisplayLocation() {
         return location;
     }
 }

@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api.client.gui.widgets.utils;
 
 import me.shedaniel.rei.api.client.gui.config.RecipeBorderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface PanelTextures {
     PanelTextures DEFAULT = RecipeBorderType.DEFAULT;
@@ -32,17 +32,17 @@ public interface PanelTextures {
     PanelTextures NONE = RecipeBorderType.NONE;
     PanelTextures SLOT = new PanelTextures() {
         @Override
-        public ResourceLocation texture() {
-            return ResourceLocation.parse("roughlyenoughitems:widget/panel_slot");
+        public Identifier texture() {
+            return Identifier.parse("roughlyenoughitems:widget/panel_slot");
         }
         
         @Override
-        public ResourceLocation darkTexture() {
-            return ResourceLocation.parse("roughlyenoughitems:widget/panel_slot_dark");
+        public Identifier darkTexture() {
+            return Identifier.parse("roughlyenoughitems:widget/panel_slot_dark");
         }
     };
     
-    ResourceLocation texture();
+    Identifier texture();
     
-    ResourceLocation darkTexture();
+    Identifier darkTexture();
 }

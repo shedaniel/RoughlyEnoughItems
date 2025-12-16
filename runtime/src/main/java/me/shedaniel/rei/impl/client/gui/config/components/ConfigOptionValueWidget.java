@@ -45,7 +45,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -111,7 +111,7 @@ public class ConfigOptionValueWidget {
         
         return Widgets.concatWithBounds(() -> new Rectangle(-label.getBounds().width, 0, label.getBounds().width + 8, 14),
                 label,
-                Widgets.withTranslate(Widgets.createTexturedWidget(ResourceLocation.parse("roughlyenoughitems:textures/gui/config/selector.png"),
+                Widgets.withTranslate(Widgets.createTexturedWidget(Identifier.parse("roughlyenoughitems:textures/gui/config/selector.png"),
                         new Rectangle(1, 1, 4, 6), 0, 0, 1, 1, 1, 1), 0, 0.5)
         );
     }

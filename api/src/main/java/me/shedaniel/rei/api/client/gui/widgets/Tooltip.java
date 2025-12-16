@@ -33,7 +33,7 @@ import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -127,9 +127,9 @@ public interface Tooltip {
     Tooltip withContextStack(EntryStack<?> stack);
     
     @Nullable
-    ResourceLocation getTooltipStyle();
+    Identifier getTooltipStyle();
     
-    Tooltip withTooltipStyle(@Nullable ResourceLocation styleLocation);
+    Tooltip withTooltipStyle(@Nullable Identifier styleLocation);
     
     default void queue() {
         EnvExecutor.runInEnv(Env.CLIENT, () -> () -> REIRuntime.getInstance().queueTooltip(this));

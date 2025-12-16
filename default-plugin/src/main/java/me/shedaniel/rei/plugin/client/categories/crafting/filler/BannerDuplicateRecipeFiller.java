@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomShapelessDisplay;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -46,7 +46,7 @@ public class BannerDuplicateRecipeFiller implements CraftingRecipeFiller<BannerD
         Map<DyeColor, Pair<EntryIngredient.Builder, EntryStack<?>>> displayMap = new HashMap<>();
         
         for (Pair<DyeColor, ItemStack> pair : ShieldDecorationRecipeFiller.randomizeBanners()) {
-            Optional<Item> bannerOptional = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(pair.getFirst().getName() + "_banner"));
+            Optional<Item> bannerOptional = BuiltInRegistries.ITEM.getOptional(Identifier.parse(pair.getFirst().getName() + "_banner"));
             if (bannerOptional.isEmpty()) continue;
             Pair<EntryIngredient.Builder, EntryStack<?>> builderPair = displayMap.computeIfAbsent(pair.getFirst(), color -> Pair.of(EntryIngredient.builder(), EntryStacks.of(bannerOptional.get())));
             builderPair.getFirst().add(EntryStacks.of(pair.getSecond()));

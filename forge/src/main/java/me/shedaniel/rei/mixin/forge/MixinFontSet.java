@@ -33,7 +33,7 @@ import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.FontTexture;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -53,7 +53,7 @@ public class MixinFontSet {
     @Shadow @Mutable @Final private List<FontTexture> textures;
     
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void init(TextureManager textureManager, ResourceLocation id, CallbackInfo ci) {
+    private void init(TextureManager textureManager, Identifier id, CallbackInfo ci) {
         this.glyphs = new CodepointMapWrapper<>(this.glyphs);
         this.glyphInfos = new CodepointMapWrapper<>(this.glyphInfos);
         this.glyphsByWidth = Int2ObjectMaps.synchronize(this.glyphsByWidth);

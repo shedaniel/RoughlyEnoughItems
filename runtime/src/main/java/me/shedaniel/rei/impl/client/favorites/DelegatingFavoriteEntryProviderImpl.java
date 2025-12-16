@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -103,7 +103,7 @@ public class DelegatingFavoriteEntryProviderImpl extends FavoriteEntry {
     }
     
     @Override
-    public ResourceLocation getType() {
+    public Identifier getType() {
         return getUnwrapped().getType();
     }
     

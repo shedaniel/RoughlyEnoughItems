@@ -59,7 +59,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -226,7 +226,7 @@ public class ClientHelperImpl implements ClientHelper {
                 return false;
             }
         } else {
-            ResourceLocation identifier = entry.getIdentifier();
+            Identifier identifier = entry.getIdentifier();
             if (identifier == null) {
                 return false;
             }

@@ -45,7 +45,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.GameType;
 import org.apache.commons.lang3.StringUtils;
@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class GameModeFavoriteEntry extends FavoriteEntry {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "gamemode");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath("roughlyenoughitems", "gamemode");
     public static final String TRANSLATION_KEY = "favorite.section.gamemode";
     public static final String KEY = "mode";
     @Nullable
@@ -179,7 +179,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     }
     
     @Override
-    public ResourceLocation getType() {
+    public Identifier getType() {
         return ID;
     }
     

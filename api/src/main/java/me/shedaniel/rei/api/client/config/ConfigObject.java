@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -247,7 +247,7 @@ public interface ConfigObject {
     
     @ApiStatus.Experimental
     @Nullable
-    ResourceLocation getInputMethodId();
+    Identifier getInputMethodId();
     
     boolean doesDisableRecipeBook();
     

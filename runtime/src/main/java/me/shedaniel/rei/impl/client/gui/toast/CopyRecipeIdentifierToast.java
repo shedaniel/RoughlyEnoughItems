@@ -29,13 +29,13 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
 public class CopyRecipeIdentifierToast implements Toast {
-    protected static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/toasts.png");
+    protected static final Identifier TEXTURE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/toasts.png");
     private String title;
     private String subtitle;
     private long startTime;

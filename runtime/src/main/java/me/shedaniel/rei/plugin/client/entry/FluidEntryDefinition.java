@@ -62,7 +62,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -109,7 +109,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     
     @Override
     @Nullable
-    public ResourceLocation getIdentifier(EntryStack<FluidStack> entry, FluidStack value) {
+    public Identifier getIdentifier(EntryStack<FluidStack> entry, FluidStack value) {
         return BuiltInRegistries.FLUID.getKey(value.getFluid());
     }
     
@@ -253,7 +253,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
                 }
             }
             if (Minecraft.getInstance().options.advancedItemTooltips) {
-                ResourceLocation fluidId = BuiltInRegistries.FLUID.getKey(entry.getValue().getFluid());
+                Identifier fluidId = BuiltInRegistries.FLUID.getKey(entry.getValue().getFluid());
                 toolTip.add((Component.literal(fluidId.toString())).withStyle(ChatFormatting.DARK_GRAY));
             }
             return Tooltip.create(toolTip);

@@ -86,7 +86,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -189,19 +189,19 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerCollapsibleEntries(CollapsibleEntryRegistry registry) {
-        registry.group(ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "enchanted_book"), Component.translatable("item.minecraft.enchanted_book"),
+        registry.group(Identifier.fromNamespaceAndPath("roughlyenoughitems", "enchanted_book"), Component.translatable("item.minecraft.enchanted_book"),
                 stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.ENCHANTED_BOOK));
-        registry.group(ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "potion"), Component.translatable("item.minecraft.potion"),
+        registry.group(Identifier.fromNamespaceAndPath("roughlyenoughitems", "potion"), Component.translatable("item.minecraft.potion"),
                 stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.POTION));
-        registry.group(ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "splash_potion"), Component.translatable("item.minecraft.splash_potion"),
+        registry.group(Identifier.fromNamespaceAndPath("roughlyenoughitems", "splash_potion"), Component.translatable("item.minecraft.splash_potion"),
                 stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.SPLASH_POTION));
-        registry.group(ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "lingering_potion"), Component.translatable("item.minecraft.lingering_potion"),
+        registry.group(Identifier.fromNamespaceAndPath("roughlyenoughitems", "lingering_potion"), Component.translatable("item.minecraft.lingering_potion"),
                 stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.LINGERING_POTION));
-        registry.group(ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "spawn_egg"), Component.translatable("text.rei.spawn_egg"),
+        registry.group(Identifier.fromNamespaceAndPath("roughlyenoughitems", "spawn_egg"), Component.translatable("text.rei.spawn_egg"),
                 stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().getItem() instanceof SpawnEggItem);
-        registry.group(ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "tipped_arrow"), Component.translatable("item.minecraft.tipped_arrow"),
+        registry.group(Identifier.fromNamespaceAndPath("roughlyenoughitems", "tipped_arrow"), Component.translatable("item.minecraft.tipped_arrow"),
                 stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.TIPPED_ARROW));
-        registry.group(ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "music_disc"), Component.translatable("text.rei.music_disc"),
+        registry.group(Identifier.fromNamespaceAndPath("roughlyenoughitems", "music_disc"), Component.translatable("text.rei.music_disc"),
                 stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().has(DataComponents.JUKEBOX_PLAYABLE));
     }
     
@@ -270,22 +270,22 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 registry.addWorkstations(PATHING, EntryStacks.of(item));
             }
         });
-        for (EntryStack<?> stack : getTag(ResourceLocation.fromNamespaceAndPath("c", "axes"))) {
+        for (EntryStack<?> stack : getTag(Identifier.fromNamespaceAndPath("c", "axes"))) {
             if (axes.add(stack.<ItemStack>castValue().getItem())) {
                 registry.addWorkstations(STRIPPING, stack);
                 registry.addWorkstations(WAX_SCRAPING, stack);
                 registry.addWorkstations(OXIDATION_SCRAPING, stack);
             }
         }
-        for (EntryStack<?> stack : getTag(ResourceLocation.fromNamespaceAndPath("c", "hoes"))) {
+        for (EntryStack<?> stack : getTag(Identifier.fromNamespaceAndPath("c", "hoes"))) {
             if (hoes.add(stack.<ItemStack>castValue().getItem())) registry.addWorkstations(TILLING, stack);
         }
-        for (EntryStack<?> stack : getTag(ResourceLocation.fromNamespaceAndPath("c", "shovels"))) {
+        for (EntryStack<?> stack : getTag(Identifier.fromNamespaceAndPath("c", "shovels"))) {
             if (shovels.add(stack.<ItemStack>castValue().getItem())) registry.addWorkstations(PATHING, stack);
         }
     }
     
-    private static EntryIngredient getTag(ResourceLocation tagId) {
+    private static EntryIngredient getTag(Identifier tagId) {
         return EntryIngredients.ofItemTag(TagKey.create(Registries.ITEM, tagId));
     }
     

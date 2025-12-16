@@ -31,11 +31,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.*;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.TriState;
 import org.joml.Matrix3f;
 import org.joml.Matrix3x2fStack;
@@ -207,7 +207,7 @@ public class SpriteRenderer {
             return consumer.setNormal(var5.x(), var5.y(), var5.z());
         }
         
-        public void next(ResourceLocation texture) {
+        public void next(Identifier texture) {
             /*if (this.consumer == null) {
                 throw new RuntimeException("Invalid VertexConsumer!");
             }

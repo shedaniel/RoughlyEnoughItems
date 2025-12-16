@@ -33,7 +33,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPosition
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.Nullable;
@@ -71,7 +71,7 @@ public class ScreenOverlayImplFabric extends ScreenOverlayImpl {
         renderTooltipInner(graphics, lines, tooltip.getX(), tooltip.getY(), tooltip.getTooltipStyle());
     }
     
-    public static void renderTooltipInner(GuiGraphics graphics, List<ClientTooltipComponent> lines, int mouseX, int mouseY, @Nullable ResourceLocation tooltipStyle) {
+    public static void renderTooltipInner(GuiGraphics graphics, List<ClientTooltipComponent> lines, int mouseX, int mouseY, @Nullable Identifier tooltipStyle) {
         if (lines.isEmpty()) {
             return;
         }

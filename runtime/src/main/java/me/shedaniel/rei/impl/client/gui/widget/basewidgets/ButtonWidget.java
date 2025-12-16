@@ -41,7 +41,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,8 +55,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ButtonWidget extends Button {
-    private static final WidgetSprites SPRITES = new WidgetSprites(ResourceLocation.withDefaultNamespace("widget/button"), ResourceLocation.withDefaultNamespace("widget/button_disabled"), ResourceLocation.withDefaultNamespace("widget/button_highlighted"));
-    private static final WidgetSprites DARK_SPRITES = new WidgetSprites(ResourceLocation.parse("roughlyenoughitems:widget/button_dark"), ResourceLocation.parse("roughlyenoughitems:widget/button_disabled_dark"), ResourceLocation.parse("roughlyenoughitems:widget/button_highlighted_dark"));
+    private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDefaultNamespace("widget/button"), Identifier.withDefaultNamespace("widget/button_disabled"), Identifier.withDefaultNamespace("widget/button_highlighted"));
+    private static final WidgetSprites DARK_SPRITES = new WidgetSprites(Identifier.parse("roughlyenoughitems:widget/button_dark"), Identifier.parse("roughlyenoughitems:widget/button_disabled_dark"), Identifier.parse("roughlyenoughitems:widget/button_highlighted_dark"));
     private Rectangle bounds;
     private boolean enabled = true;
     private Component text;
@@ -287,7 +287,7 @@ public class ButtonWidget extends Button {
     
     protected void renderBackground(GuiGraphics graphics, int x, int y, int width, int height, boolean focused, boolean dark, Color color) {
         WidgetSprites sprites = dark ? DARK_SPRITES : SPRITES;
-        ResourceLocation texture = sprites.get(this.isEnabled(), focused);
+        Identifier texture = sprites.get(this.isEnabled(), focused);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, texture, x, y, width, height, color.getColor());
     }
 }

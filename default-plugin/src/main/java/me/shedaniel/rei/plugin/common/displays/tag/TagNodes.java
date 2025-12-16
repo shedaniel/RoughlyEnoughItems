@@ -44,7 +44,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.ApiStatus;
@@ -57,8 +57,8 @@ import java.util.function.Consumer;
 
 @ApiStatus.Internal
 public class TagNodes {
-    public static final ResourceLocation REQUEST_TAGS_C2S_PACKET_ID = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "request_tags_c2s");
-    public static final ResourceLocation REQUEST_TAGS_S2C_PACKET_ID = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "request_tags_s2c");
+    public static final Identifier REQUEST_TAGS_C2S_PACKET_ID = Identifier.fromNamespaceAndPath("roughlyenoughitems", "request_tags_c2s");
+    public static final Identifier REQUEST_TAGS_S2C_PACKET_ID = Identifier.fromNamespaceAndPath("roughlyenoughitems", "request_tags_s2c");
     
     public static final CustomPacketPayload.Type<C2STagDataPacket> REQUEST_TAGS_C2S_PACKET_TYPE = new CustomPacketPayload.Type<>(REQUEST_TAGS_C2S_PACKET_ID);
     public static final CustomPacketPayload.Type<S2CTagDataPacket> REQUEST_TAGS_S2C_PACKET_TYPE = new CustomPacketPayload.Type<>(REQUEST_TAGS_S2C_PACKET_ID);
@@ -66,8 +66,8 @@ public class TagNodes {
     public static final Map<String, ResourceKey<? extends Registry<?>>> TAG_DIR_MAP = new HashMap<>();
     public static final ThreadLocal<String> CURRENT_TAG_DIR = new ThreadLocal<>();
     public static final Map<String, Map<CollectionWrapper<?>, RawTagData>> RAW_TAG_DATA_MAP = new ConcurrentHashMap<>();
-    public static final Map<ResourceKey<? extends Registry<?>>, Map<ResourceLocation, TagData>> TAG_DATA_MAP = new HashMap<>();
-    public static Map<ResourceKey<? extends Registry<?>>, Consumer<Consumer<DataResult<Map<ResourceLocation, TagData>>>>> requestedTags = new HashMap<>();
+    public static final Map<ResourceKey<? extends Registry<?>>, Map<Identifier, TagData>> TAG_DATA_MAP = new HashMap<>();
+    public static Map<ResourceKey<? extends Registry<?>>, Consumer<Consumer<DataResult<Map<Identifier, TagData>>>>> requestedTags = new HashMap<>();
     
     public static class CollectionWrapper<T> {
         private final Collection<T> collection;
@@ -87,21 +87,21 @@ public class TagNodes {
         }
     }
     
-    public record RawTagData(List<ResourceLocation> otherElements, List<ResourceLocation> otherTags) {
+    public record RawTagData(List<Identifier> otherElements, List<Identifier> otherTags) {
     }
     
-    public record TagData(IntList otherElements, List<ResourceLocation> otherTags) {
+    public record TagData(IntList otherElements, List<Identifier> otherTags) {
         public static final StreamCodec<RegistryFriendlyByteBuf, TagData> STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.collection(IntArrayList::new, ByteBufCodecs.VAR_INT), TagData::otherElements,
-                ByteBufCodecs.collection(ArrayList::new, ResourceLocation.STREAM_CODEC), TagData::otherTags,
+                ByteBufCodecs.collection(ArrayList::new, Identifier.STREAM_CODEC), TagData::otherTags,
                 TagData::new
         );
     }
     
-    public record C2STagDataPacket(UUID uuid, ResourceLocation registryName) implements CustomPacketPayload {
+    public record C2STagDataPacket(UUID uuid, Identifier registryName) implements CustomPacketPayload {
         public static final StreamCodec<RegistryFriendlyByteBuf, C2STagDataPacket> STREAM_CODEC = StreamCodec.composite(
                 UUIDUtils.STREAM_CODEC, C2STagDataPacket::uuid,
-                ResourceLocation.STREAM_CODEC, C2STagDataPacket::registryName,
+                Identifier.STREAM_CODEC, C2STagDataPacket::registryName,
                 C2STagDataPacket::new
         );
         
@@ -111,12 +111,12 @@ public class TagNodes {
         }
     }
     
-    public record S2CTagDataPacket(UUID uuid, Map<ResourceLocation, TagData> map) implements CustomPacketPayload {
+    public record S2CTagDataPacket(UUID uuid, Map<Identifier, TagData> map) implements CustomPacketPayload {
         public static final StreamCodec<RegistryFriendlyByteBuf, S2CTagDataPacket> STREAM_CODEC = StreamCodec.composite(
                 UUIDUtils.STREAM_CODEC, S2CTagDataPacket::uuid,
                 ByteBufCodecs.map(
                         Maps::newHashMapWithExpectedSize,
-                        ResourceLocation.STREAM_CODEC,
+                        Identifier.STREAM_CODEC,
                         TagData.STREAM_CODEC
                 ), S2CTagDataPacket::map,
                 S2CTagDataPacket::new
@@ -138,7 +138,7 @@ public class TagNodes {
                 C2STagDataPacket.STREAM_CODEC,
                 (C2STagDataPacket payload, NetworkManager.PacketContext context) -> {
                     ResourceKey<? extends Registry<?>> registryKey = ResourceKey.createRegistryKey(payload.registryName);
-                    Map<ResourceLocation, TagData> dataMap = TAG_DATA_MAP.getOrDefault(registryKey, Collections.emptyMap());
+                    Map<Identifier, TagData> dataMap = TAG_DATA_MAP.getOrDefault(registryKey, Collections.emptyMap());
                     var packet = new S2CTagDataPacket(payload.uuid, dataMap);
                     NetworkManager.sendToPlayer((ServerPlayer) context.getPlayer(), packet);
                 }
@@ -146,7 +146,7 @@ public class TagNodes {
     }
     
     @Environment(EnvType.CLIENT)
-    public static void requestTagData(ResourceKey<? extends Registry<?>> resourceKey, Consumer<DataResult<Map<ResourceLocation, TagData>>> callback) {
+    public static void requestTagData(ResourceKey<? extends Registry<?>> resourceKey, Consumer<DataResult<Map<Identifier, TagData>>> callback) {
         if (Minecraft.getInstance().getSingleplayerServer() != null) {
             callback.accept(DataResult.success(TAG_DATA_MAP.get(resourceKey)));
         } else if (!NetworkManager.canServerReceive(REQUEST_TAGS_C2S_PACKET_ID)) {
@@ -159,11 +159,11 @@ public class TagNodes {
             var packet = new C2STagDataPacket(uuid, resourceKey.location());
             Client.nextUUID = uuid;
             Client.nextResourceKey = resourceKey;
-            List<Consumer<DataResult<Map<ResourceLocation, TagData>>>> callbacks = new CopyOnWriteArrayList<>();
+            List<Consumer<DataResult<Map<Identifier, TagData>>>> callbacks = new CopyOnWriteArrayList<>();
             callbacks.add(callback);
             Client.nextCallback = mapDataResult -> {
                 requestedTags.put(resourceKey, c -> c.accept(mapDataResult));
-                for (Consumer<DataResult<Map<ResourceLocation, TagData>>> consumer : callbacks) {
+                for (Consumer<DataResult<Map<Identifier, TagData>>> consumer : callbacks) {
                     consumer.accept(mapDataResult);
                 }
             };
@@ -181,7 +181,7 @@ public class TagNodes {
     private static class Client {
         public static UUID nextUUID;
         public static ResourceKey<? extends Registry<?>> nextResourceKey;
-        public static Consumer<DataResult<Map<ResourceLocation, TagData>>> nextCallback;
+        public static Consumer<DataResult<Map<Identifier, TagData>>> nextCallback;
         
         private static void init() {
             ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(world -> {
@@ -213,7 +213,7 @@ public class TagNodes {
         });
     }
     
-    private static <T> Optional<DataResult<TagNode<T>>> resolveTag(TagKey<T> tagKey, Registry<T> registry, Map<ResourceLocation, TagData> tagDataMap) {
+    private static <T> Optional<DataResult<TagNode<T>>> resolveTag(TagKey<T> tagKey, Registry<T> registry, Map<Identifier, TagData> tagDataMap) {
         TagData tagData = tagDataMap.get(tagKey.location());
         if (tagData == null) return Optional.empty();
         
@@ -228,7 +228,7 @@ public class TagNodes {
         if (!holders.isEmpty()) {
             self.addValuesChild(HolderSet.direct(holders));
         }
-        for (ResourceLocation childTagId : tagData.otherTags()) {
+        for (Identifier childTagId : tagData.otherTags()) {
             TagKey<T> childTagKey = TagKey.create(tagKey.registry(), childTagId);
             if (registry.get(childTagKey).isPresent()) {
                 Optional<DataResult<TagNode<T>>> resultOptional = resolveTag(childTagKey, registry, tagDataMap);

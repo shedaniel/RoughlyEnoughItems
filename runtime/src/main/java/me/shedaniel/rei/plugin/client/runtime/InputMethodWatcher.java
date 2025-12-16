@@ -42,7 +42,7 @@ import me.shedaniel.rei.impl.client.search.method.DefaultInputMethod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -52,7 +52,7 @@ public class InputMethodWatcher implements HintProvider {
     @Override
     public List<Component> provide() {
         if (PluginManager.areAnyReloading() || OverlaySearchField.isHighlighting) return Collections.emptyList();
-        ResourceLocation id = ConfigObject.getInstance().getInputMethodId();
+        Identifier id = ConfigObject.getInstance().getInputMethodId();
         if (id == null) {
             String languageCode = Minecraft.getInstance().options.languageCode;
             MutableComponent component = Component.empty();
@@ -97,7 +97,7 @@ public class InputMethodWatcher implements HintProvider {
                             () -> CraftableFilterButtonWidget.createInputMethodEntries(access, CraftableFilterButtonWidget.getApplicableInputMethods()));
                 }),
                 new HintButton(Component.translatable("text.rei.hint.ignore"), bounds -> {
-                    ConfigManagerImpl.getInstance().getConfig().setInputMethodId(ResourceLocation.parse("rei:default"));
+                    ConfigManagerImpl.getInstance().getConfig().setInputMethodId(Identifier.parse("rei:default"));
                     ConfigManager.getInstance().saveConfig();
                 })
         );

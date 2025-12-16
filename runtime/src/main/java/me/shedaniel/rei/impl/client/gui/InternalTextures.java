@@ -23,15 +23,15 @@
 
 package me.shedaniel.rei.impl.client.gui;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class InternalTextures {
-    public static final ResourceLocation ARROW_LEFT_TEXTURE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/arrow_left.png");
-    public static final ResourceLocation ARROW_RIGHT_TEXTURE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/arrow_right.png");
-    public static final ResourceLocation ARROW_LEFT_SMALL_TEXTURE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/arrow_left_small.png");
-    public static final ResourceLocation ARROW_RIGHT_SMALL_TEXTURE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/arrow_right_small.png");
-    public static final ResourceLocation CHEST_GUI_TEXTURE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    public static final ResourceLocation CHEST_GUI_TEXTURE_DARK = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
+    public static final Identifier ARROW_LEFT_TEXTURE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/arrow_left.png");
+    public static final Identifier ARROW_RIGHT_TEXTURE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/arrow_right.png");
+    public static final Identifier ARROW_LEFT_SMALL_TEXTURE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/arrow_left_small.png");
+    public static final Identifier ARROW_RIGHT_SMALL_TEXTURE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/arrow_right_small.png");
+    public static final Identifier CHEST_GUI_TEXTURE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    public static final Identifier CHEST_GUI_TEXTURE_DARK = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     @Deprecated(forRemoval = true)
-    public static final ResourceLocation LEGACY_DIRT = ResourceLocation.withDefaultNamespace("textures/block/dirt.png");
+    public static final Identifier LEGACY_DIRT = Identifier.withDefaultNamespace("textures/block/dirt.png");
 }

@@ -40,7 +40,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.ApiStatus;
@@ -214,11 +214,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     @Nullable
-    public ResourceLocation getInputMethodId() {
+    public Identifier getInputMethodId() {
         return functionality.inputMethod;
     }
     
-    public void setInputMethodId(@Nullable ResourceLocation id) {
+    public void setInputMethodId(@Nullable Identifier id) {
         functionality.inputMethod = id;
     }
     
@@ -641,7 +641,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Functionality {
         @Nullable
-        public ResourceLocation inputMethod = null;
+        public Identifier inputMethod = null;
         @Comment("Declares whether REI should remove the recipe book.")
         public boolean disableRecipeBook = false;
         @Comment("Declares whether mob effects should be on the left side instead of the right side.")

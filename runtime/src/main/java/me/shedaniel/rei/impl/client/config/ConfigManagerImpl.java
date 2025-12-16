@@ -55,14 +55,14 @@ import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ResourceLocationException;
+import net.minecraft.IdentifierException;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -85,12 +85,12 @@ public class ConfigManagerImpl implements ConfigManager {
     }
     
     public static Jankson buildJankson(Jankson.Builder builder) {
-        // ResourceLocation
-        builder.registerSerializer(ResourceLocation.class, (location, marshaller) -> {
+        // Identifier
+        builder.registerSerializer(Identifier.class, (location, marshaller) -> {
             return new JsonPrimitive(location == null ? null : location.toString());
         });
-        builder.registerDeserializer(String.class, ResourceLocation.class, (value, marshaller) -> {
-            return value == null ? null : ResourceLocation.parse(value);
+        builder.registerDeserializer(String.class, Identifier.class, (value, marshaller) -> {
+            return value == null ? null : Identifier.parse(value);
         });
         
         // CheatingMode
@@ -234,7 +234,7 @@ public class ConfigManagerImpl implements ConfigManager {
         builder.registerDeserializer(String.class, CategoryIdentifier.class, (value, marshaller) -> {
             try {
                 return CategoryIdentifier.of(value);
-            } catch (ResourceLocationException e) {
+            } catch (IdentifierException e) {
                 throw new DeserializationException(e);
             }
         });

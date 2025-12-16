@@ -40,7 +40,7 @@ import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -55,7 +55,7 @@ public class DisplayHistoryManager {
     public Object getPossibleOrigin(DisplaysHolder.ByKey holder, Display display) {
         DisplayEntry entry = displayToEntries.get(display);
         if (entry == null) return null;
-        Optional<ResourceLocation> location = display.getDisplayLocation();
+        Optional<Identifier> location = display.getDisplayLocation();
         if (location.isEmpty()) return null;
         Set<Display> displays = holder.getDisplaysByKey(DisplayKey.create(display.getCategoryIdentifier(), location.get()));
         for (Display d : displays) {

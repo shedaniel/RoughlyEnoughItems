@@ -26,7 +26,7 @@ package me.shedaniel.rei.api.client.search.method;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,12 +38,12 @@ public interface InputMethodRegistry extends Reloadable<REIClientPlugin> {
         return PluginManager.getClientInstance().get(InputMethodRegistry.class);
     }
     
-    void add(ResourceLocation id, InputMethod<?> inputMethod);
+    void add(Identifier id, InputMethod<?> inputMethod);
     
     @Nullable
-    InputMethod<?> get(@Nullable ResourceLocation id);
+    InputMethod<?> get(@Nullable Identifier id);
     
-    InputMethod<?> getOrDefault(@Nullable ResourceLocation id);
+    InputMethod<?> getOrDefault(@Nullable Identifier id);
     
-    Map<ResourceLocation, InputMethod<?>> getAll();
+    Map<Identifier, InputMethod<?>> getAll();
 }
