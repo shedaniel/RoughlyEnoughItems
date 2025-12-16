@@ -45,3 +45,4 @@ accessible class net/minecraft/client/gui/GuiGraphics$ScissorStack
 accessible field net/minecraft/client/gui/GuiGraphics$ScissorStack stack Ljava/util/Deque;
 accessible method net/minecraft/client/gui/GuiGraphics$ScissorStack <init> ()V
 accessible method net/minecraft/client/gui/screens/Screen defaultHandleGameClickEvent (Lnet/minecraft/network/chat/ClickEvent;Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/gui/screens/Screen;)V
+accessible class net/minecraft/client/StringSplitter$WidthLimitedCharSink
