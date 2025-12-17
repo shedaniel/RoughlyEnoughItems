@@ -138,9 +138,9 @@ public class WarningAndErrorScreen extends Screen {
         super.render(graphics, int_1, int_2, float_1);
         this.listWidget.render(graphics, int_1, int_2, float_1);
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-            graphics.drawCenteredString(this.font, "Warnings during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
+            graphics.drawCenteredString(this.font, "Warnings during Roughly Enough Items' " + action, this.width / 2, 16, 0xFFFFFFFF);
         } else {
-            graphics.drawCenteredString(this.font, "Errors during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
+            graphics.drawCenteredString(this.font, "Errors during Roughly Enough Items' " + action, this.width / 2, 16, 0xFFFFFFFF);
         }
         this.buttonExit.render(graphics, int_1, int_2, float_1);
     }

@@ -305,7 +305,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
             if (selected && containsMouse) {
                 REIRuntime.getInstance().queueTooltip(Tooltip.create(Component.translatable("text.rei.weather_button.tooltip.entry", text)));
             }
-            graphics.drawString(font, text, x + 2, y + 2, selected ? 16777215 : 8947848, false);
+            graphics.drawString(font, text, x + 2, y + 2, selected ? 0xFFFFFFFF : 0xFF888888, false);
         }
         
         @Override

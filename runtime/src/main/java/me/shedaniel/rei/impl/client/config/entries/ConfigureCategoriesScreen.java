@@ -254,9 +254,9 @@ public class ConfigureCategoriesScreen extends Screen {
                 int i = client.font.width(title);
                 if (i > entryWidth - 28) {
                     FormattedText titleTrimmed = FormattedText.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 0xFFFFFFFF);
                 } else {
-                    graphics.drawString(client.font, title.getVisualOrderText(), xPos, y + 1, 16777215);
+                    graphics.drawString(client.font, title.getVisualOrderText(), xPos, y + 1, 0xFFFFFFFF);
                 }
             }
             {
@@ -265,16 +265,16 @@ public class ConfigureCategoriesScreen extends Screen {
                 int i = client.font.width(id);
                 if (i > entryWidth - 28) {
                     FormattedText idTrimmed = FormattedText.composite(client.font.substrByWidth(id, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(idTrimmed), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(idTrimmed), x + 2, y + 12, 0xFF808080);
                 } else {
-                    graphics.drawString(client.font, id.getVisualOrderText(), xPos, y + 12, 8421504);
+                    graphics.drawString(client.font, id.getVisualOrderText(), xPos, y + 12, 0xFF808080);
                 }
             }
             boolean shown = !hiddenCategories.contains(configuration.getCategoryIdentifier());
             {
                 Component subtitle = Component.translatable("config.roughlyenoughitems.configureCategories.visibility." + shown)
                         .withStyle(shown ? ChatFormatting.GREEN : ChatFormatting.RED);
-                graphics.drawString(client.font, subtitle, xPos, y + 22, 8421504);
+                graphics.drawString(client.font, subtitle, xPos, y + 22, 0xFF808080);
                 int i = xPos + client.font.width(subtitle);
                 visibilityToggleButton.getPoint().setLocation(i + 3, y + 22);
                 visibilityToggleButton.render(graphics, mouseX, mouseY, delta);
@@ -282,7 +282,7 @@ public class ConfigureCategoriesScreen extends Screen {
             if (shown) {
                 Component subtitle = Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure." + filteringQuickCraftCategories.getOrDefault(configuration.getCategoryIdentifier(), configuration.isQuickCraftingEnabledByDefault()))
                         .withStyle(ChatFormatting.GRAY);
-                graphics.drawString(client.font, subtitle, xPos, y + 32, 8421504);
+                graphics.drawString(client.font, subtitle, xPos, y + 32, 0xFF808080);
                 int i = xPos + client.font.width(subtitle);
                 quickCraftToggleButton.getPoint().setLocation(i + 3, y + 32);
                 quickCraftToggleButton.render(graphics, mouseX, mouseY, delta);

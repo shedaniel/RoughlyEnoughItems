@@ -271,7 +271,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             if (disabled) {
                 s = ChatFormatting.STRIKETHROUGH + s;
             }
-            graphics.drawString(font, s, x + 2, y + 2, selected && !disabled ? 16777215 : 8947848, false);
+            graphics.drawString(font, s, x + 2, y + 2, selected && !disabled ? 0xFFFFFFFF : 0xFF888888, false);
         }
         
         @Override

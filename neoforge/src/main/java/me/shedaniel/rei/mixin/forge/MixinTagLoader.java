@@ -107,7 +107,7 @@ public class MixinTagLoader<T> {
             }
         }
         
-        InternalLogger.getInstance().debug("Processed %d tags in %s for %s", tagDataMap.size(), stopwatch.stop(), resourceKey.location());
+        InternalLogger.getInstance().debug("Processed %d tags in %s for %s", tagDataMap.size(), stopwatch.stop(), resourceKey.identifier());
     }
     
     @Inject(method = "tryBuildTag", at = @At("RETURN"))

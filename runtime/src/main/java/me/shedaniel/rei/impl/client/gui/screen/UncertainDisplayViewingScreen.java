@@ -130,7 +130,7 @@ public class UncertainDisplayViewingScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int int_1, int int_2, float float_1) {
         super.render(graphics, int_1, int_2, float_1);
-        graphics.drawCenteredString(this.font, Component.translatable("text.rei.recipe_screen_type.selection"), this.width / 2, 20, 16777215);
+        graphics.drawCenteredString(this.font, Component.translatable("text.rei.recipe_screen_type.selection"), this.width / 2, 20, 0xFFFFFFFF);
         graphics.enableScissor(0, 20 + font.lineHeight + 2, width, 20 + font.lineHeight + 2 + height - 42);
         if (showTips) {
             int i = 32;

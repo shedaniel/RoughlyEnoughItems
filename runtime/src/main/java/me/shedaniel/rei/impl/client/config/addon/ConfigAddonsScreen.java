@@ -142,9 +142,9 @@ public class ConfigAddonsScreen extends Screen {
                 int i = client.font.width(title);
                 if (i > entryWidth - 28) {
                     FormattedText titleTrimmed = FormattedText.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 0xFFFFFFFF);
                 } else {
-                    graphics.drawString(client.font, title.getVisualOrderText(), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, title.getVisualOrderText(), x + 2, y + 1, 0xFFFFFFFF);
                 }
             }
             {
@@ -152,9 +152,9 @@ public class ConfigAddonsScreen extends Screen {
                 int i = client.font.width(subtitle);
                 if (i > entryWidth - 28) {
                     FormattedText subtitleTrimmed = FormattedText.composite(client.font.substrByWidth(subtitle, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 0xFF808080);
                 } else {
-                    graphics.drawString(client.font, subtitle.getVisualOrderText(), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, subtitle.getVisualOrderText(), x + 2, y + 12, 0xFF808080);
                 }
             }
             configureButton.setX(x + entryWidth - 25);
