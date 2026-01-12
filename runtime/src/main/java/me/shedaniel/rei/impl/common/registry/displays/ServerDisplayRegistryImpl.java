@@ -210,6 +210,11 @@ public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommon
     }
     
     private void fillRecipes() {
+        if (GameInstance.getServer() == null) {
+            InternalLogger.getInstance().debug("Skipping recipe fill: server not available");
+            return;
+        }
+
         Stopwatch stopwatch = Stopwatch.createStarted();
         int lastSize = size();
         if (!fillers().isEmpty()) {
