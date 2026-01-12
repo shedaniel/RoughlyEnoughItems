@@ -112,7 +112,7 @@ public class ClientHelperImpl implements ClientHelper {
     
     public boolean hasOperatorPermission() {
         try {
-            return Minecraft.getInstance().getConnection().getSuggestionsProvider().permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.MODERATORS));
+            return Minecraft.getInstance().getConnection().getSuggestionsProvider().permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(1)));
         } catch (NullPointerException e) {
             return true;
         }
