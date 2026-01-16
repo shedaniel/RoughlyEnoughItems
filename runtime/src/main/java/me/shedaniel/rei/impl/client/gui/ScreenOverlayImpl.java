@@ -515,9 +515,6 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (!visible) {
             return false;
         }
-        if (draggingStack != null) {
-            draggingStack.mouseClicked(event, doubleClick);
-        }
         for (GuiEventListener element : widgets) {
             if (element != configButton && element != menuHolder.widget() && element != hintsWidget && element != draggingStack && element.mouseClicked(event, doubleClick)) {
                 this.setFocused(element);
@@ -527,6 +524,9 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
                     REIRuntimeImpl.getSearchField().setFocused(false);
                 return true;
             }
+        }
+        if (draggingStack != null) {
+            draggingStack.mouseClicked(event, doubleClick);
         }
         if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesMouse(event.button())) {
             REIRuntimeImpl.getSearchField().setFocused(true);
