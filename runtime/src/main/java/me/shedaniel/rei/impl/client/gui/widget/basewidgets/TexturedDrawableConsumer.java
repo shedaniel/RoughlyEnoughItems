@@ -27,14 +27,14 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public final class TexturedDrawableConsumer implements DrawableConsumer {
-    private ResourceLocation identifier;
+    private Identifier identifier;
     private int x, y, width, height, uWidth, vHeight, textureWidth, textureHeight;
     private float u, v;
     
-    public TexturedDrawableConsumer(ResourceLocation identifier, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
+    public TexturedDrawableConsumer(Identifier identifier, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
         this.identifier = identifier;
         this.x = x;
         this.y = y;
@@ -53,7 +53,7 @@ public final class TexturedDrawableConsumer implements DrawableConsumer {
         innerBlit(graphics, RenderPipelines.GUI_TEXTURED, identifier, x, x + width, y, y + height, uWidth, vHeight, u, v, textureWidth, textureHeight);
     }
     
-    private static void innerBlit(GuiGraphics graphics, RenderPipeline pipeline, ResourceLocation location, int xStart, int xEnd, int yStart, int yEnd, int width, int height, float u, float v, int texWidth, int texHeight) {
+    private static void innerBlit(GuiGraphics graphics, RenderPipeline pipeline, Identifier location, int xStart, int xEnd, int yStart, int yEnd, int width, int height, float u, float v, int texWidth, int texHeight) {
         graphics.innerBlit(pipeline, location, xStart, xEnd, yStart, yEnd, u / texWidth, (u + width) / texWidth, v / texHeight, (v + height) / texHeight, -1);
     }
 }

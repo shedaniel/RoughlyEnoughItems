@@ -59,7 +59,7 @@ public class FireworkRocketRecipeFiller implements CraftingRecipeFiller<Firework
             displays.add(new DefaultCustomShapelessDisplay(
                     List.of(inputs),
                     List.of(EntryIngredient.of(outputs)),
-                    Optional.of(recipe.id().location())));
+                    Optional.of(recipe.id().identifier())));
         }
         
         return displays;

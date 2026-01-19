@@ -28,9 +28,9 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicEntryListWidget;
 import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.*;
+import net.minecraft.client.gui.*;
+import net.minecraft.util.*;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -42,10 +42,11 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import org.apache.commons.lang3.mutable.*;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
@@ -333,7 +334,9 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
             if (event.button() == 0) {
                 Style style = this.getTextAt(event.x(), event.y());
                 if (style != null && style.getClickEvent() != null) {
-                    Minecraft.getInstance().screen.handleComponentClicked(style);
+
+
+                    Screen.defaultHandleGameClickEvent(style.getClickEvent(), Minecraft.getInstance(), Minecraft.getInstance().screen);
                     return true;
                 }
             }
@@ -351,13 +354,32 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
                     int line = textY / 12;
                     if (line < this.textSplit.size()) {
                         FormattedCharSequence orderedText = this.textSplit.get(line);
-                        return Minecraft.getInstance().font.getSplitter().componentStyleAtWidth(orderedText, textX);
+                        return styleAtWidth(orderedText, textX, Minecraft.getInstance().font);
                     }
                 }
             }
             
             return null;
         }
+    }
+
+    @Nullable
+    private static Style styleAtWidth(FormattedCharSequence text, int width, Font font) {
+        StringSplitter splitter = font.getSplitter();
+        StringSplitter.WidthLimitedCharSink sink =
+                splitter.new WidthLimitedCharSink(width);
+
+        final MutableObject<Style> result = new MutableObject<>();
+
+        text.accept((i, style, codepoint) -> {
+            if (!sink.accept(i, style, codepoint)) {
+                result.setValue(style);
+                return false;
+            }
+            return true;
+        });
+
+        return result.getValue();
     }
     
     public static class HorizontalRuleEntry extends Entry {
@@ -383,11 +405,11 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
     
     public static class ImageEntry extends Entry {
         private DynamicTexture texture;
-        private ResourceLocation id;
+        private Identifier id;
         private int width;
         private int height;
         
-        public ImageEntry(int width, DynamicTexture texture, ResourceLocation id) {
+        public ImageEntry(int width, DynamicTexture texture, Identifier id) {
             this.id = id;
             this.texture = texture;
             this.width = (width - 6) / 2;

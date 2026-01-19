@@ -87,7 +87,7 @@ public enum SimpleTransferHandlerImpl implements ClientInternals.SimpleTransferH
         }
         
         RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), context.getMinecraft().getConnection().registryAccess());
-        buf.writeResourceLocation(context.getDisplay().getCategoryIdentifier().getIdentifier());
+        buf.writeIdentifier(context.getDisplay().getCategoryIdentifier().getIdentifier());
         buf.writeBoolean(context.isStackedCrafting());
         
         buf.writeNbt(save(context, buf.registryAccess(), inputs, inputSlots, inventorySlots));

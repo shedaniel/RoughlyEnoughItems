@@ -35,7 +35,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -113,7 +113,7 @@ public abstract class FavoriteEntry implements RegionEntry<FavoriteEntry> {
     @Override
     public abstract FavoriteEntry copy();
     
-    public abstract ResourceLocation getType();
+    public abstract Identifier getType();
     
     @Override
     public boolean equals(Object o) {

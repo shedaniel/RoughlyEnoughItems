@@ -58,11 +58,10 @@ public class FilteringAddRuleScreen extends Screen {
         super.init();
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
-            addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+            addRenderableWidget(new Button.Plain(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            }, Supplier::get) {
-            });
+            }, Supplier::get) {});
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height));
         for (FilteringRuleType<?> rule : FilteringRuleTypeRegistry.getInstance()) {
@@ -136,11 +135,10 @@ public class FilteringAddRuleScreen extends Screen {
         public DefaultRuleEntry(Screen parent, List<FilteringRule<?>> rules, FilteringRule<?> rule, Function<Screen, Screen> screenFunction) {
             super(rule);
             this.screenFunction = (screenFunction == null ? ((FilteringRuleType<FilteringRule<?>>) rule.getType()).createEntryScreen(rule) : screenFunction);
-            addButton = new Button(0, 0, 20, 20, Component.nullToEmpty(" + "), button -> {
+            addButton = new Button.Plain(0, 0, 20, 20, Component.nullToEmpty(" + "), button -> {
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(parent));
                 rules.add(0, rule);
-            }, Supplier::get) {
-            };
+            }, Supplier::get) {};
             addButton.active = this.screenFunction != null;
         }
         
@@ -152,9 +150,9 @@ public class FilteringAddRuleScreen extends Screen {
                 int i = client.font.width(title);
                 if (i > entryWidth - 28) {
                     FormattedText titleTrimmed = FormattedText.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 0xFFFFFFFF);
                 } else {
-                    graphics.drawString(client.font, title.getVisualOrderText(), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, title.getVisualOrderText(), x + 2, y + 1, 0xFFFFFFFF);
                 }
             }
             {
@@ -162,9 +160,9 @@ public class FilteringAddRuleScreen extends Screen {
                 int i = client.font.width(subtitle);
                 if (i > entryWidth - 28) {
                     FormattedText subtitleTrimmed = FormattedText.composite(client.font.substrByWidth(subtitle, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 0xFF808080);
                 } else {
-                    graphics.drawString(client.font, subtitle.getVisualOrderText(), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, subtitle.getVisualOrderText(), x + 2, y + 12, 0xFF808080);
                 }
             }
             addButton.setX(x + entryWidth - 25);

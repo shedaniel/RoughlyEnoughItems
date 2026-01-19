@@ -112,7 +112,7 @@ public abstract class TagNode<T> {
             for (Holder<T> holder : value) {
                 holder.unwrapKey().ifPresent(key -> {
                     builder.append(prefix);
-                    builder.append(key.location().toString());
+                    builder.append(key.identifier().toString());
                     builder.append('\n');
                 });
             }

@@ -90,6 +90,7 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
                 graphics.pose().pushMatrix();
                 graphics.pose().translate(-1.2f, -1);
                 graphics.innerBlit(RenderPipelines.GUI_TEXTURED, REIRuntime.getInstance().getDefaultDisplayTexture(), bounds.getCenterX() - 8, bounds.getCenterX() + 8, bounds.getCenterY() - 8, bounds.getCenterY() + 8, 116f / 256f, (116f + 16f) / 256f, 0f, 16f / 256f, -1);
+                //private void innerBlit(RenderPipeline renderPipeline, Identifier identifier, int x, int x, int y, int y, float r, float g, float b, float m, int n) {
                 graphics.pose().popMatrix();
             }
         };

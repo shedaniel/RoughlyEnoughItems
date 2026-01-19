@@ -24,26 +24,26 @@
 package me.shedaniel.rei.impl.client.gui.config.options;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class OptionCategory {
     private final String key;
-    private final ResourceLocation icon;
+    private final Identifier icon;
     private final Component name;
     private final Component description;
     private final List<OptionGroup> groups = new ArrayList<>();
     
-    private OptionCategory(String key, ResourceLocation icon, Component name, Component description) {
+    private OptionCategory(String key, Identifier icon, Component name, Component description) {
         this.key = key;
         this.icon = icon;
         this.name = name;
         this.description = description;
     }
     
-    public static OptionCategory of(String key, ResourceLocation icon, Component name, Component description) {
+    public static OptionCategory of(String key, Identifier icon, Component name, Component description) {
         return new OptionCategory(key, icon, name, description);
     }
     
@@ -56,7 +56,7 @@ public class OptionCategory {
         return key;
     }
     
-    public ResourceLocation getIcon() {
+    public Identifier getIcon() {
         return icon;
     }
     

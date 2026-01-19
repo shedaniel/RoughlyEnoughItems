@@ -34,12 +34,12 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityEquipment;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AnvilMenu;
@@ -54,7 +54,7 @@ public class DefaultAnvilDisplay extends BasicDisplay {
             RecordCodecBuilder.mapCodec(instance -> instance.group(
                     EntryIngredient.codec().listOf().fieldOf("inputs").forGetter(DefaultAnvilDisplay::getInputEntries),
                     EntryIngredient.codec().listOf().fieldOf("outputs").forGetter(DefaultAnvilDisplay::getOutputEntries),
-                    ResourceLocation.CODEC.optionalFieldOf("location").forGetter(DefaultAnvilDisplay::getDisplayLocation),
+                    Identifier.CODEC.optionalFieldOf("location").forGetter(DefaultAnvilDisplay::getDisplayLocation),
                     Codec.INT.optionalFieldOf("cost").forGetter(d -> d.cost.stream().boxed().findFirst())
             ).apply(instance, (inputs, outputs, location, cost) -> new DefaultAnvilDisplay(inputs, outputs, location, cost.stream().mapToInt(i -> i).findFirst()))),
             StreamCodec.composite(
@@ -62,7 +62,7 @@ public class DefaultAnvilDisplay extends BasicDisplay {
                     DefaultAnvilDisplay::getInputEntries,
                     EntryIngredient.streamCodec().apply(ByteBufCodecs.list()),
                     DefaultAnvilDisplay::getOutputEntries,
-                    ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC),
+                    ByteBufCodecs.optional(Identifier.STREAM_CODEC),
                     DefaultAnvilDisplay::getDisplayLocation,
                     ByteBufCodecs.optional(ByteBufCodecs.INT),
                     d -> d.cost.stream().boxed().findFirst(),
@@ -83,15 +83,15 @@ public class DefaultAnvilDisplay extends BasicDisplay {
         );
     }
     
-    public DefaultAnvilDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location) {
+    public DefaultAnvilDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<Identifier> location) {
         this(inputs, outputs, location, OptionalInt.empty());
     }
     
-    public DefaultAnvilDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location, CompoundTag tag) {
+    public DefaultAnvilDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<Identifier> location, CompoundTag tag) {
         this(inputs, outputs, location, tag.contains("Cost") ? Util.make(() -> tag.getInt("Cost").isPresent() ? OptionalInt.of(tag.getInt("Cost").get()) : OptionalInt.empty()) : OptionalInt.empty());
     }
     
-    public DefaultAnvilDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location, OptionalInt cost) {
+    public DefaultAnvilDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<Identifier> location, OptionalInt cost) {
         super(inputs, outputs, location);
         this.cost = cost;
     }

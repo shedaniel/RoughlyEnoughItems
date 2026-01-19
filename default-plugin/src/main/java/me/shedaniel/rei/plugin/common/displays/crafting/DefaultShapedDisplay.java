@@ -32,7 +32,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 
@@ -44,7 +44,7 @@ public class DefaultShapedDisplay extends DefaultCraftingDisplay {
             RecordCodecBuilder.mapCodec(instance -> instance.group(
                     EntryIngredient.codec().listOf().fieldOf("inputs").forGetter(DefaultCraftingDisplay::getInputEntries),
                     EntryIngredient.codec().listOf().fieldOf("outputs").forGetter(DefaultCraftingDisplay::getOutputEntries),
-                    ResourceLocation.CODEC.optionalFieldOf("location").forGetter(DefaultCraftingDisplay::getDisplayLocation),
+                    Identifier.CODEC.optionalFieldOf("location").forGetter(DefaultCraftingDisplay::getDisplayLocation),
                     Codec.INT.fieldOf("width").forGetter(DefaultCraftingDisplay::getWidth),
                     Codec.INT.fieldOf("height").forGetter(DefaultCraftingDisplay::getHeight)
             ).apply(instance, DefaultCustomShapedDisplay::new)),
@@ -53,7 +53,7 @@ public class DefaultShapedDisplay extends DefaultCraftingDisplay {
                     DefaultCraftingDisplay::getInputEntries,
                     EntryIngredient.streamCodec().apply(ByteBufCodecs.list()),
                     DefaultCraftingDisplay::getOutputEntries,
-                    ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC),
+                    ByteBufCodecs.optional(Identifier.STREAM_CODEC),
                     DefaultCraftingDisplay::getDisplayLocation,
                     ByteBufCodecs.INT,
                     DefaultCraftingDisplay::getWidth,
@@ -69,7 +69,7 @@ public class DefaultShapedDisplay extends DefaultCraftingDisplay {
         super(
                 CollectionUtils.map(recipe.value().getIngredients(), opt -> opt.map(EntryIngredients::ofIngredient).orElse(EntryIngredient.empty())),
                 List.of(EntryIngredients.of(recipe.value().result)),
-                Optional.of(recipe.id().location())
+                Optional.of(recipe.id().identifier())
         );
         this.width = recipe.value().getWidth();
         this.height = recipe.value().getHeight();

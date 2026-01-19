@@ -40,9 +40,9 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderType;
+
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -73,9 +73,9 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     @Nullable
     protected E hoveredItem;
     protected E selectedItem;
-    protected ResourceLocation backgroundLocation;
+    protected Identifier backgroundLocation;
     
-    public DynamicErrorFreeEntryListWidget(Minecraft client, int width, int height, int top, int bottom, ResourceLocation backgroundLocation) {
+    public DynamicErrorFreeEntryListWidget(Minecraft client, int width, int height, int top, int bottom, Identifier backgroundLocation) {
         this.client = client;
         this.width = width;
         this.height = height;
@@ -221,7 +221,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     protected void clickedHeader(int int_1, int int_2) {
     }
     
-    public static void renderBackBackground(GuiGraphics graphics, ResourceLocation backgroundLocation,
+    public static void renderBackBackground(GuiGraphics graphics, Identifier backgroundLocation,
                                             int left, int top, int right, int bottom, int yOffset, int color) {
         /*graphics.drawSpecial(source -> {
             VertexConsumer buffer = source.getBuffer(RenderType.guiTextured(backgroundLocation));

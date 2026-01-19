@@ -136,7 +136,7 @@ public class ConfigButtonWidget {
                                     Screen screen = Minecraft.getInstance().screen;
                                     
                                     if (screen != null) {
-                                        screen.init(Minecraft.getInstance(), screen.width, screen.height);
+                                        screen.init(screen.width, screen.height);
                                     }
                                 }
                         ),
@@ -147,7 +147,7 @@ public class ConfigButtonWidget {
                                     Screen screen = Minecraft.getInstance().screen;
                                     
                                     if (screen != null) {
-                                        screen.init(Minecraft.getInstance(), screen.width, screen.height);
+                                        screen.init(screen.width, screen.height);
                                     }
                                 }
                         ),

@@ -39,8 +39,8 @@ public class MixinScreen {
     @Unique
     private static final ThreadLocal<Boolean> REI_IN = ThreadLocal.withInitial(() -> false);
     
-    @Inject(method = "init(Lnet/minecraft/client/Minecraft;II)V", at = @At("HEAD"))
-    private void init(Minecraft minecraft, int i, int j, CallbackInfo ci) {
+    @Inject(method = "init(II)V", at = @At("HEAD"))
+    private void init(int i, int j, CallbackInfo ci) {
         if (!REI_IN.get()) {
             REI_IN.set(true);
             for (Consumer<Screen> consumer : ErrorDisplayerImpl.consumerList) {

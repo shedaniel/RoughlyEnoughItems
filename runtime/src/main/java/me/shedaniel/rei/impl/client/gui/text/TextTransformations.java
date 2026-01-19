@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl.client.gui.text;
 
 import me.shedaniel.math.Color;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;

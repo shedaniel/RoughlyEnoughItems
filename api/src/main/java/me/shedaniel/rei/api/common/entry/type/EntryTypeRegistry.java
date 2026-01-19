@@ -26,7 +26,7 @@ package me.shedaniel.rei.api.common.entry.type;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REICommonPlugin;
 import me.shedaniel.rei.api.common.registry.Reloadable;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
@@ -69,7 +69,7 @@ public interface EntryTypeRegistry extends Reloadable<REICommonPlugin> {
      * @param definition the definition of the entry
      * @param <T>        the type of the entry
      */
-    <T> void register(ResourceLocation id, EntryDefinition<T> definition);
+    <T> void register(Identifier id, EntryDefinition<T> definition);
     
     /**
      * Returns the entry definition from the entry type.
@@ -89,14 +89,14 @@ public interface EntryTypeRegistry extends Reloadable<REICommonPlugin> {
      * @return the definition of the entry, may be {@code null} if {@code id} is an unknown type
      */
     @Nullable
-    EntryDefinition<?> get(ResourceLocation id);
+    EntryDefinition<?> get(Identifier id);
     
     /**
      * Returns the set of types in their identifier form.
      *
      * @return the set of types
      */
-    Set<ResourceLocation> keySet();
+    Set<Identifier> keySet();
     
     /**
      * Returns the set of entry definitions.

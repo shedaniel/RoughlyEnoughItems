@@ -46,7 +46,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
@@ -58,9 +58,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class WeatherFavoriteEntry extends FavoriteEntry {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "weather");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath("roughlyenoughitems", "weather");
     public static final String TRANSLATION_KEY = "favorite.section.weather";
-    private static final ResourceLocation CHEST_GUI_TEXTURE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    private static final Identifier CHEST_GUI_TEXTURE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final String KEY = "weather";
     @Nullable
     private final Weather weather;
@@ -183,7 +183,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
     }
     
     @Override
-    public ResourceLocation getType() {
+    public Identifier getType() {
         return ID;
     }
     
@@ -305,7 +305,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
             if (selected && containsMouse) {
                 REIRuntime.getInstance().queueTooltip(Tooltip.create(Component.translatable("text.rei.weather_button.tooltip.entry", text)));
             }
-            graphics.drawString(font, text, x + 2, y + 2, selected ? 16777215 : 8947848, false);
+            graphics.drawString(font, text, x + 2, y + 2, selected ? 0xFFFFFFFF : 0xFF888888, false);
         }
         
         @Override

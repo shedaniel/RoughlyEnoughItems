@@ -52,7 +52,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -85,7 +85,7 @@ public class CollapsibleEntriesScreen extends Screen {
         }
         
         CollapsibleEntryRegistryImpl collapsibleRegistry = (CollapsibleEntryRegistryImpl) CollapsibleEntryRegistry.getInstance();
-        Multimap<ResourceLocation, EntryStack<?>> entries = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
+        Multimap<Identifier, EntryStack<?>> entries = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
         for (HashedEntryStackWrapper wrapper : ((EntryRegistryImpl) EntryRegistry.getInstance()).getFilteredList().getList()) {
             for (CollapsibleEntryRegistryImpl.Entry entry : collapsibleRegistry.getEntries()) {
                 if (entry.getMatcher().matches(wrapper.unwrap(), wrapper.hashExact())) {
@@ -108,19 +108,17 @@ public class CollapsibleEntriesScreen extends Screen {
         super.init();
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
-            addRenderableWidget(new Button(4, 4, font.width(backText) + 10, 20, backText,
-                    button -> this.onClose(), Supplier::get) {
-            });
+            addRenderableWidget(new Button.Plain(4, 4, font.width(backText) + 10, 20, backText,
+                    button -> this.onClose(), Supplier::get) {});
         }
         {
             Component addText = Component.literal(" + ");
-            addRenderableWidget(new Button(width - 4 - 20, 4, 20, 20, addText, $ -> {
-                setupCustom(ResourceLocation.parse("custom:" + UUID.randomUUID()), "", new ArrayList<>(), this.configObject, () -> {
+            addRenderableWidget(new Button.Plain(width - 4 - 20, 4, 20, 20, addText, $ -> {
+                setupCustom(Identifier.parse("custom:" + UUID.randomUUID()), "", new ArrayList<>(), this.configObject, () -> {
                     this.prepareWidgets(configObject);
                     this.dirty = true;
                 });
-            }, Supplier::get) {
-            });
+            }, Supplier::get) {});
         }
         
         this.listWidget = new ListWidget(width, height, 30);
@@ -128,7 +126,7 @@ public class CollapsibleEntriesScreen extends Screen {
         this.dirty = true;
     }
     
-    public static void setupCustom(ResourceLocation id, String name, List<EntryStack<?>> stacks, CollapsibleConfigManager.CollapsibleConfigObject configObject, Runnable markDirty) {
+    public static void setupCustom(Identifier id, String name, List<EntryStack<?>> stacks, CollapsibleConfigManager.CollapsibleConfigObject configObject, Runnable markDirty) {
         Minecraft.getInstance().setScreen(new OptionEntriesScreen(Component.translatable("text.rei.collapsible.entries.custom.title"), Minecraft.getInstance().screen) {
             private TextFieldListEntry entry;
             

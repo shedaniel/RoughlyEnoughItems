@@ -59,8 +59,8 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.LazyLoadedValue;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.permissions.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
@@ -78,14 +78,14 @@ import java.util.stream.Stream;
 @Environment(EnvType.CLIENT)
 public class ClientHelperImpl implements ClientHelper {
     @ApiStatus.Internal
-    public final LazyLoadedValue<Boolean> isAprilFools = new LazyLoadedValue<>(() -> {
+    public final Supplier<Boolean> isAprilFools = () -> {
         try {
             LocalDateTime now = LocalDateTime.now();
             return now.getMonthValue() == 4 && now.getDayOfMonth() == 1;
         } catch (Throwable ignored) {
         }
         return false;
-    });
+    };
     private final Map<String, String> modNameCache = new HashMap<String, String>() {{
         put("minecraft", "Minecraft");
         put("c", "Global");
@@ -103,7 +103,7 @@ public class ClientHelperImpl implements ClientHelper {
     
     public boolean hasPermissionToUsePackets() {
         try {
-            Minecraft.getInstance().getConnection().getSuggestionsProvider().hasPermission(0);
+            Minecraft.getInstance().getConnection().getSuggestionsProvider().permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.ALL));
             return hasOperatorPermission() && canUsePackets();
         } catch (NullPointerException e) {
             return true;
@@ -112,7 +112,7 @@ public class ClientHelperImpl implements ClientHelper {
     
     public boolean hasOperatorPermission() {
         try {
-            return Minecraft.getInstance().getConnection().getSuggestionsProvider().hasPermission(1);
+            return Minecraft.getInstance().getConnection().getSuggestionsProvider().permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(1)));
         } catch (NullPointerException e) {
             return true;
         }
@@ -226,7 +226,7 @@ public class ClientHelperImpl implements ClientHelper {
                 return false;
             }
         } else {
-            ResourceLocation identifier = entry.getIdentifier();
+            Identifier identifier = entry.getIdentifier();
             if (identifier == null) {
                 return false;
             }

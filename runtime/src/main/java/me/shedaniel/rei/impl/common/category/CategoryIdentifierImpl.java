@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.common.category;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.Internals;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Map;
 import java.util.Objects;
@@ -34,16 +34,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public class CategoryIdentifierImpl<D extends Display> implements CategoryIdentifier<D> {
-    private final ResourceLocation location;
+    private final Identifier location;
     private final int hashCode;
     
-    public CategoryIdentifierImpl(ResourceLocation location) {
+    public CategoryIdentifierImpl(Identifier location) {
         this.location = Objects.requireNonNull(location);
         this.hashCode = location.hashCode();
     }
     
     @Override
-    public ResourceLocation getIdentifier() {
+    public Identifier getIdentifier() {
         return location;
     }
     
@@ -72,7 +72,7 @@ public class CategoryIdentifierImpl<D extends Display> implements CategoryIdenti
         Internals.attachInstance((Function<String, CategoryIdentifier<?>>) id -> {
             CategoryIdentifier<?> identifier = cache.get(id);
             if (identifier != null) return identifier;
-            identifier = new CategoryIdentifierImpl<>(ResourceLocation.parse(id));
+            identifier = new CategoryIdentifierImpl<>(Identifier.parse(id));
             cache.put(id, identifier);
             return identifier;
         }, "categoryIdentifier");

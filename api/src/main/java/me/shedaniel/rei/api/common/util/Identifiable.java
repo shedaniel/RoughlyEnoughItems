@@ -23,7 +23,8 @@
 
 package me.shedaniel.rei.api.common.util;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.*;
+import net.minecraft.resources.Identifier;
 
 /**
  * An interface that allows an entry to be identified.
@@ -34,5 +35,5 @@ public interface Identifiable {
      *
      * @return the unique identifier
      */
-    ResourceLocation getIdentifier();
+    Identifier getIdentifier();
 }

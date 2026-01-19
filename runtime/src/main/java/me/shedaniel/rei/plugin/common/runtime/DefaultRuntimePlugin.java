@@ -37,7 +37,7 @@ import me.shedaniel.rei.api.common.transfer.info.stack.VanillaSlotAccessor;
 import me.shedaniel.rei.plugin.client.entry.FluidEntryDefinition;
 import me.shedaniel.rei.plugin.client.entry.ItemEntryDefinition;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
@@ -48,7 +48,7 @@ import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class DefaultRuntimePlugin implements REICommonPlugin {
-    public static final ResourceLocation PLUGIN = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "default_runtime_plugin");
+    public static final Identifier PLUGIN = Identifier.fromNamespaceAndPath("roughlyenoughitems", "default_runtime_plugin");
     
     @Override
     public void registerEntryTypes(EntryTypeRegistry registry) {
@@ -66,7 +66,7 @@ public class DefaultRuntimePlugin implements REICommonPlugin {
     
     @Override
     public void registerSlotAccessors(SlotAccessorRegistry registry) {
-        registry.register(ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "vanilla"),
+        registry.register(Identifier.fromNamespaceAndPath("roughlyenoughitems", "vanilla"),
                 slotAccessor -> slotAccessor instanceof VanillaSlotAccessor,
                 new SlotAccessorRegistry.Serializer() {
                     @Override
@@ -86,7 +86,7 @@ public class DefaultRuntimePlugin implements REICommonPlugin {
                         return tag;
                     }
                 });
-        registry.register(ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "player"),
+        registry.register(Identifier.fromNamespaceAndPath("roughlyenoughitems", "player"),
                 slotAccessor -> slotAccessor instanceof PlayerInventorySlotAccessor,
                 new SlotAccessorRegistry.Serializer() {
                     @Override

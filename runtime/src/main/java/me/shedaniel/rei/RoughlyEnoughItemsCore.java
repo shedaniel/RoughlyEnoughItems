@@ -60,7 +60,7 @@ import me.shedaniel.rei.impl.init.PlatformAdapter;
 import me.shedaniel.rei.impl.init.PluginDetector;
 import me.shedaniel.rei.impl.init.PrimitivePlatformAdapter;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -129,7 +129,7 @@ public class RoughlyEnoughItemsCore {
         Internals.attachInstanceSupplier(LOGGER, "logger");
         CategoryIdentifierImpl.attach();
         Internals.attachInstance((Function<Ingredient, EntryIngredient>) ingredient -> PlatformAdapter.get().fromIngredient(ingredient), "ingredientToEntryIngredient");
-        Internals.attachInstance((Function<ResourceLocation, EntryType<?>>) DeferringEntryTypeProviderImpl.INSTANCE, "entryTypeDeferred");
+        Internals.attachInstance((Function<Identifier, EntryType<?>>) DeferringEntryTypeProviderImpl.INSTANCE, "entryTypeDeferred");
         Internals.attachInstance((Supplier<RegistryAccess>) () -> InstanceHelper.getInstance().registryAccess(), "registryAccess");
         Internals.attachInstance(EntryStackProviderImpl.INSTANCE, Internals.EntryStackProvider.class);
         Internals.attachInstance(NbtHasherProviderImpl.INSTANCE, Internals.NbtHasherProvider.class);
@@ -160,7 +160,7 @@ public class RoughlyEnoughItemsCore {
                     if (GameInstance.getServer() == null) return;
                     ReloadManagerImpl.reloadPlugins(null, ReloadInterruptionContext.ofNever());
                 }, executor2);
-            }, ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "reload_plugins"));
+            }, Identifier.fromNamespaceAndPath("roughlyenoughitems", "reload_plugins"));
         }
     }
     

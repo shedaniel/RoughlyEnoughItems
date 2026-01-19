@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.screen;
 
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -92,7 +92,7 @@ public class ConfigReloadingScreen extends Screen {
         int n = height + 12 * 2;
         int o = this.isFocused() ? -1 : -6250336;
         graphics.fill(k + 1, l, k + m, l + n, -16777216);
-        graphics.submitOutline(k, l, m, n, o);
+        graphics.renderOutline(k, l, m, n, o);
         graphics.drawCenteredString(this.font, title, this.width / 2, l + 12, CommonColors.WHITE);
         graphics.drawCenteredString(this.font, text, this.width / 2, l + 12 + 9, 0xFF808080);
         if (subtitle != null) {

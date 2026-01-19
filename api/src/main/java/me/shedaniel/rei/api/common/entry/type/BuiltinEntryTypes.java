@@ -23,13 +23,13 @@
 
 package me.shedaniel.rei.api.common.entry.type;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.NonExtendable
 public interface BuiltinEntryTypes {
-    ResourceLocation EMPTY_ID = ResourceLocation.withDefaultNamespace("empty");
+    Identifier EMPTY_ID = Identifier.withDefaultNamespace("empty");
     
     EntryType<Unit> EMPTY = EntryType.deferred(EMPTY_ID);
 }

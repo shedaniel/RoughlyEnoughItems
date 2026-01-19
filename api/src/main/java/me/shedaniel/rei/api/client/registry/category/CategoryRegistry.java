@@ -38,7 +38,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.Identifiable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -338,7 +338,7 @@ public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<
          * {@inheritDoc}
          */
         @Override
-        default ResourceLocation getIdentifier() {
+        default Identifier getIdentifier() {
             return getCategoryIdentifier().getIdentifier();
         }
     }

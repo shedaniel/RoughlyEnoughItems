@@ -28,7 +28,7 @@ import com.google.common.collect.SetMultimap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 
@@ -115,7 +115,7 @@ public class DisplaysHolderImpl implements DisplaysHolder {
         @Override
         public void add(Display display, @Nullable Object origin) {
             super.add(display, origin);
-            Optional<ResourceLocation> location = display.getDisplayLocation();
+            Optional<Identifier> location = display.getDisplayLocation();
             if (location.isPresent()) {
                 this.displaysByKey.put(DisplayKey.create(display.getCategoryIdentifier(), location.get()), display);
             }
@@ -123,7 +123,7 @@ public class DisplaysHolderImpl implements DisplaysHolder {
         
         @Override
         protected void removeFallout(Display display) {
-            Optional<ResourceLocation> location = display.getDisplayLocation();
+            Optional<Identifier> location = display.getDisplayLocation();
             if (location.isPresent()) {
                 this.displaysByKey.remove(DisplayKey.create(display.getCategoryIdentifier(), location.get()), display);
             }

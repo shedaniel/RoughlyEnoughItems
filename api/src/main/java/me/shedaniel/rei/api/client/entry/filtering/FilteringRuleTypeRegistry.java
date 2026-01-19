@@ -27,7 +27,7 @@ import me.shedaniel.rei.api.client.entry.filtering.base.BasicFilteringRule;
 import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,7 +47,7 @@ public interface FilteringRuleTypeRegistry extends List<FilteringRuleType<?>> {
      * @return the filtering rule type with the specified id, or {@code null} if none exists
      */
     @Nullable
-    FilteringRuleType<?> get(ResourceLocation id);
+    FilteringRuleType<?> get(Identifier id);
     
     /**
      * Returns the id of the specified filtering rule type, or {@code null} if none exists.
@@ -56,7 +56,7 @@ public interface FilteringRuleTypeRegistry extends List<FilteringRuleType<?>> {
      * @return the id of the specified filtering rule type, or {@code null} if none exists
      */
     @Nullable
-    ResourceLocation getId(FilteringRuleType<?> rule);
+    Identifier getId(FilteringRuleType<?> rule);
     
     /**
      * Registers the specified filtering rule type.
@@ -64,7 +64,7 @@ public interface FilteringRuleTypeRegistry extends List<FilteringRuleType<?>> {
      * @param id   the id of the filtering rule type
      * @param rule the filtering rule type
      */
-    void register(ResourceLocation id, FilteringRuleType<?> rule);
+    void register(Identifier id, FilteringRuleType<?> rule);
     
     /**
      * Returns the basic filtering rule that can be used to filter entries,

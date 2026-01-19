@@ -40,7 +40,7 @@ import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigOptions;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.ArrowWidget;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.PanelWidget;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;

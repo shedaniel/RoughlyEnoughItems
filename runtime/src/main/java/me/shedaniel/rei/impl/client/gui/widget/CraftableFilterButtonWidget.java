@@ -54,7 +54,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -107,7 +107,7 @@ public class CraftableFilterButtonWidget {
                         .toList())
         ));
         
-        List<Map.Entry<ResourceLocation, InputMethod<?>>> applicableInputMethods = getApplicableInputMethods();
+        List<Map.Entry<Identifier, InputMethod<?>>> applicableInputMethods = getApplicableInputMethods();
         if (applicableInputMethods.size() > 1) {
             entries.add(new SubMenuEntry(Component.translatable("text.rei.config.menu.search_field.input_method"), createInputMethodEntries(access, applicableInputMethods)));
         }
@@ -122,14 +122,14 @@ public class CraftableFilterButtonWidget {
         return entries;
     }
     
-    public static List<Map.Entry<ResourceLocation, InputMethod<?>>> getApplicableInputMethods() {
+    public static List<Map.Entry<Identifier, InputMethod<?>>> getApplicableInputMethods() {
         String languageCode = Minecraft.getInstance().options.languageCode;
         return InputMethodRegistry.getInstance().getAll().entrySet().stream()
                 .filter(entry -> CollectionUtils.anyMatch(entry.getValue().getMatchingLocales(), locale -> locale.code().equals(languageCode)))
                 .toList();
     }
     
-    public static List<FavoriteMenuEntry> createInputMethodEntries(MenuAccess access, List<Map.Entry<ResourceLocation, InputMethod<?>>> applicableInputMethods) {
+    public static List<FavoriteMenuEntry> createInputMethodEntries(MenuAccess access, List<Map.Entry<Identifier, InputMethod<?>>> applicableInputMethods) {
         ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
         List<FavoriteMenuEntry> entries = applicableInputMethods.stream()
                 .<FavoriteMenuEntry>map(pair -> ToggleMenuEntry.of(pair.getValue().getName(),
@@ -142,13 +142,13 @@ public class CraftableFilterButtonWidget {
                                             InternalLogger.getInstance().error("Failed to dispose input method", throwable);
                                         }
                                         
-                                        ConfigManagerImpl.getInstance().getConfig().setInputMethodId(ResourceLocation.parse("rei:default"));
+                                        ConfigManagerImpl.getInstance().getConfig().setInputMethodId(Identifier.parse("rei:default"));
                                     }).join();
                                     double[] progress = {0};
                                     CompletableFuture<Void> future = pair.getValue().prepare(service, p -> progress[0] = Mth.clamp(p, 0, 1)).whenComplete((unused, throwable) -> {
                                         if (throwable != null) {
                                             InternalLogger.getInstance().error("Failed to prepare input method", throwable);
-                                            ConfigManagerImpl.getInstance().getConfig().setInputMethodId(ResourceLocation.parse("rei:default"));
+                                            ConfigManagerImpl.getInstance().getConfig().setInputMethodId(Identifier.parse("rei:default"));
                                         } else {
                                             ConfigManagerImpl.getInstance().getConfig().setInputMethodId(pair.getKey());
                                         }
@@ -160,7 +160,7 @@ public class CraftableFilterButtonWidget {
                                     }, () -> {
                                         Minecraft.getInstance().setScreen(screen);
                                         InternalLogger.getInstance().error("Failed to prepare input method: cancelled");
-                                        ConfigManagerImpl.getInstance().getConfig().setInputMethodId(ResourceLocation.parse("rei:default"));
+                                        ConfigManagerImpl.getInstance().getConfig().setInputMethodId(Identifier.parse("rei:default"));
                                         future.cancel(Platform.isFabric());
                                         service.shutdown();
                                     });

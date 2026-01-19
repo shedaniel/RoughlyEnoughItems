@@ -36,7 +36,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -160,7 +160,7 @@ public interface REIRuntime extends Reloadable<REIClientPlugin> {
      *
      * @return the texture location of the default display background
      */
-    ResourceLocation getDefaultDisplayTexture();
+    Identifier getDefaultDisplayTexture();
     
     /**
      * Returns the texture location of the default display background.
@@ -168,7 +168,7 @@ public interface REIRuntime extends Reloadable<REIClientPlugin> {
      * @param darkTheme whether dark mode is enabled
      * @return the texture location of the default display background
      */
-    ResourceLocation getDefaultDisplayTexture(boolean darkTheme);
+    Identifier getDefaultDisplayTexture(boolean darkTheme);
     
     /**
      * Returns the location of the search field, according to the current screen.

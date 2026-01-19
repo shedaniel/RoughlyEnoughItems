@@ -39,7 +39,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
@@ -69,11 +69,10 @@ public abstract class OptionEntriesScreen extends Screen {
         {
             Component doneText = Component.translatable("gui.done");
             int width = Minecraft.getInstance().font.width(doneText);
-            addRenderableWidget(new Button(this.width - 4 - width - 10, 4, width + 10, 20, doneText, button -> {
+            addRenderableWidget(new Button.Plain(this.width - 4 - width - 10, 4, width + 10, 20, doneText, button -> {
                 save();
                 minecraft.setScreen(parent);
-            }, Supplier::get) {
-            });
+            }, Supplier::get) {});
         }
         listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height));
         addEntries(ruleEntry -> listWidget.addItem(ruleEntry));
@@ -223,11 +222,10 @@ public abstract class OptionEntriesScreen extends Screen {
         private final Button widget;
         
         public ButtonListEntry(int width, Function<ButtonListEntry, Component> textFunction, BiConsumer<ButtonListEntry, Button> buttonConsumer) {
-            this.widget = new Button(0, 0, 100, 20, textFunction.apply(this), button -> {
+            this.widget = new Button.Plain(0, 0, 100, 20, textFunction.apply(this), button -> {
                 buttonConsumer.accept(this, button);
                 button.setMessage(textFunction.apply(this));
-            }, Supplier::get) {
-            };
+            }, Supplier::get) {};
         }
         
         @Override
@@ -271,7 +269,7 @@ public abstract class OptionEntriesScreen extends Screen {
     }
     
     public static class SubListEntry extends ListEntry {
-        private static final ResourceLocation CONFIG_TEX = ResourceLocation.fromNamespaceAndPath("cloth-config2", "textures/gui/cloth_config.png");
+        private static final Identifier CONFIG_TEX = Identifier.fromNamespaceAndPath("cloth-config2", "textures/gui/cloth_config.png");
         private final CategoryLabelWidget widget;
         private final List<ListEntry> rules;
         private final List<GuiEventListener> children;

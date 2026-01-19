@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import me.shedaniel.rei.api.client.entry.filtering.base.BasicFilteringRule;
 import me.shedaniel.rei.impl.common.InternalLogger;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,12 +39,12 @@ import java.util.Iterator;
 
 @ApiStatus.Internal
 public class FilteringRuleTypeRegistryImpl extends AbstractList<FilteringRuleType<?>> implements FilteringRuleTypeRegistry {
-    private final BiMap<ResourceLocation, FilteringRuleType<?>> types = HashBiMap.create();
+    private final BiMap<Identifier, FilteringRuleType<?>> types = HashBiMap.create();
     
     public FilteringRuleTypeRegistryImpl() {
-        register(ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "search"), SearchFilteringRuleType.INSTANCE);
-        register(ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "manual"), ManualFilteringRuleType.INSTANCE);
-        register(ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "basic"), BasicFilteringRuleType.INSTANCE);
+        register(Identifier.fromNamespaceAndPath("roughlyenoughitems", "search"), SearchFilteringRuleType.INSTANCE);
+        register(Identifier.fromNamespaceAndPath("roughlyenoughitems", "manual"), ManualFilteringRuleType.INSTANCE);
+        register(Identifier.fromNamespaceAndPath("roughlyenoughitems", "basic"), BasicFilteringRuleType.INSTANCE);
     }
     
     @Override
@@ -64,18 +64,18 @@ public class FilteringRuleTypeRegistryImpl extends AbstractList<FilteringRuleTyp
     
     @Override
     @Nullable
-    public FilteringRuleType<?> get(ResourceLocation id) {
+    public FilteringRuleType<?> get(Identifier id) {
         return types.get(id);
     }
     
     @Override
     @Nullable
-    public ResourceLocation getId(FilteringRuleType<?> rule) {
+    public Identifier getId(FilteringRuleType<?> rule) {
         return types.inverse().get(rule);
     }
     
     @Override
-    public void register(ResourceLocation id, FilteringRuleType<?> rule) {
+    public void register(Identifier id, FilteringRuleType<?> rule) {
         types.put(id, rule);
         InternalLogger.getInstance().debug("Added filtering rule [%s]: %s", id, rule);
     }

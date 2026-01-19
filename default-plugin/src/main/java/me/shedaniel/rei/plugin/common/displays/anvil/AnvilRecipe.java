@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.plugin.common.displays.anvil;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,17 +32,17 @@ import java.util.OptionalInt;
 
 public class AnvilRecipe {
     @Nullable
-    private final ResourceLocation id;
+    private final Identifier id;
     private final List<ItemStack> leftInput;
     private final List<ItemStack> rightInputs;
     private final List<ItemStack> outputs;
     private final OptionalInt cost;
     
-    public AnvilRecipe(@Nullable ResourceLocation id, List<ItemStack> leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs) {
+    public AnvilRecipe(@Nullable Identifier id, List<ItemStack> leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs) {
         this(id, leftInput, rightInputs, outputs, OptionalInt.empty());
     }
     
-    public AnvilRecipe(@Nullable ResourceLocation id, List<ItemStack> leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs, OptionalInt cost) {
+    public AnvilRecipe(@Nullable Identifier id, List<ItemStack> leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs, OptionalInt cost) {
         this.id = id;
         this.leftInput = leftInput;
         this.rightInputs = rightInputs;
@@ -50,7 +50,7 @@ public class AnvilRecipe {
         this.cost = cost;
     }
     
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
     

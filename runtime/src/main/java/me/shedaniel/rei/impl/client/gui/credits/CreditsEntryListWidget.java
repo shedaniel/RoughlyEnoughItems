@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.client.gui.credits;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratableEntry;

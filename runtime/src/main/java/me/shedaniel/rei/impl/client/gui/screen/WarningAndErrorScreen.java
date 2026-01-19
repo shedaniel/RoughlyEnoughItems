@@ -28,7 +28,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.widget.DynamicErrorFreeEntryListWidget;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -123,7 +123,7 @@ public class WarningAndErrorScreen extends Screen {
         for (StringItem child : listWidget.children()) {
             listWidget.max = Math.max(listWidget.max, child.getWidth());
         }
-        addRenderableWidget(buttonExit = new Button(width / 2 - 100, height - 26, 200, 20,
+        addRenderableWidget(buttonExit = new Button.Plain(width / 2 - 100, height - 26, 200, 20,
                 Component.literal(errors.isEmpty() ? "Continue" : "Exit"),
                 button -> onContinue.accept(parent), Supplier::get) {});
     }
@@ -138,9 +138,9 @@ public class WarningAndErrorScreen extends Screen {
         super.render(graphics, int_1, int_2, float_1);
         this.listWidget.render(graphics, int_1, int_2, float_1);
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-            graphics.drawCenteredString(this.font, "Warnings during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
+            graphics.drawCenteredString(this.font, "Warnings during Roughly Enough Items' " + action, this.width / 2, 16, 0xFFFFFFFF);
         } else {
-            graphics.drawCenteredString(this.font, "Errors during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
+            graphics.drawCenteredString(this.font, "Errors during Roughly Enough Items' " + action, this.width / 2, 16, 0xFFFFFFFF);
         }
         this.buttonExit.render(graphics, int_1, int_2, float_1);
     }

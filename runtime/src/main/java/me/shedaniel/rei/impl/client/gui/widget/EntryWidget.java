@@ -64,7 +64,7 @@ import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -76,7 +76,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.item.Item;
@@ -105,7 +105,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     private long lastCycleTime = -1;
     @Nullable
     private Set<UnaryOperator<Tooltip>> tooltipProcessors;
-    public ResourceLocation tagMatch;
+    public Identifier tagMatch;
     public boolean removeTagMatch = true;
     
     private long lastCheckTime = -1;

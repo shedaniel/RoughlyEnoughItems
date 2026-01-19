@@ -45,7 +45,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
@@ -55,8 +55,8 @@ import java.util.List;
 
 @ApiStatus.Internal
 public class UncertainDisplayViewingScreen extends Screen {
-    private static final ResourceLocation DEFAULT = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/screenshot_default.png");
-    private static final ResourceLocation COMPOSITE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/screenshot_composite.png");
+    private static final Identifier DEFAULT = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/screenshot_default.png");
+    private static final Identifier COMPOSITE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/screenshot_composite.png");
     private final List<Widget> widgets;
     protected long start;
     protected long duration;
@@ -130,7 +130,7 @@ public class UncertainDisplayViewingScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int int_1, int int_2, float float_1) {
         super.render(graphics, int_1, int_2, float_1);
-        graphics.drawCenteredString(this.font, Component.translatable("text.rei.recipe_screen_type.selection"), this.width / 2, 20, 16777215);
+        graphics.drawCenteredString(this.font, Component.translatable("text.rei.recipe_screen_type.selection"), this.width / 2, 20, 0xFFFFFFFF);
         graphics.enableScissor(0, 20 + font.lineHeight + 2, width, 20 + font.lineHeight + 2 + height - 42);
         if (showTips) {
             int i = 32;
@@ -141,7 +141,7 @@ public class UncertainDisplayViewingScreen extends Screen {
         }
         int k = 10, l = 44, m = width - 20, n = height - l - 10 - 5;
         graphics.fill( k + 1, l, k + m, l + n, -16777216);
-        graphics.submitOutline(k, l, m, n, -1);
+        graphics.fill(k, l, m, n, -1);
         for (Widget widget : widgets) {
             widget.render(graphics, int_1, int_2, float_1);
         }

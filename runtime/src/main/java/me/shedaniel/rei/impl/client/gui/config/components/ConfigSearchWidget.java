@@ -38,7 +38,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.*;
 import java.util.function.IntSupplier;
@@ -86,7 +86,7 @@ public class ConfigSearchWidget {
                     }
                 },
                 Widgets.withTranslate(label, 0, 0.5),
-                Widgets.createTexturedWidget(ResourceLocation.parse("roughlyenoughitems:textures/gui/config/search_options.png"), new Rectangle(3, 3, 16, 16), 0, 0, 1, 1, 1, 1)
+                Widgets.createTexturedWidget(Identifier.parse("roughlyenoughitems:textures/gui/config/search_options.png"), new Rectangle(3, 3, 16, 16), 0, 0, 1, 1, 1, 1)
         );
     }
     
@@ -127,7 +127,7 @@ public class ConfigSearchWidget {
                         return new Rectangle(-1, -1, 18, 18);
                     }
                 },
-                Widgets.createTexturedWidget(ResourceLocation.parse("roughlyenoughitems:textures/gui/config/search_options.png"), bounds, 0, 0, 1, 1, 1, 1)
+                Widgets.createTexturedWidget(Identifier.parse("roughlyenoughitems:textures/gui/config/search_options.png"), bounds, 0, 0, 1, 1, 1, 1)
         
         ), translatable("config.rei.texts.search_options"));
     }

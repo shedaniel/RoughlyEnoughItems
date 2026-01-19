@@ -62,25 +62,23 @@ public class DisplayRegistryInfoScreen extends ScreenWithMenu {
     public void init() {
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
-            addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+            addRenderableWidget(new Button.Plain(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 this.onClose.run();
                 this.onClose = null;
-            }, Supplier::get) {
-            });
+            }, Supplier::get) {});
         }
         {
             Component text = Component.translatable("text.rei.sort");
             Rectangle bounds = new Rectangle(this.width - 4 - Minecraft.getInstance().font.width(text) - 10, 4, Minecraft.getInstance().font.width(text) + 10, 20);
-            addRenderableWidget(new Button(bounds.x, bounds.y, bounds.width, bounds.height, text, button -> {
+            addRenderableWidget(new Button.Plain(bounds.x, bounds.y, bounds.width, bounds.height, text, button -> {
                 this.setMenu(new Menu(bounds, CollectionUtils.map(SortType.values(), type -> {
                     return ToggleMenuEntry.of(Component.translatable("text.rei.sort.by", type.name().toLowerCase(Locale.ROOT)), () -> false, o -> {
                         this.closeMenu();
                         this.sortType = type;
-                        this.init(this.minecraft, this.width, this.height);
+                        this.init(this.width, this.height);
                     });
                 }), false));
-            }, Supplier::get) {
-            });
+            }, Supplier::get) {});
         }
         list = new ListWidget();
         list.addItem(new EntryImpl(Component.literal("Total Displays"), DisplayRegistry.getInstance().size()));

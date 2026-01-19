@@ -37,7 +37,7 @@ import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProvider
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitor;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;

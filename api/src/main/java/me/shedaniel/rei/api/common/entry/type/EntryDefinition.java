@@ -33,7 +33,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
@@ -81,7 +81,7 @@ public interface EntryDefinition<T> {
      * @return the identifier for an entry
      */
     @Nullable
-    ResourceLocation getIdentifier(EntryStack<T> entry, T value);
+    Identifier getIdentifier(EntryStack<T> entry, T value);
     
     /**
      * Returns the container namespace of the entry, used for determining the
@@ -93,7 +93,7 @@ public interface EntryDefinition<T> {
      */
     @Nullable
     default String getContainingNamespace(EntryStack<T> entry, T value) {
-        ResourceLocation identifier = getIdentifier(entry, value);
+        Identifier identifier = getIdentifier(entry, value);
         
         if (identifier == null) {
             return null;

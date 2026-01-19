@@ -47,7 +47,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
@@ -60,7 +60,7 @@ import java.util.function.Supplier;
 @SuppressWarnings("UnstableApiUsage")
 public class CollapsibleEntryWidget extends WidgetWithBounds {
     private final boolean custom;
-    private final ResourceLocation id;
+    private final Identifier id;
     private final Component component;
     private final Collection<Slot> stacks;
     private final CollapsibleConfigManager.CollapsibleConfigObject configObject;
@@ -88,7 +88,7 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
     private int height;
     private int rowSize;
     
-    public CollapsibleEntryWidget(boolean custom, ResourceLocation id, Component component, Collection<EntryStack<?>> stacks,
+    public CollapsibleEntryWidget(boolean custom, Identifier id, Component component, Collection<EntryStack<?>> stacks,
                                   CollapsibleConfigManager.CollapsibleConfigObject configObject, Runnable markDirty) {
         this.custom = custom;
         this.id = id;
@@ -96,28 +96,25 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
         this.stacks = CollectionUtils.map(stacks, stack -> Widgets.createSlot(new Rectangle(0, 0, 16, 16))
                 .entry(stack).disableBackground());
         this.configObject = configObject;
-        this.toggleButton = new Button(0, 0, 20, 20, Component.translatable("text.rei.collapsible.entries.toggle"), button -> {
+        this.toggleButton = new Button.Plain(0, 0, 20, 20, Component.translatable("text.rei.collapsible.entries.toggle"), button -> {
             if (this.configObject.disabledGroups.contains(this.id)) {
                 this.configObject.disabledGroups.remove(this.id);
             } else {
                 this.configObject.disabledGroups.add(this.id);
             }
-        }, Supplier::get) {
-        };
+        }, Supplier::get) {};
         this.toggleButton.setWidth(this.font.width(toggleButton.getMessage()) + 8);
         if (this.custom) {
-            this.deleteButton = new Button(0, 0, 20, 20, Component.translatable("text.rei.collapsible.entries.delete"), button -> {
+            this.deleteButton = new Button.Plain(0, 0, 20, 20, Component.translatable("text.rei.collapsible.entries.delete"), button -> {
                 this.configObject.customGroups.removeIf(customEntry -> customEntry.id.equals(this.id));
                 markDirty.run();
-            }, Supplier::get) {
-            };
+            }, Supplier::get) {};
             this.deleteButton.setWidth(this.font.width(deleteButton.getMessage()) + 8);
-            this.configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
+            this.configureButton = new Button.Plain(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
                 CollapsibleEntriesScreen.setupCustom(this.id, this.component.getString(), new ArrayList<>(stacks), this.configObject, markDirty);
             }, Supplier::get) {
                 @Override
-                protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-                    super.renderWidget(graphics, mouseX, mouseY, delta);
+                protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
                     graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, getX() + 3, getY() + 3, 0, 0, 14, 14, 256, 256);
                 }
             };

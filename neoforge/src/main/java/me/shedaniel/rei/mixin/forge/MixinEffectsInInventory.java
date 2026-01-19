@@ -43,23 +43,14 @@ public abstract class MixinEffectsInInventory {
     private boolean leftSideEffects() {
         return ConfigObject.getInstance().isLeftSideMobEffects();
     }
-    
-    @ModifyVariable(method = "renderEffects",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getActiveEffects()Ljava/util/Collection;", ordinal = 0),
-            ordinal = 2) // 3rd int
-    public int modifyK(int k) {
+
+    @ModifyVariable(method = "renderEffects", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    private int rei$moveEffectsToLeft(int k) {
         if (!leftSideEffects()) return k;
-        boolean bl = this.screen.leftPos >= 120;
-        return bl ? this.screen.leftPos - 120 - 4 : this.screen.leftPos - 32 - 4;
-    }
-    
-    @ModifyVariable(method = "renderEffects",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/screens/inventory/EffectsInInventory;renderBackgrounds(Lnet/minecraft/client/gui/GuiGraphics;IILjava/lang/Iterable;Z)V",
-                    ordinal = 0),
-            ordinal = 0) // 1st bool
-    public boolean modifyBl(boolean bl) {
-        if (!leftSideEffects()) return bl;
-        return this.screen.leftPos >= 120;
+
+        int left = this.screen.leftPos;
+        boolean wide = left >= 120;
+
+        return wide ? left - 120 - 4 : left - 32 - 4;
     }
 }

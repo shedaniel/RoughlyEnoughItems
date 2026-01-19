@@ -57,7 +57,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.BlockItem;
@@ -103,7 +103,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     
     @Override
     @Nullable
-    public ResourceLocation getIdentifier(EntryStack<ItemStack> entry, ItemStack value) {
+    public Identifier getIdentifier(EntryStack<ItemStack> entry, ItemStack value) {
         return BuiltInRegistries.ITEM.getKey(value.getItem());
     }
     

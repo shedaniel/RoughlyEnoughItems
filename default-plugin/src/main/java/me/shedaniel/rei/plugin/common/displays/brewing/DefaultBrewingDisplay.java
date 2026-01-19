@@ -35,7 +35,7 @@ import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.ApiStatus;
@@ -102,7 +102,7 @@ public class DefaultBrewingDisplay implements Display {
     }
     
     @Override
-    public Optional<ResourceLocation> getDisplayLocation() {
+    public Optional<Identifier> getDisplayLocation() {
         return Optional.empty();
     }
     

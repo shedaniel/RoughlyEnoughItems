@@ -48,7 +48,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Matrix3x2f;
 
@@ -63,7 +63,7 @@ public final class InternalWidgets {
     private InternalWidgets() {
     }
     
-    public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<Display> displaySupplier, Supplier<Collection<ResourceLocation>> idsSupplier, List<Widget> setupDisplay, DisplayCategory<?> category) {
+    public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<Display> displaySupplier, Supplier<Collection<Identifier>> idsSupplier, List<Widget> setupDisplay, DisplayCategory<?> category) {
         Button autoCraftingButton = Widgets.createButton(rectangle, text)
                 .focusable(false)
                 .onClick(button -> {
@@ -234,7 +234,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public DrawableConsumer createTexturedConsumer(ResourceLocation texture, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
+        public DrawableConsumer createTexturedConsumer(Identifier texture, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
             return new TexturedDrawableConsumer(texture, x, y, width, height, u, v, uWidth, vHeight, textureWidth, textureHeight);
         }
         
@@ -261,7 +261,7 @@ public final class InternalWidgets {
                 magnification = 4;
             }
             Rectangle bounds = new Rectangle(point.getX() - 9, point.getY() + 1, 8, 8);
-            Widget widget = Widgets.createTexturedWidget(ResourceLocation.parse("roughlyenoughitems:textures/gui/shapeless_icon_" + magnification + "x.png"), bounds.getX(), bounds.getY(), 0, 0, bounds.getWidth(), bounds.getHeight(), 1, 1, 1, 1);
+            Widget widget = Widgets.createTexturedWidget(Identifier.parse("roughlyenoughitems:textures/gui/shapeless_icon_" + magnification + "x.png"), bounds.getX(), bounds.getY(), 0, 0, bounds.getWidth(), bounds.getHeight(), 1, 1, 1, 1);
             return Widgets.withTooltip(Widgets.withBounds(widget, bounds),
                     Component.translatable("text.rei.shapeless"));
         }

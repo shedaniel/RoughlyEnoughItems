@@ -32,7 +32,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
@@ -108,7 +108,7 @@ public interface Display extends DisplaySpec {
      *
      * @return the display location
      */
-    Optional<ResourceLocation> getDisplayLocation();
+    Optional<Identifier> getDisplayLocation();
     
     /**
      * Returns the serializer for this display.
@@ -131,8 +131,8 @@ public interface Display extends DisplaySpec {
     
     @Override
     @ApiStatus.NonExtendable
-    default Collection<ResourceLocation> provideInternalDisplayIds() {
-        Optional<ResourceLocation> location = getDisplayLocation();
+    default Collection<Identifier> provideInternalDisplayIds() {
+        Optional<Identifier> location = getDisplayLocation();
         if (location.isPresent()) {
             return Collections.singletonList(location.get());
         } else {

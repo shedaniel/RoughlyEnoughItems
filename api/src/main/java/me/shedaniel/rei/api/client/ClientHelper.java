@@ -34,7 +34,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+
+import net.minecraft.resources.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
@@ -117,7 +118,7 @@ public interface ClientHelper {
      * @param identifier the identifier to find
      * @return the mod name with blue and italic formatting
      */
-    default Component getFormattedModFromIdentifier(ResourceLocation identifier) {
+    default Component getFormattedModFromIdentifier(Identifier identifier) {
         String mod = getModFromIdentifier(identifier);
         if (mod.isEmpty())
             return Component.empty();
@@ -171,7 +172,7 @@ public interface ClientHelper {
      * @param identifier the identifier to find
      * @return the mod name
      */
-    default String getModFromIdentifier(ResourceLocation identifier) {
+    default String getModFromIdentifier(Identifier identifier) {
         if (identifier == null)
             return "";
         return getModFromModId(identifier.getNamespace());

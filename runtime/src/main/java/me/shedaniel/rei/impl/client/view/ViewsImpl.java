@@ -56,7 +56,7 @@ import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -442,7 +442,7 @@ public class ViewsImpl implements Views {
     private static class WrappedDisplaySpec implements DisplaySpec {
         private final DisplayMerger<Display> merger;
         private final Display display;
-        private List<ResourceLocation> ids = null;
+        private List<Identifier> ids = null;
         private final int hash;
         
         public WrappedDisplaySpec(DisplayMerger<Display> merger, Display display) {
@@ -469,10 +469,10 @@ public class ViewsImpl implements Views {
         }
         
         @Override
-        public Collection<ResourceLocation> provideInternalDisplayIds() {
+        public Collection<Identifier> provideInternalDisplayIds() {
             if (ids == null) {
                 ids = new ArrayList<>();
-                Optional<ResourceLocation> location = display.getDisplayLocation();
+                Optional<Identifier> location = display.getDisplayLocation();
                 if (location.isPresent()) {
                     ids.add(location.get());
                 }
@@ -481,7 +481,7 @@ public class ViewsImpl implements Views {
         }
         
         public void add(Display display) {
-            Optional<ResourceLocation> location = display.getDisplayLocation();
+            Optional<Identifier> location = display.getDisplayLocation();
             if (location.isPresent()) {
                 provideInternalDisplayIds().add(location.get());
             }

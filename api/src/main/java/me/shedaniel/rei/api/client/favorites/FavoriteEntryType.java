@@ -33,7 +33,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,12 +44,12 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
     /**
      * A builtin type of favorites, wrapping a {@link EntryStack}.
      */
-    ResourceLocation ENTRY_STACK = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "entry_stack");
+    Identifier ENTRY_STACK = Identifier.fromNamespaceAndPath("roughlyenoughitems", "entry_stack");
     /**
      * A builtin type of favorites, wrapping a {@link Display}.
      */
     @ApiStatus.Experimental
-    ResourceLocation DISPLAY = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "display");
+    Identifier DISPLAY = Identifier.fromNamespaceAndPath("roughlyenoughitems", "display");
     
     static Registry registry() {
         return PluginManager.getClientInstance().get(FavoriteEntryType.Registry.class);
@@ -63,12 +63,12 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
     
     @ApiStatus.NonExtendable
     interface Registry extends Reloadable<REIClientPlugin> {
-        void register(ResourceLocation id, FavoriteEntryType<?> type);
+        void register(Identifier id, FavoriteEntryType<?> type);
         
-        @Nullable <A extends FavoriteEntry> FavoriteEntryType<A> get(ResourceLocation id);
+        @Nullable <A extends FavoriteEntry> FavoriteEntryType<A> get(Identifier id);
         
         @Nullable
-        ResourceLocation getId(FavoriteEntryType<?> type);
+        Identifier getId(FavoriteEntryType<?> type);
         
         Section getOrCrateSection(Component text);
         

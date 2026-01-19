@@ -28,7 +28,7 @@ import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessorRegistry;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 public class SlotAccessorRegistryImpl implements SlotAccessorRegistry {
-    private final Map<ResourceLocation, Serializer> map = new HashMap<>();
+    private final Map<Identifier, Serializer> map = new HashMap<>();
     
     @Override
     public void startReload() {
@@ -56,7 +56,7 @@ public class SlotAccessorRegistryImpl implements SlotAccessorRegistry {
     }
     
     @Override
-    public void register(ResourceLocation id, Predicate<SlotAccessor> accessorPredicate, Serializer serializer) {
+    public void register(Identifier id, Predicate<SlotAccessor> accessorPredicate, Serializer serializer) {
         this.map.put(id, new Serializer() {
             @Override
             public SlotAccessor read(AbstractContainerMenu menu, Player player, CompoundTag tag) {
@@ -77,13 +77,13 @@ public class SlotAccessorRegistryImpl implements SlotAccessorRegistry {
     
     @Override
     @Nullable
-    public Serializer get(ResourceLocation id) {
+    public Serializer get(Identifier id) {
         return this.map.get(id);
     }
     
     @Override
     public CompoundTag save(AbstractContainerMenu menu, Player player, SlotAccessor accessor) {
-        for (Map.Entry<ResourceLocation, Serializer> entry : map.entrySet()) {
+        for (Map.Entry<Identifier, Serializer> entry : map.entrySet()) {
             CompoundTag tag = entry.getValue().save(menu, player, accessor);
             if (tag != null) {
                 tag.putString("id", entry.getKey().toString());
@@ -96,7 +96,7 @@ public class SlotAccessorRegistryImpl implements SlotAccessorRegistry {
     @Override
     public SlotAccessor read(AbstractContainerMenu menu, Player player, CompoundTag tag) {
         String id = tag.getString("id").orElseThrow();
-        Serializer serializer = map.get(ResourceLocation.parse(id));
+        Serializer serializer = map.get(Identifier.parse(id));
         if (serializer == null) {
             throw new NullPointerException("No serializer found for " + id);
         }

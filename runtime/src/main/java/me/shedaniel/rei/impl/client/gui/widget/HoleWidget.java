@@ -28,7 +28,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class HoleWidget {
     public static Widget create(Rectangle bounds) {
@@ -43,7 +43,7 @@ public class HoleWidget {
     
     public static Widget createMenuBackground(Rectangle bounds) {
         return Widgets.withBounds(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
-            graphics.blit(RenderPipelines.GUI_TEXTURED, ResourceLocation.withDefaultNamespace("textures/gui/menu_list_background.png"), bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), bounds.width, bounds.height, 32, 32);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace("textures/gui/menu_list_background.png"), bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), bounds.width, bounds.height, 32, 32);
         }), bounds);
     }
     

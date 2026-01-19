@@ -26,7 +26,7 @@ package me.shedaniel.rei.api.common.entry.type;
 import me.shedaniel.rei.api.client.entry.type.BuiltinClientEntryTypes;
 import me.shedaniel.rei.api.common.util.Identifiable;
 import me.shedaniel.rei.impl.Internals;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -44,21 +44,21 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.NonExtendable
 public interface EntryType<T> extends Identifiable {
     /**
-     * Creates a deferred {@link EntryType} from the given {@link ResourceLocation}.
-     * It is crucial that the {@link ResourceLocation} is the same as the one used to register the {@link EntryDefinition}.
+     * Creates a deferred {@link EntryType} from the given {@link Identifier}.
+     * It is crucial that the {@link Identifier} is the same as the one used to register the {@link EntryDefinition}.
      *
      * @param id  the identifier used to resolve the {@link EntryDefinition}
      * @param <T> the type of entry
      * @return the deferred {@link EntryType}
      */
-    static <T> EntryType<T> deferred(ResourceLocation id) {
+    static <T> EntryType<T> deferred(Identifier id) {
         return Internals.deferEntryType(id).cast();
     }
     
-    ResourceLocation getId();
+    Identifier getId();
     
     @Override
-    default ResourceLocation getIdentifier() {
+    default Identifier getIdentifier() {
         return getId();
     }
     

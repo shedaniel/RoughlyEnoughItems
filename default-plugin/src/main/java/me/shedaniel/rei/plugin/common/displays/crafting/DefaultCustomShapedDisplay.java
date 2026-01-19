@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.common.display.DisplaySerializer;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +40,7 @@ public class DefaultCustomShapedDisplay extends DefaultCraftingDisplay {
             RecordCodecBuilder.mapCodec(instance -> instance.group(
                     EntryIngredient.codec().listOf().fieldOf("inputs").forGetter(DefaultCustomShapedDisplay::getInputEntries),
                     EntryIngredient.codec().listOf().fieldOf("outputs").forGetter(DefaultCustomShapedDisplay::getOutputEntries),
-                    ResourceLocation.CODEC.optionalFieldOf("location").forGetter(DefaultCustomShapedDisplay::getDisplayLocation),
+                    Identifier.CODEC.optionalFieldOf("location").forGetter(DefaultCustomShapedDisplay::getDisplayLocation),
                     Codec.INT.fieldOf("width").forGetter(DefaultCustomShapedDisplay::getWidth),
                     Codec.INT.fieldOf("height").forGetter(DefaultCustomShapedDisplay::getHeight)
             ).apply(instance, DefaultCustomShapedDisplay::new)),
@@ -49,7 +49,7 @@ public class DefaultCustomShapedDisplay extends DefaultCraftingDisplay {
                     DefaultCustomShapedDisplay::getInputEntries,
                     EntryIngredient.streamCodec().apply(ByteBufCodecs.list()),
                     DefaultCustomShapedDisplay::getOutputEntries,
-                    ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC),
+                    ByteBufCodecs.optional(Identifier.STREAM_CODEC),
                     DefaultCustomShapedDisplay::getDisplayLocation,
                     ByteBufCodecs.INT,
                     DefaultCustomShapedDisplay::getWidth,
@@ -61,7 +61,7 @@ public class DefaultCustomShapedDisplay extends DefaultCraftingDisplay {
     private final int width;
     private final int height;
     
-    public DefaultCustomShapedDisplay(List<EntryIngredient> input, List<EntryIngredient> output, Optional<ResourceLocation> location, int width, int height) {
+    public DefaultCustomShapedDisplay(List<EntryIngredient> input, List<EntryIngredient> output, Optional<Identifier> location, int width, int height) {
         super(input, output, location);
         this.width = width;
         this.height = height;

@@ -43,7 +43,7 @@ public class MapCloningRecipeFiller implements CraftingRecipeFiller<MapCloningRe
         displays.add(new DefaultCustomShapelessDisplay(
                 List.of(EntryIngredients.of(Items.FILLED_MAP), EntryIngredients.of(Items.MAP)),
                 List.of(EntryIngredients.of(Items.FILLED_MAP, 2)),
-                Optional.of(recipe.id().location())));
+                Optional.of(recipe.id().identifier())));
         
         return displays;
     }

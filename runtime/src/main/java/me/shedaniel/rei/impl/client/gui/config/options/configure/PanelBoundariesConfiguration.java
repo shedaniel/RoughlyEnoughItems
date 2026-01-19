@@ -35,7 +35,7 @@ import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigOptions;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionValueEntry;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
@@ -85,7 +85,7 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
                 PanelBoundary newBoundary = access.get(option);
                 access.set(option, new PanelBoundary(1.0, newBoundary.verticalPercentage(), 50, newBoundary.verticalLimit(), 1.0, newBoundary.verticalAlign()));
                 if (!isReducedMotion()) innerAlphaAnimator.setTo(-1.0F, 200);
-                init(minecraft, BoundariesScreen.this.width, BoundariesScreen.this.height);
+                init(BoundariesScreen.this.width, BoundariesScreen.this.height);
             }).build());
             double v = horizontalUsePercentage ? boundary.horizontalPercentage() : boundary.horizontalLimit() / 50.0;
             addRenderableWidget(horizontalSlider = new AbstractSliderButton(0, 0, 20, 20, getSliderMessage("config.rei.options.layout.boundaries.desc.limit", horizontalUsePercentage, v, 50), v) {
@@ -147,7 +147,7 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
                 PanelBoundary newBoundary = access.get(option);
                 access.set(option, new PanelBoundary(newBoundary.horizontalPercentage(), 1.0, newBoundary.horizontalLimit(), 1000, newBoundary.horizontalAlign(), 0.5));
                 if (!isReducedMotion()) innerAlphaAnimator.setTo(-1.0F, 200);
-                init(minecraft, BoundariesScreen.this.width, BoundariesScreen.this.height);
+                init(BoundariesScreen.this.width, BoundariesScreen.this.height);
             }).build());
             v = verticalUsePercentage ? boundary.verticalPercentage() : boundary.verticalLimit() / 1000.0;
             addRenderableWidget(verticalSlider = new AbstractSliderButton(0, 0, 20, 20, getSliderMessage("config.rei.options.layout.boundaries.desc.limit", verticalUsePercentage, v, 1000), v) {

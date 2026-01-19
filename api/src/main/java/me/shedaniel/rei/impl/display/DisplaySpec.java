@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.display;
 
 import me.shedaniel.rei.api.common.display.Display;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
@@ -35,5 +35,5 @@ public interface DisplaySpec {
     Display provideInternalDisplay();
     
     @ApiStatus.Internal
-    Collection<ResourceLocation> provideInternalDisplayIds();
+    Collection<Identifier> provideInternalDisplayIds();
 }

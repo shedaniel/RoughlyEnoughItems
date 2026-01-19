@@ -36,7 +36,7 @@ import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigOptions;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;

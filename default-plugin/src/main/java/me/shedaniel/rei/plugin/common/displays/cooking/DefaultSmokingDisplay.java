@@ -28,7 +28,7 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializer;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 
@@ -42,7 +42,7 @@ public class DefaultSmokingDisplay extends DefaultCookingDisplay {
         super(recipe);
     }
     
-    public DefaultSmokingDisplay(List<EntryIngredient> input, List<EntryIngredient> output, Optional<ResourceLocation> id, float xp, double cookTime) {
+    public DefaultSmokingDisplay(List<EntryIngredient> input, List<EntryIngredient> output, Optional<Identifier> id, float xp, double cookTime) {
         super(input, output, id, xp, cookTime);
     }
     

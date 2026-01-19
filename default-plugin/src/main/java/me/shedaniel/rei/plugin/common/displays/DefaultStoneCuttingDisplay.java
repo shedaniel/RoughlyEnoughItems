@@ -33,7 +33,7 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 
@@ -45,14 +45,14 @@ public class DefaultStoneCuttingDisplay extends BasicDisplay {
             RecordCodecBuilder.mapCodec(instance -> instance.group(
                     EntryIngredient.codec().listOf().fieldOf("inputs").forGetter(DefaultStoneCuttingDisplay::getInputEntries),
                     EntryIngredient.codec().listOf().fieldOf("outputs").forGetter(DefaultStoneCuttingDisplay::getOutputEntries),
-                    ResourceLocation.CODEC.optionalFieldOf("location").forGetter(DefaultStoneCuttingDisplay::getDisplayLocation)
+                    Identifier.CODEC.optionalFieldOf("location").forGetter(DefaultStoneCuttingDisplay::getDisplayLocation)
             ).apply(instance, DefaultStoneCuttingDisplay::new)),
             StreamCodec.composite(
                     EntryIngredient.streamCodec().apply(ByteBufCodecs.list()),
                     DefaultStoneCuttingDisplay::getInputEntries,
                     EntryIngredient.streamCodec().apply(ByteBufCodecs.list()),
                     DefaultStoneCuttingDisplay::getOutputEntries,
-                    ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC),
+                    ByteBufCodecs.optional(Identifier.STREAM_CODEC),
                     DefaultStoneCuttingDisplay::getDisplayLocation,
                     DefaultStoneCuttingDisplay::new
             ));
@@ -60,10 +60,10 @@ public class DefaultStoneCuttingDisplay extends BasicDisplay {
     public DefaultStoneCuttingDisplay(RecipeHolder<StonecutterRecipe> recipe) {
         this(List.of(EntryIngredients.ofIngredient(recipe.value().input())),
                 List.of(EntryIngredients.of(recipe.value().result())),
-                Optional.of(recipe.id().location()));
+                Optional.of(recipe.id().identifier()));
     }
     
-    public DefaultStoneCuttingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location) {
+    public DefaultStoneCuttingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<Identifier> location) {
         super(inputs, outputs, location);
     }
     

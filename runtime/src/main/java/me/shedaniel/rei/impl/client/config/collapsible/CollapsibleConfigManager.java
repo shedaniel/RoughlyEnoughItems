@@ -32,7 +32,7 @@ import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -77,19 +77,19 @@ public class CollapsibleConfigManager {
     @Config(name = "roughlyenoughitems/collapsible")
     @Environment(EnvType.CLIENT)
     public static final class CollapsibleConfigObject implements ConfigData {
-        public List<ResourceLocation> disabledGroups = new ArrayList<>();
+        public List<Identifier> disabledGroups = new ArrayList<>();
         public List<CustomGroup> customGroups = new ArrayList<>();
     }
     
     public static final class CustomGroup {
-        public ResourceLocation id = ResourceLocation.withDefaultNamespace("missingno");
+        public Identifier id = Identifier.withDefaultNamespace("missingno");
         public String name = "Invalid";
         public List<EntryStackProvider<?>> stacks = new ArrayList<>();
         
         public CustomGroup() {
         }
         
-        public CustomGroup(ResourceLocation id, String name, List<EntryStackProvider<?>> stacks) {
+        public CustomGroup(Identifier id, String name, List<EntryStackProvider<?>> stacks) {
             this.id = id;
             this.name = name;
             this.stacks = stacks;

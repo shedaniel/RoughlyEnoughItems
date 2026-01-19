@@ -128,7 +128,7 @@ public class CreditsScreen extends Screen {
         entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(Component.literal("Visit the project page at CurseForge."), "https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items", entryListWidget.getItemWidth(), false));
         entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(Component.literal("Support the project via Patreon!"), "https://patreon.com/shedaniel", entryListWidget.getItemWidth(), true));
         entryListWidget.creditsAddEntry(new TextCreditsItem(Component.empty()));
-        addRenderableWidget(buttonDone = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> openPrevious(), Supplier::get) {});
+        addRenderableWidget(buttonDone = new Button.Plain(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> openPrevious(), Supplier::get) {});
     }
     
     private static void fillTranslators(Exception[] exception, List<Tuple<String, List<TranslatorEntry>>> translators) {
@@ -155,7 +155,7 @@ public class CreditsScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         super.render(graphics, mouseX, mouseY, delta);
-        graphics.drawCenteredString(this.font, I18n.get("text.rei.credits"), this.width / 2, 16, 16777215);
+        graphics.drawCenteredString(this.font, I18n.get("text.rei.credits"), this.width / 2, 16, 0xFFFFFFFF);
     }
     
     @Override

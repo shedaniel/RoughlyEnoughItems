@@ -26,12 +26,12 @@ package me.shedaniel.rei.api.common.category;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.util.Identifiable;
 import me.shedaniel.rei.impl.Internals;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.IdentifierException;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * A category identifier is used to identify a category. This is the typed version of {@link ResourceLocation}.
+ * A category identifier is used to identify a category. This is the typed version of {@link Identifier}.
  *
  * @param <D> the type of display
  */
@@ -45,7 +45,7 @@ public interface CategoryIdentifier<D extends Display> extends Identifiable {
      * @param str the string to create the identifier from
      * @param <D> the type of display
      * @return the identifier
-     * @throws ResourceLocationException if the string is not a valid resource location
+     * @throws IdentifierException if the string is not a valid resource location
      */
     static <D extends Display> CategoryIdentifier<D> of(String str) {
         return Internals.getCategoryIdentifier(str);
@@ -58,7 +58,7 @@ public interface CategoryIdentifier<D extends Display> extends Identifiable {
      * @param path      the path of the identifier
      * @param <D>       the type of display
      * @return the identifier
-     * @throws ResourceLocationException if the string is not a valid resource location
+     * @throws IdentifierException if the string is not a valid resource location
      */
     static <D extends Display> CategoryIdentifier<D> of(String namespace, String path) {
         return of(namespace + ":" + path);
@@ -71,7 +71,7 @@ public interface CategoryIdentifier<D extends Display> extends Identifiable {
      * @param <D>        the type of display
      * @return the identifier
      */
-    static <D extends Display> CategoryIdentifier<D> of(ResourceLocation identifier) {
+    static <D extends Display> CategoryIdentifier<D> of(Identifier identifier) {
         return of(identifier.toString());
     }
     
