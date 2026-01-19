@@ -121,7 +121,7 @@ unifiedPublishing {
     project {
         displayName = "[Fabric $rootProject.supported_version] v$project.version"
         releaseType = rootProject.unstable == "false" ? "release" : "alpha"
-        gameVersions = ["1.21.9", "1.21.10"]
+        gameVersions = ["1.21.11"]
         gameLoaders = ["fabric"]
         changelog = rootProject.releaseChangelog
 
