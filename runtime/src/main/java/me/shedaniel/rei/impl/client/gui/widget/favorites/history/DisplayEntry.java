@@ -167,7 +167,7 @@ public class DisplayEntry extends WidgetWithBounds {
             reachedStable = true;
         }
         
-        if (stable && (bounds.getMaxX() + xOffset < parent.getBounds().x || bounds.x + xOffset > parent.getBounds().getMaxX())) {
+        if (stable && (bounds.getMaxX() + xOffset() < parent.getBounds().x || bounds.x + xOffset() > parent.getBounds().getMaxX())) {
             return;
         }
         
