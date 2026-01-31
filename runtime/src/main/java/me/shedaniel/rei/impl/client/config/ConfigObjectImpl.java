@@ -744,4 +744,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             public List<FilteringRule<?>> filteringRules = new ArrayList<>();
         }
     }
+
+    /**
+     * Suppresses the "partial recipe" warning permanently.
+     */
+    public boolean hideNotFullRecipeWarning = false;
+
 }
