@@ -436,6 +436,8 @@
   "config.rei.options.filtering.filter_displays.desc": "Apply filtering rules to determine the visibility of displays. Displays with all entries filtered will be hidden.",
   "config.rei.options.filtering.merge_displays": "Merge Displays",
   "config.rei.options.filtering.merge_displays.desc": "Merge displays with the same recipe. This is useful for unifying recipes.",
+  "config.rei.options.filtering.force_local_recipes": "Force Local Recipes (Ignore Server Sync)",
+  "config.rei.options.filtering.force_local_recipes.desc": "Loads recipes from client resources instead of waiting for server synchronization. Useful for multiplayer servers (e.g. 2b2t) that do not send recipe data. §eWarning: Some recipes may not exist on the server. §eRequires reconnecting to the server after toggling.",
   "config.rei.options.groups.list.entries": "Entries",
   "config.rei.options.list.display_mode": "Display Mode",
   "config.rei.options.list.display_mode.desc": "The way entries are laid out. Paginated mode displays entries in pages, where there are buttons to traverse the different pages. Scrolled mode displays entries in a vertical list.",

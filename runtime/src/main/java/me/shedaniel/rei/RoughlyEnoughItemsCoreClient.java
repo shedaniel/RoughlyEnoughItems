@@ -92,6 +92,7 @@ import me.shedaniel.rei.impl.common.entry.type.types.EmptyEntryDefinition;
 import me.shedaniel.rei.impl.common.networking.DisplaySyncPacket;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.plugins.ReloadManagerImpl;
+import me.shedaniel.rei.impl.common.registry.displays.ServerDisplayRegistryImpl;
 import me.shedaniel.rei.impl.common.util.InstanceHelper;
 import me.shedaniel.rei.impl.common.util.IssuesDetector;
 import me.shedaniel.rei.plugin.test.REITestCommonPlugin;
@@ -117,7 +118,13 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.world.item.crafting.RecipeAccess;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
 import net.minecraft.world.item.crafting.display.RecipeDisplayId;
 import org.apache.commons.lang3.mutable.MutableLong;
@@ -125,6 +132,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.*;
 import java.util.stream.Stream;
 
@@ -311,6 +319,11 @@ public class RoughlyEnoughItemsCoreClient {
         Minecraft client = Minecraft.getInstance();
         final ResourceLocation recipeButtonTex = ResourceLocation.withDefaultNamespace("textures/gui/recipe_button.png");
         MutableLong endReload = new MutableLong(-1);
+        // Set up client-side recipe loading for forceLocalRecipes mode.
+        // When on a remote server with no integrated server, ServerDisplayRegistryImpl
+        // cannot access GameInstance.getServer().getRecipeManager(). This supplier
+        // provides recipes loaded from the client's vanilla data pack instead.
+        ServerDisplayRegistryImpl.setClientRecipeSupplier(RoughlyEnoughItemsCoreClient::loadRecipesFromClientDataPacks);
         PRE_UPDATE_RECIPES.register((recipeAccess, registryAccess) -> {
             reloadPlugins(null, ReloadStage.START, registryAccess);
         });
@@ -318,6 +331,10 @@ public class RoughlyEnoughItemsCoreClient {
             reloadPlugins(endReload, ReloadStage.END);
         });
         ClientRecipeUpdateEvent.ADD.register((recipeAccess, entries) -> {
+            if (ConfigObject.getInstance().isForceLocalRecipes() && !Minecraft.getInstance().isLocalServer()) {
+                InternalLogger.getInstance().debug("Ignoring server recipe ADD (%d entries) because forceLocalRecipes is enabled.", entries.size());
+                return;
+            }
             if (ClientHelperImpl.getInstance().canUsePackets()) {
                 return;
             }
@@ -328,6 +345,10 @@ public class RoughlyEnoughItemsCoreClient {
             registry.addJob(() -> registry.addRecipes(mapped));
         });
         ClientRecipeUpdateEvent.REMOVE.register((recipeAccess, entries) -> {
+            if (ConfigObject.getInstance().isForceLocalRecipes() && !Minecraft.getInstance().isLocalServer()) {
+                InternalLogger.getInstance().debug("Ignoring server recipe REMOVE (%d entries) because forceLocalRecipes is enabled.", entries.size());
+                return;
+            }
             if (ClientHelperImpl.getInstance().canUsePackets()) {
                 return;
             }
@@ -499,5 +520,43 @@ public class RoughlyEnoughItemsCoreClient {
             lastReload.setValue(System.currentTimeMillis());
         }
         ReloadManagerImpl.reloadPlugins(start, () -> InstanceHelper.connectionFromClient() == null);
+    }
+    
+    private static List<RecipeHolder<?>> loadRecipesFromClientDataPacks() {
+        try {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.getConnection() == null) return Collections.emptyList();
+            if (mc.isLocalServer()) return Collections.emptyList();
+            if (!ConfigObject.getInstance().isForceLocalRecipes()) return Collections.emptyList();
+            
+            InternalLogger.getInstance().info("[Force Local Recipes] Loading recipes from client data packs...");
+            
+            HolderLookup.Provider registryAccess = mc.getConnection().registryAccess();
+            
+            // Create a data resource manager from the vanilla pack.
+            // The vanilla JAR contains all recipe JSONs under data/<namespace>/recipe/.
+            List<PackResources> packResourcesList = new ArrayList<>();
+            packResourcesList.add(mc.getVanillaPackResources());
+            
+            List<RecipeHolder<?>> result;
+            try (MultiPackResourceManager dataManager = new MultiPackResourceManager(PackType.SERVER_DATA, packResourcesList)) {
+                // Create a temporary RecipeManager and force it to load recipes
+                // from the data resource manager synchronously.
+                RecipeManager recipeManager = new RecipeManager(registryAccess);
+                recipeManager.reload(
+                    CompletableFuture::completedFuture,
+                    dataManager,
+                    Runnable::run,
+                    Runnable::run
+                ).join();
+                result = new ArrayList<>(recipeManager.getRecipes());
+            }
+            
+            InternalLogger.getInstance().info("[Force Local Recipes] Loaded %d recipes from client data packs", result.size());
+            return result;
+        } catch (Exception e) {
+            InternalLogger.getInstance().error("[Force Local Recipes] Failed to load recipes from client data packs", e);
+            return Collections.emptyList();
+        }
     }
 }

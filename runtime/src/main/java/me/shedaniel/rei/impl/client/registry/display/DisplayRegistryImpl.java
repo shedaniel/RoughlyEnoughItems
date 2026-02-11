@@ -156,6 +156,15 @@ public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin
     
     @Override
     public void endReload() {
+        // Inject force-local recipe displays from ServerDisplayRegistryImpl
+        List<Display> forceLocalDisplays = me.shedaniel.rei.impl.common.registry.displays.ServerDisplayRegistryImpl.consumePendingForceLocalDisplays();
+        if (forceLocalDisplays != null && !forceLocalDisplays.isEmpty()) {
+            InternalLogger.getInstance().info("[Force Local Recipes] Injecting %d displays into client registry", forceLocalDisplays.size());
+            for (Display display : forceLocalDisplays) {
+                super.add(display, SYNCED);
+            }
+        }
+        
         InternalLogger.getInstance().debug("Found %d displays", size());
         
         for (CategoryIdentifier<?> identifier : getAll().keySet()) {

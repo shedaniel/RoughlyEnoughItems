@@ -288,6 +288,16 @@ public interface ConfigObject {
     @ApiStatus.Experimental
     boolean doesCacheDisplayLookup();
     
+    /**
+     * Returns whether REI should force loading recipes from local client data
+     * instead of waiting for server synchronization.
+     * Useful for multiplayer servers that do not send recipe data.
+     *
+     * @return whether force local recipes is enabled
+     */
+    @ApiStatus.Experimental
+    boolean isForceLocalRecipes();
+    
     boolean doDebugRenderTimeRequired();
     
     boolean doMergeDisplayUnderOne();

@@ -28,6 +28,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
@@ -102,6 +103,10 @@ public record DisplaySyncPacket(SyncType syncType, Collection<Display> displays,
     
     @Environment(EnvType.CLIENT)
     public void handle(NetworkManager.PacketContext context) {
+        if (ConfigObject.getInstance().isForceLocalRecipes() && !net.minecraft.client.Minecraft.getInstance().isLocalServer()) {
+            InternalLogger.getInstance().info("[REI Server Display Sync] Ignoring server display sync because forceLocalRecipes is enabled.");
+            return;
+        }
         DisplayRegistryImpl registry = (DisplayRegistryImpl) DisplayRegistry.getInstance();
         if (syncType() == SyncType.SET) {
             InternalLogger.getInstance().info("[REI Server Display Sync] Received server's request to set %d recipes.", displays().size());
