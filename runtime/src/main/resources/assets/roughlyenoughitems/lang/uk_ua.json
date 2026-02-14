@@ -514,5 +514,6 @@
   "rule.roughlyenoughitems.filtering.basic.subtitle": "Фільтр груп за допомогою REI плаґінів. Це не налаштовується тут.",
   "rule.roughlyenoughitems.filtering.hide.tag": "Фільтр теґів",
   "rule.roughlyenoughitems.filtering.hide.tag.subtitle": "Фільтр груп за «c:hidden_from_recipe_viewers». Це не налаштовується тут.",
-  "modmenu.descriptionTranslation.roughlyenoughitems": "Більш чистий та налаштовуваний."
+  "modmenu.descriptionTranslation.roughlyenoughitems": "Більш чистий та налаштовуваний.",
+  "fml.menu.mods.info.description.roughlyenoughitems": "Більш чистий та налаштовуваний."
 }
