@@ -122,6 +122,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.tags.TagLoader;
 import net.minecraft.world.item.crafting.RecipeAccess;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -531,7 +532,7 @@ public class RoughlyEnoughItemsCoreClient {
             
             InternalLogger.getInstance().info("[Force Local Recipes] Loading recipes from client data packs...");
             
-            HolderLookup.Provider registryAccess = mc.getConnection().registryAccess();
+            RegistryAccess registryAccess = mc.getConnection().registryAccess();
             
             // Create a data resource manager from the vanilla pack.
             // The vanilla JAR contains all recipe JSONs under data/<namespace>/recipe/.
@@ -540,8 +541,36 @@ public class RoughlyEnoughItemsCoreClient {
             
             List<RecipeHolder<?>> result;
             try (MultiPackResourceManager dataManager = new MultiPackResourceManager(PackType.SERVER_DATA, packResourcesList)) {
-                // Create a temporary RecipeManager and force it to load recipes
-                // from the data resource manager synchronously.
+                // Load tags for ALL builtin registries (items, blocks, fluids, etc.)
+                // from the vanilla data pack. The connection's registryAccess only contains
+                // dynamic registries, but recipe ingredients reference tags from builtin
+                // registries like minecraft:item (e.g. #minecraft:bundles, #minecraft:planks).
+                int tagCount = 0;
+                for (net.minecraft.core.Registry<?> registry : net.minecraft.core.registries.BuiltInRegistries.REGISTRY) {
+                    if (registry instanceof net.minecraft.core.WritableRegistry) {
+                        try {
+                            @SuppressWarnings({"unchecked", "rawtypes"})
+                            net.minecraft.core.WritableRegistry writable = (net.minecraft.core.WritableRegistry) registry;
+                            TagLoader.loadTagsForRegistry(dataManager, writable);
+                            tagCount++;
+                        } catch (Exception e) {
+                            // Some registries might not have tag directories, skip silently
+                        }
+                    }
+                }
+                InternalLogger.getInstance().info("[Force Local Recipes] Loaded tags for %d builtin registries from client data packs", tagCount);
+                
+                // Also load tags for dynamic registries from the connection's registryAccess
+                List<net.minecraft.core.Registry.PendingTags<?>> pendingTags =
+                        TagLoader.loadTagsForExistingRegistries(dataManager, registryAccess);
+                for (net.minecraft.core.Registry.PendingTags<?> pt : pendingTags) {
+                    pt.apply();
+                }
+                if (!pendingTags.isEmpty()) {
+                    InternalLogger.getInstance().info("[Force Local Recipes] Loaded and applied %d dynamic registry tag sets", pendingTags.size());
+                }
+                
+                // Now load recipes — tag references will resolve correctly.
                 RecipeManager recipeManager = new RecipeManager(registryAccess);
                 recipeManager.reload(
                     CompletableFuture::completedFuture,
