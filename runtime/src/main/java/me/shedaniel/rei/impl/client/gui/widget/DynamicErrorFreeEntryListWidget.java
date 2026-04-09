@@ -31,6 +31,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -248,7 +249,6 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                 left, top, right, bottom, (int) getScroll(), 32);
     }
     
-    @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.drawBackground();
         int scrollbarPosition = this.getScrollbarPosition();
@@ -266,6 +266,11 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         int maxScroll = this.getMaxScroll();
         this.renderScrollBar(graphics, maxScroll, scrollbarPosition, int_4);
         this.renderDecorations(graphics, mouseX, mouseY);
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        render(graphics instanceof GuiGraphics guiGraphics ? guiGraphics : new GuiGraphics(graphics), mouseX, mouseY, delta);
     }
     
     protected void renderScrollBar(GuiGraphics graphics, int maxScroll, int scrollbarPositionMinX, int scrollbarPositionMaxX) {

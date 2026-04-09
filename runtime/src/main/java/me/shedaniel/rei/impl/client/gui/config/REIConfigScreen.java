@@ -72,7 +72,7 @@ import java.util.function.BiConsumer;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
-public class REIConfigScreen extends Screen implements ConfigAccess {
+public class REIConfigScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen implements ConfigAccess {
     private final Screen parent;
     private final List<OptionCategory> categories;
     private final List<Widget> widgets = new ArrayList<>();

@@ -54,13 +54,16 @@ import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REICommonPlugin;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.access.ClientRecipeBookEntriesAccessor;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
@@ -75,6 +78,7 @@ import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.client.gui.widget.TooltipContextImpl;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
+import me.shedaniel.rei.impl.client.recipe.ClientLocalRecipeManager;
 import me.shedaniel.rei.impl.client.registry.category.CategoryRegistryImpl;
 import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
 import me.shedaniel.rei.impl.client.registry.screen.ScreenRegistryImpl;
@@ -94,17 +98,23 @@ import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.plugins.ReloadManagerImpl;
 import me.shedaniel.rei.impl.common.util.InstanceHelper;
 import me.shedaniel.rei.impl.common.util.IssuesDetector;
+import me.shedaniel.rei.plugin.common.displays.cooking.DefaultBlastingDisplay;
+import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmeltingDisplay;
+import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
+import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import me.shedaniel.rei.plugin.test.REITestCommonPlugin;
 import me.shedaniel.rei.plugin.test.REITestPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CraftingScreen;
+import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.RegistryAccess;
@@ -117,8 +127,18 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.RecipeAccess;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.display.FurnaceRecipeDisplay;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
 import net.minecraft.world.item.crafting.display.RecipeDisplayId;
+import net.minecraft.world.item.crafting.display.ShapedCraftingRecipeDisplay;
+import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
+import net.minecraft.world.item.crafting.display.SmithingRecipeDisplay;
+import net.minecraft.world.item.crafting.display.StonecutterRecipeDisplay;
+import net.minecraft.world.item.Items;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -131,6 +151,18 @@ import java.util.stream.Stream;
 public class RoughlyEnoughItemsCoreClient {
     public static final Event<BiConsumer<RecipeAccess, RegistryAccess>> PRE_UPDATE_RECIPES = EventFactory.createLoop();
     public static final Event<Runnable> POST_UPDATE_TAGS = EventFactory.createLoop();
+    private static boolean receivedServerDisplaySync = false;
+    private static final MutableLong CLIENT_RECIPE_RELOAD_DEBOUNCE = new MutableLong(-1);
+    private static final MutableLong CLIENT_RECIPE_SEARCH_SYNC_DEBOUNCE = new MutableLong(-1);
+    private static @Nullable ClientRecipeFallbackSyncState lastClientRecipeFallbackSyncState;
+    /**
+     * Server-known client recipe displays are tracked separately from the player's local recipe manager.
+     * On vanilla servers and Realms this cache is fed by Architectury's client recipe update events.
+     */
+    private static final Map<RecipeDisplayId, RecipeDisplayEntry> CLIENT_RECIPE_FALLBACK = new LinkedHashMap<>();
+    private static final Comparator<RecipeHolder<?>> RECIPE_HOLDER_COMPARATOR = Comparator
+            .comparing((RecipeHolder<?> recipe) -> recipe.id().identifier().getNamespace())
+            .thenComparing(recipe -> recipe.id().identifier().getPath());
     public static boolean isLeftMousePressed = false;
     
     public static void attachClientInternals() {
@@ -230,6 +262,7 @@ public class RoughlyEnoughItemsCoreClient {
     
     public void onInitializeClient() {
         IssuesDetector.detect();
+        ClientLocalRecipeManager.init();
         registerEvents();
         RoughlyEnoughItemsCore.getPluginDetector().detectClientPlugins().get().run();
         loadTestPlugins();
@@ -239,7 +272,7 @@ public class RoughlyEnoughItemsCoreClient {
             ItemStack stack = buf.readLenientJsonWithCodec(ItemStack.OPTIONAL_CODEC);
             String player = buf.readUtf(32767);
             if (client.player != null) {
-                client.player.displayClientMessage(Component.literal(I18n.get("text.rei.cheat_items").replaceAll("\\{item_name}", EntryStacks.of(stack.copy()).asFormattedText().getString()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
+                client.player.sendSystemMessage(Component.literal(I18n.get("text.rei.cheat_items").replaceAll("\\{item_name}", EntryStacks.of(stack.copy()).asFormattedText().getString()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)));
             }
         });
         NetworkManager.registerReceiver(NetworkManager.s2c(), RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (buf, context) -> {
@@ -309,36 +342,47 @@ public class RoughlyEnoughItemsCoreClient {
     private void registerEvents() {
         Minecraft client = Minecraft.getInstance();
         final Identifier recipeButtonTex = Identifier.withDefaultNamespace("textures/gui/recipe_button.png");
-        MutableLong endReload = new MutableLong(-1);
         PRE_UPDATE_RECIPES.register((recipeAccess, registryAccess) -> {
+            ClientLocalRecipeManager.scheduleReload();
             reloadPlugins(null, ReloadStage.START, registryAccess);
         });
-        ClientRecipeUpdateEvent.EVENT.register(recipeManager -> {
-            reloadPlugins(endReload, ReloadStage.END);
+        ClientRecipeUpdateEvent.EVENT.register(recipeAccess -> {
+            ClientLocalRecipeManager.scheduleReload();
+            reloadPlugins(CLIENT_RECIPE_RELOAD_DEBOUNCE, ReloadStage.END);
         });
         ClientRecipeUpdateEvent.ADD.register((recipeAccess, entries) -> {
             if (ClientHelperImpl.getInstance().canUsePackets()) {
                 return;
             }
-            
-            InternalLogger.getInstance().debug("Received server's request to add %d recipes.", entries.size());
-            DisplayRegistryImpl registry = (DisplayRegistryImpl) DisplayRegistry.getInstance();
-            List<RecipeDisplayEntry> mapped = CollectionUtils.map(entries, ClientboundRecipeBookAddPacket.Entry::contents);
-            registry.addJob(() -> registry.addRecipes(mapped));
+
+            for (ClientboundRecipeBookAddPacket.Entry entry : entries) {
+                RecipeDisplayEntry displayEntry = entry.contents();
+                CLIENT_RECIPE_FALLBACK.put(displayEntry.id(), displayEntry);
+            }
+
+            InternalLogger.getInstance().debug("Received server's request to add %d recipes to the client fallback cache.", entries.size());
+            queueClientRecipeFallbackSync();
         });
         ClientRecipeUpdateEvent.REMOVE.register((recipeAccess, entries) -> {
             if (ClientHelperImpl.getInstance().canUsePackets()) {
                 return;
             }
-            
-            InternalLogger.getInstance().debug("Received server's request to remove %d recipes.", entries.size());
-            DisplayRegistryImpl registry = (DisplayRegistryImpl) DisplayRegistry.getInstance();
-            Set<RecipeDisplayId> ids = new HashSet<>(entries);
-            registry.addJob(() -> registry.removeRecipes(ids));
+
+            for (RecipeDisplayId id : entries) {
+                CLIENT_RECIPE_FALLBACK.remove(id);
+            }
+
+            InternalLogger.getInstance().debug("Received server's request to remove %d recipes from the client fallback cache.", entries.size());
+            queueClientRecipeFallbackSync();
         });
         ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> {
             InternalLogger.getInstance().debug("Player quit, clearing reload tasks!");
-            endReload.setValue(-1);
+            CLIENT_RECIPE_RELOAD_DEBOUNCE.setValue(-1);
+            CLIENT_RECIPE_SEARCH_SYNC_DEBOUNCE.setValue(-1);
+            receivedServerDisplaySync = false;
+            lastClientRecipeFallbackSyncState = null;
+            CLIENT_RECIPE_FALLBACK.clear();
+            ClientLocalRecipeManager.clear();
             ReloadManagerImpl.terminateReloadTasks();
         });
         ClientGuiEvent.INIT_PRE.register((screen, access) -> {
@@ -351,7 +395,7 @@ public class RoughlyEnoughItemsCoreClient {
                 }
                 
                 InternalLogger.getInstance().error("Detected missing stage: END! This is possibly due to issues during client recipe reload! REI will force a reload of the recipes now!");
-                reloadPlugins(endReload, ReloadStage.END);
+                reloadPlugins(CLIENT_RECIPE_RELOAD_DEBOUNCE, ReloadStage.END);
             }
             
             return EventResult.pass();
@@ -481,6 +525,137 @@ public class RoughlyEnoughItemsCoreClient {
         }
         return true;
     }
+
+    @ApiStatus.Internal
+    public static void queueClientRecipeFallbackSync() {
+        DisplayRegistryImpl registry = (DisplayRegistryImpl) DisplayRegistry.getInstance();
+        registry.addJob(() -> {
+            if (receivedServerDisplaySync) {
+                lastClientRecipeFallbackSyncState = null;
+                registry.removeClientFallbackRecipes();
+                return;
+            }
+
+            ClientRecipeFallbackEntries entries = collectClientRecipeFallbackEntries();
+            DisplayRegistryImpl.ClientFallbackSyncStats stats = registry.syncClientRecipes(entries.recipeBookEntries(), entries.localEntries());
+            lastClientRecipeFallbackSyncState = new ClientRecipeFallbackSyncState(entries.snapshot(), stats.registeredDisplays());
+            InternalLogger.getInstance().debug("Queued client fallback sync completed with %d registered displays from %d recipe-book entries and %d local entries.",
+                    stats.registeredDisplays(), entries.recipeBookEntries().size(), entries.localEntries().size());
+        });
+    }
+
+    @ApiStatus.Internal
+    public static void handleClientRecipeDefinitionsUpdated() {
+        receivedServerDisplaySync = false;
+        lastClientRecipeFallbackSyncState = null;
+        queueClientRecipeFallbackSync();
+    }
+
+    @ApiStatus.Internal
+    public static void handleClientRecipeBookAdded(int count) {
+        InternalLogger.getInstance().debug("Observed %d direct client recipe-book additions.", count);
+    }
+
+    @ApiStatus.Internal
+    public static void handleClientRecipeBookRemoved(int count) {
+        InternalLogger.getInstance().debug("Observed %d direct client recipe-book removals.", count);
+    }
+
+    @ApiStatus.Internal
+    public static void handleClientRecipeBookRefreshed() {
+        InternalLogger.getInstance().debug("Observed a direct client recipe-book refresh.");
+    }
+
+    @ApiStatus.Internal
+    public static boolean hasReceivedServerDisplaySync() {
+        return receivedServerDisplaySync;
+    }
+
+    @ApiStatus.Internal
+    public static String describeClientRecipeFallbackSyncState() {
+        ClientRecipeFallbackSyncState state = lastClientRecipeFallbackSyncState;
+        if (state == null) {
+            return "<never-synced>";
+        }
+
+        ClientRecipeFallbackSnapshot snapshot = state.snapshot();
+        return String.format(Locale.ROOT, "recipeBook=%d local=%d registered=%d recipeBookSignature=%d localSignature=%d",
+                snapshot.recipeBookEntries(), snapshot.localEntries(), state.registeredDisplays(),
+                snapshot.recipeBookSignature(), snapshot.localSignature());
+    }
+
+    @ApiStatus.Internal
+    public static void ensureClientRecipeFallbackSyncedForSearch() {
+        if (receivedServerDisplaySync || PluginManager.areAnyReloading()) {
+            return;
+        }
+
+        Minecraft client = Minecraft.getInstance();
+        if (InstanceHelper.connectionFromClient() == null || client.player == null) {
+            return;
+        }
+
+        DisplayRegistryImpl registry = (DisplayRegistryImpl) DisplayRegistry.getInstance();
+        boolean missing = !registry.hasClientFallbackRecipes();
+        if (!missing) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        if (CLIENT_RECIPE_SEARCH_SYNC_DEBOUNCE.getValue() > 0
+                && now - CLIENT_RECIPE_SEARCH_SYNC_DEBOUNCE.getValue() < 250) {
+            return;
+        }
+        CLIENT_RECIPE_SEARCH_SYNC_DEBOUNCE.setValue(now);
+
+        InternalLogger.getInstance().debug("Queueing client fallback refresh for active recipe search because the fallback cache is empty.");
+        queueClientRecipeFallbackSync();
+    }
+
+    private static ClientRecipeFallbackEntries collectClientRecipeFallbackEntries() {
+        if (InstanceHelper.connectionFromClient() == null) {
+            return ClientRecipeFallbackEntries.EMPTY;
+        }
+
+        List<RecipeDisplayEntry> recipeBookEntries = List.copyOf(CLIENT_RECIPE_FALLBACK.values());
+        RecipeManager localRecipeManager = ClientLocalRecipeManager.getRecipeManager();
+        if (localRecipeManager == null) {
+            return new ClientRecipeFallbackEntries(recipeBookEntries, List.of());
+        }
+
+        Set<RecipeDisplayId> knownIds = new HashSet<>();
+        for (RecipeDisplayEntry entry : recipeBookEntries) {
+            knownIds.add(entry.id());
+        }
+
+        Map<RecipeDisplayId, RecipeDisplayEntry> localEntries = new LinkedHashMap<>();
+        localRecipeManager.getRecipes().stream()
+                .sorted(RECIPE_HOLDER_COMPARATOR)
+                .forEach(recipe -> localRecipeManager.listDisplaysForRecipe(recipe.id(), entry -> {
+                    if (!knownIds.contains(entry.id())) {
+                        localEntries.putIfAbsent(entry.id(), entry);
+                    }
+                }));
+
+        return new ClientRecipeFallbackEntries(recipeBookEntries, List.copyOf(localEntries.values()));
+    }
+
+    public static void markReceivedServerDisplaySync() {
+        receivedServerDisplaySync = true;
+        lastClientRecipeFallbackSyncState = null;
+        DisplayRegistryImpl registry = (DisplayRegistryImpl) DisplayRegistry.getInstance();
+        registry.addJob(registry::removeClientFallbackRecipes);
+    }
+
+    private static boolean isClientRecipeFallbackStale(ClientRecipeFallbackSnapshot snapshot) {
+        ClientRecipeFallbackSyncState state = lastClientRecipeFallbackSyncState;
+        if (state == null) {
+            return true;
+        }
+        if (!state.snapshot().equals(snapshot)) {
+            return true;
+        }
+        return state.registeredDisplays() == 0 && snapshot.totalEntries() > 0;
+    }
     
     @ApiStatus.Internal
     public static void reloadPlugins(MutableLong lastReload, @Nullable ReloadStage start) {
@@ -498,5 +673,41 @@ public class RoughlyEnoughItemsCoreClient {
             lastReload.setValue(System.currentTimeMillis());
         }
         ReloadManagerImpl.reloadPlugins(start, () -> InstanceHelper.connectionFromClient() == null);
+    }
+
+    private record ClientRecipeFallbackEntries(List<RecipeDisplayEntry> recipeBookEntries, List<RecipeDisplayEntry> localEntries) {
+        private static final ClientRecipeFallbackEntries EMPTY = new ClientRecipeFallbackEntries(List.of(), List.of());
+
+        private ClientRecipeFallbackSnapshot snapshot() {
+            return new ClientRecipeFallbackSnapshot(recipeBookEntries.size(), localEntries.size(),
+                    signatureOf(recipeBookEntries), signatureOf(localEntries));
+        }
+    }
+
+    private record ClientRecipeFallbackSnapshot(int recipeBookEntries, int localEntries, int recipeBookSignature, int localSignature) {
+        private int totalEntries() {
+            return recipeBookEntries + localEntries;
+        }
+    }
+
+    private record ClientRecipeFallbackSyncState(ClientRecipeFallbackSnapshot snapshot, int registeredDisplays) {
+    }
+
+    private static int signatureOf(Collection<RecipeDisplayEntry> entries) {
+        int hash = 1;
+        var context = EntryIngredients.slotDisplayContext();
+        for (RecipeDisplayEntry entry : entries) {
+            hash = 31 * hash + entry.hashCode();
+            hash = 31 * hash + signatureOfResultItems(entry, context);
+        }
+        return hash;
+    }
+
+    private static int signatureOfResultItems(RecipeDisplayEntry entry, net.minecraft.util.context.ContextMap context) {
+        try {
+            return entry.resultItems(context).hashCode();
+        } catch (Throwable throwable) {
+            return entry.display().toString().hashCode();
+        }
     }
 }

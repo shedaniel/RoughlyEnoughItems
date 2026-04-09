@@ -21,35 +21,20 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.client.categories.crafting.filler;
+package me.shedaniel.rei.mixin.fabric;
 
-import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.util.EntryIngredients;
-import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomShapelessDisplay;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.MapCloningRecipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import me.shedaniel.rei.impl.client.access.ClientRecipeBookEntriesAccessor;
+import net.minecraft.client.ClientRecipeBook;
+import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
+import net.minecraft.world.item.crafting.display.RecipeDisplayId;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
-public class MapCloningRecipeFiller implements CraftingRecipeFiller<MapCloningRecipe> {
+@Mixin(ClientRecipeBook.class)
+public interface MixinClientRecipeBook extends ClientRecipeBookEntriesAccessor {
     @Override
-    public Collection<Display> apply(RecipeHolder<MapCloningRecipe> recipe) {
-        List<Display> displays = new ArrayList<>();
-        
-        displays.add(new DefaultCustomShapelessDisplay(
-                List.of(EntryIngredients.of(Items.FILLED_MAP), EntryIngredients.of(Items.MAP)),
-                List.of(EntryIngredients.of(Items.FILLED_MAP, 2)),
-                Optional.of(recipe.id().identifier())));
-        
-        return displays;
-    }
-    
-    @Override
-    public Class<MapCloningRecipe> getRecipeClass() {
-        return MapCloningRecipe.class;
-    }
+    @Accessor("known")
+    Map<RecipeDisplayId, RecipeDisplayEntry> rei$getKnownEntries();
 }

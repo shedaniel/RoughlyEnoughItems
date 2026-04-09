@@ -30,7 +30,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-public class ScreenWithMenu extends Screen {
+public class ScreenWithMenu extends REIScreen {
     @Nullable
     private Menu menu;
     

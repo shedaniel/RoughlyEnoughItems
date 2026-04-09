@@ -39,7 +39,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class ErrorsScreen extends Screen {
+public class ErrorsScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private List<Object> components;
     private AbstractButton doneButton;
     private ErrorsEntryListWidget listWidget;

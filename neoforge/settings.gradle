@@ -1,0 +1,38 @@
+pluginManagement {
+    def rootProperties = new Properties()
+    file("../gradle.properties").withInputStream {
+        rootProperties.load(it)
+    }
+
+    repositories {
+        maven { url "https://maven.fabricmc.net/" }
+        maven { url "https://maven.shedaniel.me/" }
+        maven { url "https://maven.architectury.dev/" }
+        maven { url "https://maven.minecraftforge.net/" }
+        maven { url "https://files.minecraftforge.net/maven/" }
+        gradlePluginPortal()
+    }
+
+    plugins {
+        id("dev.architectury.loom-no-remap") version "1.14-SNAPSHOT"
+    }
+}
+
+def rootProperties = new Properties()
+file("../gradle.properties").withInputStream {
+    rootProperties.load(it)
+}
+
+gradle.beforeProject { project ->
+    rootProperties.each { key, value ->
+        if (!project.hasProperty(key.toString())) {
+            project.ext.set(key.toString(), value)
+        }
+    }
+}
+
+if (JavaVersion.current().ordinal() + 1 < 25) {
+    throw new IllegalStateException("Please run gradle with Java 25+!")
+}
+
+rootProject.name = "RoughlyEnoughItems-neoforge"

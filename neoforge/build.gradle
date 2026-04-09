@@ -1,245 +1,139 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id("dev.architectury.loom-no-remap")
+    id("maven-publish")
 }
 
-architectury {
-    platformSetupLoomIde()
-    neoForge()
-}
+version = "26.1.1.15-beta"
+group = "me.shedaniel"
 
-configurations {
-    common
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
-    compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
-}
-
-processResources {
-    filesMatching("META-INF/neoforge.mods.toml") {
-        expand "version": project.version
-    }
-    inputs.property "version", project.version
+base {
+    archivesName = "RoughlyEnoughItems-neoforge"
 }
 
 repositories {
-    maven { url "https://www.cursemaven.com" }
-    maven { url "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven" }
-    maven {
-        name "Modmaven"
-        url "https://modmaven.dev/"
-        // For Gradle 5.1 and above, limit it to just AE2
-        content {
-            includeGroup 'appeng'
+    maven { url "https://maven.shedaniel.me" }
+    maven { url "https://maven.architectury.dev" }
+    maven { url "https://maven.terraformersmc.com/releases" }
+    maven { url "https://maven.neoforged.net/releases/" }
+}
+
+sourceSets {
+    main {
+        java.srcDirs = [
+                layout.buildDirectory.dir("generated/neoforgeSources/main/java")
+        ]
+        resources.srcDirs = [
+                "../runtime/src/main/resources",
+                "../neoforge/src/main/resources"
+        ]
+    }
+    test {
+        java.srcDirs = [
+                "../runtime/src/test/java"
+        ]
+    }
+}
+
+def prepareNeoForgeSources = tasks.register("prepareNeoForgeSources", Sync) {
+    into layout.buildDirectory.dir("generated/neoforgeSources/main/java")
+    outputs.upToDateWhen { false }
+
+    from("../api/src/main/java")
+    from("../runtime/src/main/java") {
+        exclude("me/shedaniel/rei/impl/client/registry/screen/DefaultScreenOverlayRenderer.java")
+    }
+    from("../default-plugin/src/main/java")
+    from("../neoforge/src/main/java")
+
+    exclude("me/shedaniel/rei/REIModMenuEntryPoint.java")
+    exclude("me/shedaniel/rei/mixin/forge/MixinEffectsInInventory.java")
+
+    filter { String line ->
+        line = line.replaceAll(/\bGuiGraphics\b/, "GuiGraphicsExtractor")
+        line = line
+                .replace(".drawCenteredString(", ".centeredText(")
+                .replace(".drawWordWrap(", ".textWithWordWrap(")
+                .replace(".drawString(", ".text(")
+                .replace(".renderOutline(", ".outline(")
+                .replace(".hLine(", ".horizontalLine(")
+                .replace(".vLine(", ".verticalLine(")
+                .replace(".renderItemDecorations(", ".itemDecorations(")
+                .replace(".renderItem(", ".item(")
+                .replace("graphics.renderDeferredElements();", "graphics.extractDeferredElements(mouseX, mouseY, delta);")
+                .replace("graphics instanceof GuiGraphicsExtractor guiGraphics ? guiGraphics : new GuiGraphicsExtractor(graphics)", "graphics")
+                .replace("graphics instanceof GuiGraphicsExtractor existing ? existing : new GuiGraphicsExtractor(graphics)", "graphics")
+                .replace('initializeEntryPoint(true, "me.shedaniel.rei.REIModMenuEntryPoint");', "")
+        line = line.replaceAll(/(\w+)\.withFreshScissorStack\(/, 'me.shedaniel.rei.impl.client.gui.forge.REIGuiGraphicsCompat.withFreshScissorStack($1, ')
+        line = line.replaceAll(/(\w+)\.innerBlit\(/, 'me.shedaniel.rei.impl.client.gui.forge.REIGuiGraphicsCompat.innerBlit($1, ')
+        return line
+    }
+}
+
+loom {
+    noIntermediateMappings()
+
+    mods {
+        roughlyenoughitems {
+            sourceSet sourceSets.main
         }
     }
 }
 
-sourceSets {
-    serverComponent {
-        compileClasspath += main.compileClasspath
-        runtimeClasspath += main.runtimeClasspath
-    }
+dependencies {
+    minecraft("com.mojang:minecraft:${project.minecraft_version}")
+
+    neoForge("net.neoforged:neoforge:${project.neoforge_version}")
+    compileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
+    implementation("me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}")
+    implementation("dev.architectury:architectury-neoforge:${architectury_version}")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-processServerComponentResources {
+processResources {
+    inputs.property "version", project.version
+
     filesMatching("META-INF/neoforge.mods.toml") {
         expand "version": project.version
     }
-    inputs.property "version", project.version
 }
 
-loom {
+tasks.withType(JavaCompile).configureEach {
+    dependsOn prepareNeoForgeSources
+    options.encoding = "UTF-8"
+    options.release = 25
+    options.compilerArgs += ["-Xmaxerrs", "120"]
 }
 
-def depProjects = [":api", ":runtime", ":default-plugin"]
-
-dependencies {
-    neoForge("net.neoforged:neoforge:${rootProject.neoforge_version}")
-    modApi("me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}")
-    modApi("dev.architectury:architectury-neoforge:${architectury_version}")
-
-    depProjects.forEach {
-        common(project(path: it, configuration: "namedElements")) { transitive false }
-        shadowCommon(project(path: it, configuration: "transformProductionNeoForge")) { transitive false }
-    }
-}
-
-def modRuntime(str) {
-    dependencies.modLocalRuntime(str)
-}
-
-shadowJar {
-    configurations = [project.configurations.shadowCommon]
-    archiveClassifier = "dev-shadow"
-}
-
-remapJar {
-    input.set shadowJar.archiveFile
-    dependsOn shadowJar
-    archiveClassifier = null
-}
-
-task renameJarForPublication(type: Zip, dependsOn: remapJar) {
-    from remapJar.archiveFile.map { zipTree(it) }
-    metadataCharset "UTF-8"
-    archiveExtension = "jar"
-    destinationDirectory = base.libsDirectory
-    archiveClassifier = project.name
-}
-
-assemble.dependsOn renameJarForPublication
-
-jar {
-    archiveClassifier = "dev"
+test {
+    useJUnitPlatform()
 }
 
 java {
     withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
-sourcesJar {
-    afterEvaluate {
-        depProjects.forEach {
-            def depSources = project(it).sourcesJar
-            dependsOn depSources
-            from depSources.archiveFile.map { zipTree(it) }
-        }
-    }
+tasks.named("sourcesJar") {
+    dependsOn prepareNeoForgeSources
 }
 
-task serverOnlyJar(type: Jar, dependsOn: [remapJar]) {
-    archiveClassifier = "server-only"
-    from(zipTree(remapJar.archiveFile.get().asFile)) {
-        exclude "META-INF/neoforge.mods.toml", "mezz/**", "me/shedaniel/rei/forge/RoughlyEnoughItemsForge.class", "me/shedaniel/rei/forge/JEIStub.class"
-    }
-    from(sourceSets.serverComponent.output)
-}
+jar {
+    exclude("net/**")
 
-tasks.build {
-    dependsOn tasks.serverOnlyJar
-}
-
-components.java {
-    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
-        skip()
+    from("../LICENSE") {
+        rename { "${it}_${project.base.archivesName.get()}" }
     }
 }
 
 publishing {
     publications {
-        mavenNeoForge(MavenPublication) {
-            artifactId = rootProject.name + "-" + project.name
+        create("mavenJava", MavenPublication) {
+            artifactId = project.base.archivesName.get()
             from components.java
-        }
-        ["api", "default-plugin"].forEach { projectName ->
-            def remapMojang = tasks.create("remapMojangJarFor$projectName", net.fabricmc.loom.task.RemapJarTask) {
-                inputFile = project(":" + projectName).tasks.jar.archiveFile
-                archiveClassifier = "mojang-remapped-$projectName"
-                targetNamespace = "mojang"
-            }
-            def remapMojangSourcesJar = tasks.create("remapMojangSourcesFor$projectName", net.fabricmc.loom.task.RemapSourcesJarTask) {
-                inputFile = project(":" + projectName).tasks.sourcesJar.archiveFile
-                archiveClassifier = "mojang-remapped-$projectName-sources"
-                targetNamespace = "mojang"
-            }
-            create(projectName + "NeoForge", MavenPublication.class) { publication ->
-                publication.artifactId = rootProject.name + "-" + projectName + "-neoforge"
-                project.afterEvaluate {
-                    def project = project(":" + projectName)
-                    remapMojang.inputFile = project.fakeForgeJar.archiveFile
-                    def normalArtifact, sourceArtifact
-                    publication.artifact(remapMojang) { classifier null; normalArtifact = it }
-                    publication.artifact(remapMojangSourcesJar) {
-                        builtBy remapMojangSourcesJar
-                        classifier "sources"
-                        sourceArtifact = it
-                    }
-
-                    from components.java
-                    publication.setArtifacts([normalArtifact, sourceArtifact])
-                }
-            }
-        }
-    }
-}
-
-unifiedPublishing {
-    if (rootProject.neoforge_pr != "") return
-    project {
-        displayName = "[NeoForge $rootProject.supported_version] v$project.version"
-        releaseType = "beta"
-        gameVersions = ["1.21.11"]
-        gameLoaders = ["neoforge"]
-        changelog = rootProject.releaseChangelog
-
-        mainPublication renameJarForPublication
-
-        relations {
-            depends {
-                curseforge = "architectury-api"
-                modrinth = "architectury-api"
-            }
-            depends {
-                curseforge = "cloth-config"
-                modrinth = "cloth-config"
-            }
-        }
-
-        if (project.hasProperty("danielshe_curse_api_key") || System.getenv("danielshe_curse_api_key") != null) {
-            curseforge {
-                token = project.hasProperty("danielshe_curse_api_key") ? project.property("danielshe_curse_api_key") : System.getenv("danielshe_curse_api_key")
-                id = "310111"
-                gameVersions.addAll "Java 17"
-
-                relations {
-                    depends "roughly-enough-items-hacks"
-                }
-            }
-        }
-
-        if (project.hasProperty("modrinth_key") || System.getenv("modrinth_key") != null) {
-            modrinth {
-                token = project.hasProperty("modrinth_key") ? project.property("modrinth_key") : System.getenv("modrinth_key")
-                id = "nfn13YXA"
-                version = "$project.version+$project.name"
-            }
-        }
-    }
-    project {
-        displayName = "[NeoForge $rootProject.supported_version] v$project.version"
-        releaseType = "release"
-        gameVersions = ["1.21.11"]
-        gameLoaders = ["neoforge"]
-        changelog = rootProject.releaseChangelog
-
-        mainPublication serverOnlyJar
-
-        relations {
-            depends {
-                curseforge = "architectury-api"
-                modrinth = "architectury-api"
-            }
-            depends {
-                curseforge = "cloth-config"
-                modrinth = "cloth-config"
-            }
-        }
-
-        if (project.hasProperty("danielshe_curse_api_key") || System.getenv("danielshe_curse_api_key") != null) {
-            curseforge {
-                token = project.hasProperty("danielshe_curse_api_key") ? project.property("danielshe_curse_api_key") : System.getenv("danielshe_curse_api_key")
-                id = "567899"
-                gameVersions.addAll "Java 17"
-            }
-        }
-
-        if (project.hasProperty("modrinth_key") || System.getenv("modrinth_key") != null) {
-            modrinth {
-                releaseType = "release"
-                token = project.hasProperty("modrinth_key") ? project.property("modrinth_key") : System.getenv("modrinth_key")
-                id = "OM4ZYSws"
-                version = "$project.version+$project.name"
-            }
         }
     }
 }

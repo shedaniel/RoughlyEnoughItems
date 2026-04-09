@@ -46,7 +46,7 @@ public abstract class DefaultCookingDisplay extends BasicDisplay implements Cook
     
     public DefaultCookingDisplay(RecipeHolder<? extends AbstractCookingRecipe> recipe) {
         this(List.of(EntryIngredients.ofIngredient(recipe.value().input())),
-                List.of(EntryIngredients.of(recipe.value().result())),
+                List.of(EntryIngredients.ofSlotDisplay(recipe.value().display().getFirst().result())),
                 Optional.of(recipe.id().identifier()), recipe.value().experience(), recipe.value().cookingTime());
     }
     

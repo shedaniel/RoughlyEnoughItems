@@ -53,7 +53,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public abstract class OptionEntriesScreen extends Screen {
+public abstract class OptionEntriesScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private ListWidget listWidget;
     public Screen parent;
     
@@ -195,7 +195,7 @@ public abstract class OptionEntriesScreen extends Screen {
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             widget.setX(x + 2);
             widget.setY(y + 2);
-            widget.render(graphics, mouseX, mouseY, delta);
+            widget.extractRenderState(graphics, mouseX, mouseY, delta);
         }
         
         @Override
@@ -232,7 +232,7 @@ public abstract class OptionEntriesScreen extends Screen {
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             widget.setX(x + 2);
             widget.setY(y);
-            widget.render(graphics, mouseX, mouseY, delta);
+            widget.extractRenderState(graphics, mouseX, mouseY, delta);
         }
         
         @Override

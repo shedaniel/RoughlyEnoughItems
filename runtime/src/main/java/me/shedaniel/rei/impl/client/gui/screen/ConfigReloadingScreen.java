@@ -37,7 +37,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class ConfigReloadingScreen extends Screen {
+public class ConfigReloadingScreen extends REIScreen {
     private final Component title;
     private final BooleanSupplier predicate;
     private Supplier<@Nullable Component> subtitle = () -> null;

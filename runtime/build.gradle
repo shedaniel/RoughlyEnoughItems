@@ -1,4 +1,6 @@
-archivesBaseName = rootProject.name + "-" + project.name
+base {
+    archivesName = rootProject.name + "-" + project.name
+}
 
 architectury {
     common(platforms.split(","))
@@ -9,9 +11,9 @@ loom {
 }
 
 dependencies {
-    modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
-    modApi("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
-    modApi("dev.architectury:architectury:${architectury_version}")
+    compileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
+    api("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
+    api("dev.architectury:architectury:${architectury_version}")
     compileOnly(annotationProcessor("org.projectlombok:lombok:1.18.22"))
     compileOnly(project(path: ":api", configuration: "namedElements"))
     testImplementation(project(path: ":api", configuration: "namedElements"))

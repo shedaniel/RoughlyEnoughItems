@@ -215,7 +215,7 @@ public class TagNodes {
     
     private static <T> Optional<DataResult<TagNode<T>>> resolveTag(TagKey<T> tagKey, Registry<T> registry, Map<Identifier, TagData> tagDataMap) {
         TagData tagData = tagDataMap.get(tagKey.location());
-        if (tagData == null) return Optional.empty();
+        if (tagData == null) return resolveTagFromRegistry(tagKey, registry);
         
         TagNode<T> self = TagNode.ofReference(tagKey);
         List<Holder<T>> holders = new ArrayList<>();
@@ -240,6 +240,15 @@ public class TagNodes {
                 }
             }
         }
+        return Optional.of(DataResult.success(self));
+    }
+    
+    private static <T> Optional<DataResult<TagNode<T>>> resolveTagFromRegistry(TagKey<T> tagKey, Registry<T> registry) {
+        Optional<HolderSet.Named<T>> holders = registry.get(tagKey);
+        if (holders.isEmpty()) return Optional.empty();
+        
+        TagNode<T> self = TagNode.ofReference(tagKey);
+        self.addValuesChild(holders.get());
         return Optional.of(DataResult.success(self));
     }
 }

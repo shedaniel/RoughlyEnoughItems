@@ -58,7 +58,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class CollapsibleEntriesScreen extends Screen {
+public class CollapsibleEntriesScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private final Runnable onClose;
     private final CollapsibleConfigManager.CollapsibleConfigObject configObject;
     private final List<CollapsibleEntryWidget> widgets = new ArrayList<>();

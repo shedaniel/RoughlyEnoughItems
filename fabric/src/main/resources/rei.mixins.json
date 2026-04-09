@@ -2,9 +2,10 @@
   "required": true,
   "package": "me.shedaniel.rei.mixin.fabric",
   "plugin": "me.shedaniel.rei.mixin.fabric.REIMixinPlugin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_25",
   "client": [
     "MixinClientPacketListener",
+    "MixinClientRecipeBook",
     "MixinEffectsInInventory",
     "MixinInputConstants",
     "MixinInputConstantsKey",

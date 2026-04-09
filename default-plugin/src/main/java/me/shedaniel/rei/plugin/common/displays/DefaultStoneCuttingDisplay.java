@@ -59,7 +59,7 @@ public class DefaultStoneCuttingDisplay extends BasicDisplay {
     
     public DefaultStoneCuttingDisplay(RecipeHolder<StonecutterRecipe> recipe) {
         this(List.of(EntryIngredients.ofIngredient(recipe.value().input())),
-                List.of(EntryIngredients.of(recipe.value().result())),
+                List.of(EntryIngredients.ofSlotDisplay(recipe.value().resultDisplay())),
                 Optional.of(recipe.id().identifier()));
     }
     

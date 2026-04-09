@@ -53,7 +53,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class WarningAndErrorScreen extends Screen {
+public class WarningAndErrorScreen extends REIScreen {
     private AbstractWidget buttonExit;
     private StringEntryListWidget listWidget;
     private String action;
@@ -142,7 +142,7 @@ public class WarningAndErrorScreen extends Screen {
         } else {
             graphics.drawCenteredString(this.font, "Errors during Roughly Enough Items' " + action, this.width / 2, 16, 0xFFFFFFFF);
         }
-        this.buttonExit.render(graphics, int_1, int_2, float_1);
+        this.buttonExit.extractRenderState(graphics, int_1, int_2, float_1);
     }
     
     private static class StringEntryListWidget extends DynamicErrorFreeEntryListWidget<StringItem> {

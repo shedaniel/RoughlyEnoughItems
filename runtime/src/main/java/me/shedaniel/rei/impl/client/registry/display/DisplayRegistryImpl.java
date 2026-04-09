@@ -37,6 +37,8 @@ import me.shedaniel.rei.api.client.registry.display.reason.DisplayAdditionReason
 import me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibilityPredicate;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.history.DisplayHistoryManager;
@@ -55,6 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin, DisplayRegistryImpl.ClientDisplaysHolder> implements DisplayRegistry, DisplayConsumerImpl, DisplayGeneratorsRegistryImpl {
     public static final Object SYNCED = new Object();
+    public static final Object CLIENT_FALLBACK = new Object();
     private final Map<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> displayGenerators = new ConcurrentHashMap<>();
     private final List<DynamicDisplayGenerator<?>> globalDisplayGenerators = new ArrayList<>();
     private final List<DisplayVisibilityPredicate> visibilityPredicates = new ArrayList<>();
@@ -82,6 +85,16 @@ public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin
     
     public void addJob(Runnable job) {
         this.jobs.add(job);
+    }
+
+    public boolean hasClientFallbackRecipes() {
+        WeakHashMap<Display, Object> origins = this.holder().origins();
+        for (Object origin : origins.values()) {
+            if (isClientFallbackOrigin(origin)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     @Override
@@ -225,6 +238,72 @@ public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin
             this.holder().remove(display);
         }
     }
+
+    public ClientFallbackSyncStats syncClientRecipes(Collection<RecipeDisplayEntry> recipeBookEntries, Collection<RecipeDisplayEntry> localEntries) {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        removeClientFallbackRecipes();
+        int registeredDisplays = 0;
+        Map<CategoryIdentifier<?>, Integer> categoryCounts = new LinkedHashMap<>();
+        if (!fillers().isEmpty()) {
+            for (RecipeDisplayEntry entry : recipeBookEntries) {
+                try {
+                    Collection<Display> displays = tryFillDisplay(entry.display(), DisplayAdditionReason.RECIPE_MANAGER, DisplayAdditionReason.withId(entry.id()));
+                    if (displays.isEmpty()) {
+                        logMissingClientFallbackDisplay("recipe-book", entry);
+                        continue;
+                    }
+                    for (Display display : displays) {
+                        if (!addClientFallbackDisplay(display, new ClientFallbackOrigin(entry))) {
+                            InternalLogger.getInstance().warn("Rejected recipe-book fallback display %s [%s] in category %s for outputs %s",
+                                    display.getClass().getName(), entry.id(), display.getCategoryIdentifier(), describeOutputs(entry));
+                            continue;
+                        }
+                        registeredDisplays++;
+                        categoryCounts.merge(display.getCategoryIdentifier(), 1, Integer::sum);
+                    }
+                } catch (Throwable e) {
+                    InternalLogger.getInstance().error("Failed to fill client fallback display for recipe: %s [%s]", entry.display(), entry.id(), e);
+                }
+            }
+            for (RecipeDisplayEntry entry : localEntries) {
+                try {
+                    Collection<Display> displays = tryFillDisplay(entry.display(), DisplayAdditionReason.RECIPE_MANAGER);
+                    if (displays.isEmpty()) {
+                        logMissingClientFallbackDisplay("local", entry);
+                        continue;
+                    }
+                    for (Display display : displays) {
+                        if (!addClientFallbackDisplay(display, new ClientFallbackOrigin(entry))) {
+                            InternalLogger.getInstance().warn("Rejected local fallback display %s [%s] in category %s for outputs %s",
+                                    display.getClass().getName(), entry.id(), display.getCategoryIdentifier(), describeOutputs(entry));
+                            continue;
+                        }
+                        registeredDisplays++;
+                        categoryCounts.merge(display.getCategoryIdentifier(), 1, Integer::sum);
+                    }
+                } catch (Throwable e) {
+                    InternalLogger.getInstance().error("Failed to fill local fallback display for recipe: %s [%s]", entry.display(), entry.id(), e);
+                }
+            }
+        }
+        InternalLogger.getInstance().debug("Filled %d displays from client recipe fallback in %s%s",
+                registeredDisplays, stopwatch.stop(), describeCategoryCounts(categoryCounts));
+        return new ClientFallbackSyncStats(recipeBookEntries.size(), localEntries.size(), registeredDisplays, Map.copyOf(categoryCounts));
+    }
+
+    public void removeClientFallbackRecipes() {
+        List<Display> toRemove = new LinkedList<>();
+        WeakHashMap<Display, Object> origins = this.holder().origins();
+        for (Map.Entry<Display, Object> entry : origins.entrySet()) {
+            if (isClientFallbackOrigin(entry.getValue())) {
+                toRemove.add(entry.getKey());
+            }
+        }
+
+        for (Display display : toRemove) {
+            this.holder().remove(display);
+        }
+    }
     
     private void removeFailedDisplays() {
         Multimap<CategoryIdentifier<?>, Display> failedDisplays = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
@@ -261,6 +340,53 @@ public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin
     
     public DisplayCache cache() {
         return holder().cache;
+    }
+
+    public static boolean isClientFallbackOrigin(@Nullable Object origin) {
+        return origin == CLIENT_FALLBACK || origin instanceof ClientFallbackOrigin;
+    }
+
+    public record ClientFallbackOrigin(RecipeDisplayEntry entry) {
+    }
+
+    public record ClientFallbackSyncStats(int recipeBookEntries, int localEntries, int registeredDisplays,
+                                          Map<CategoryIdentifier<?>, Integer> categoryCounts) {
+    }
+
+    private static void logMissingClientFallbackDisplay(String source, RecipeDisplayEntry entry) {
+        InternalLogger.getInstance().warn("No REI display filler matched %s fallback recipe %s [%s] with outputs %s",
+                source, entry.display().getClass().getName(), entry.id(), describeOutputs(entry));
+    }
+
+    private boolean addClientFallbackDisplay(Display display, ClientFallbackOrigin origin) {
+        if (!DisplayValidator.validate(display)) {
+            return false;
+        }
+        this.holder().add(display, origin);
+        return true;
+    }
+
+    private static String describeCategoryCounts(Map<CategoryIdentifier<?>, Integer> categoryCounts) {
+        if (categoryCounts.isEmpty()) {
+            return "";
+        }
+
+        return categoryCounts.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(Comparator.comparing(Object::toString)))
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(java.util.stream.Collectors.joining(", ", " [", "]"));
+    }
+
+    private static String describeOutputs(RecipeDisplayEntry entry) {
+        try {
+            List<String> outputs = new ArrayList<>();
+            for (EntryStack<?> stack : EntryIngredients.ofItemStacks(entry.resultItems(EntryIngredients.slotDisplayContext()))) {
+                outputs.add(stack.getIdentifier() + " (" + stack.asFormattedText().getString() + ")");
+            }
+            return outputs.isEmpty() ? "<empty>" : outputs.toString();
+        } catch (Throwable throwable) {
+            return "<failed to resolve outputs: " + throwable.getClass().getSimpleName() + ": " + throwable.getMessage() + ">";
+        }
     }
     
     public static class ClientDisplaysHolder extends DisplaysHolderImpl.ByKey {

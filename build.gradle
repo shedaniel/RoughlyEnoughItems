@@ -1,8 +1,5 @@
 plugins {
-    id("architectury-plugin") version("3.4-SNAPSHOT")
-    id("dev.architectury.loom") version("1.13-SNAPSHOT") apply false
-    id("org.cadixdev.licenser") version("0.6.1")
-    id("me.shedaniel.unified-publishing") version("0.1.+")
+    id("net.fabricmc.fabric-loom") version("${loom_version}")
     id("maven-publish")
 }
 
@@ -10,165 +7,107 @@ import java.text.SimpleDateFormat
 
 def runNumber = System.getenv("GITHUB_RUN_NUMBER") ?: "9999"
 version = rootProject.base_version + "." + runNumber + (rootProject.unstable.toBoolean() ? "-alpha" : "")
-
 group = "me.shedaniel"
 
-subprojects {
-    apply plugin: "me.shedaniel.unified-publishing"
-    apply plugin: "java"
-    apply plugin: "dev.architectury.loom"
+base {
+    archivesName = "${rootProject.name}-fabric"
+}
 
-    sourceCompatibility = targetCompatibility = 1.8
+repositories {
+    maven { url "https://maven.shedaniel.me" }
+    maven { url "https://maven.architectury.dev" }
+    maven { url "https://maven.terraformersmc.com/releases" }
+}
 
-    java {
-        withSourcesJar()
+sourceSets {
+    main {
+        java.srcDirs = [
+                "api/src/main/java",
+                "runtime/src/main/java",
+                "default-plugin/src/main/java",
+                "fabric/src/main/java"
+        ]
+        resources.srcDirs = [
+                "runtime/src/main/resources",
+                "fabric/src/main/resources"
+        ]
     }
-
-    loom {
-        silentMojangMappingsLicense()
-    }
-
-    repositories {
-        maven { url "https://maven.neoforged.net/releases/" }
-        if (rootProject.neoforge_pr != "") {
-            maven {
-                url "https://prmaven.neoforged.net/NeoForge/pr$rootProject.neoforge_pr"
-                content {
-                    includeModule("net.neoforged", "neoforge")
-                }
-            }
-        }
-    }
-
-    dependencies {
-        minecraft("com.mojang:minecraft:${rootProject.minecraft_version}")
-        mappings(loom.layered {
-            officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-1.17.1:2021.10.10@zip")
-            crane("dev.architectury:crane:1.17+build.11")
-        })
-    }
-
-    jar {
-        from rootProject.file("LICENSE")
-    }
-
-    tasks.withType(JavaCompile) {
-        options.encoding = "UTF-8"
-        options.release = 21
+    test {
+        java.srcDirs = [
+                "runtime/src/test/java"
+        ]
     }
 }
 
-subprojects {
-    if (project.path == ':fabric' || project.path == ':forge' || project.path == ':neoforge') {
-        loom {
-            mods {
-                main { // to match the default mod generated for Forge
-                    sourceSet project.sourceSets.main
-                    def depProjects = [":api", ":runtime", ":default-plugin"]
-                    depProjects.each {
-                        sourceSet project(it).sourceSets.main
-                    }
-                }
-            }
+loom {
+    noIntermediateMappings()
+    enableTransitiveAccessWideners = false
+    accessWidenerPath = file("fabric/src/main/resources/roughlyenoughitems.accessWidener")
+
+    mods {
+        roughlyenoughitems {
+            sourceSet sourceSets.main
         }
     }
 }
 
-allprojects {
-    apply plugin: "maven-publish"
-    apply plugin: "architectury-plugin"
-    apply plugin: "org.cadixdev.licenser"
+dependencies {
+    minecraft("com.mojang:minecraft:${project.minecraft_version}")
 
-    architectury {
-        compileOnly()
+    implementation("net.fabricmc:fabric-loader:${project.fabricloader_version}")
+    implementation("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}")
+    implementation("me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}") {
+        exclude(module: "fabric-api")
     }
+    // Temporary migration bridge:
+    // the 26.1 branch still compiles against a locally remapped Architectury classes jar.
+    // The shim sources under fabric/src/main/java/dev/architectury/injectables/targets keep
+    // dev-time target resolution working until this can move back to a published dependency.
+    implementation(files("architectury-19.0.9999.jar"))
 
-    repositories {
-        maven { url "https://maven.shedaniel.me" }
-        maven { url "https://maven.parchmentmc.org" }
-        maven { url "https://maven.terraformersmc.com/releases" }
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
     }
+}
 
-    license {
-        header rootProject.file("HEADER")
-        include "**/*.java"
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.release = 25
+}
 
-        ext {
-            name = "shedaniel"
-            year = "2018, 2019, 2020, 2021, 2022, 2023"
+test {
+    useJUnitPlatform()
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
+}
+
+tasks.named("validateAccessWidener").configure {
+    enabled = false
+}
+
+publishing {
+    publications {
+        create("mavenJava", MavenPublication) {
+            artifactId = project.base.archivesName.get()
+            from components.java
         }
-    }
-
-    tasks.withType(GenerateModuleMetadata) {
-        enabled = false
-    }
-}
-
-["api", "default-plugin", "runtime"].forEach {
-    project(":fabric").evaluationDependsOn(":$it")
-}
-
-subprojects {
-    group = rootProject.group
-    version = rootProject.version
-    archivesBaseName = rootProject.name
-
-    publishing {
-        repositories {
-            if (System.getenv("MAVEN_PASS") != null) {
-                maven {
-                    url = "https://deploy.shedaniel.me/"
-                    credentials {
-                        username = "shedaniel"
-                        password = System.getenv("MAVEN_PASS")
-                    }
-                }
-            }
-        }
-    }
-}
-
-task licenseFormatAll
-subprojects { licenseFormatAll.dependsOn("${path}:licenseFormat") }
-
-ext {
-    releaseChangelog = "No changelog"
-}
-
-/* Thank you modmenu & fablabs */
-task releaseOnCf {
-    def df = new SimpleDateFormat("yyyy-MM-dd HH:mm")
-    df.setTimeZone(TimeZone.getTimeZone("UTC"))
-    def branch
-    if (System.env.BRANCH_NAME) {
-        branch = System.env.BRANCH_NAME
-        branch = branch.substring(branch.lastIndexOf("/") + 1)
-    } else {
-        branch = "git rev-parse --abbrev-ref HEAD".execute().in.text.trim()
-    }
-    if (branch == "HEAD") {
-        branch = "git rev-parse --short HEAD".execute().in.text.trim()
-    }
-    def time = df.format(new Date())
-    def changes = new StringBuilder()
-    changes << "## REI v$project.version for $project.supported_version\nUpdated at **$time**.\n[Click here for changelog](https://www.github.com/shedaniel/RoughlyEnoughItems/commits/$branch)"
-    def proc = "git log --max-count=200 --pretty=format:%s".execute()
-    proc.in.eachLine { line ->
-        def processedLine = line.toString()
-        if (!processedLine.contains("New translations") && !processedLine.contains("Merge") && !processedLine.contains("branch")) {
-            changes << "\n- ${processedLine.capitalize()}"
-        }
-    }
-    proc.waitFor()
-    releaseChangelog = changes.toString()
-    if (subprojects.any { it.name == "forge" }) {
-        dependsOn project("forge").tasks.getByName("publishUnified")
-    }
-    if (subprojects.any { it.name == "neoforge" }) {
-        dependsOn project("neoforge").tasks.getByName("publishUnified")
-    }
-    if (subprojects.any { it.name == "fabric" }) {
-        dependsOn project("fabric").tasks.getByName("publishUnified")
     }
 }

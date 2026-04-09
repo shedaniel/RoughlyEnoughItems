@@ -57,7 +57,8 @@ public class ImportantWarningsWidget extends WidgetWithBounds {
         if (((EntryRegistryImpl) EntryRegistry.getInstance()).listeners.add(LISTENER)) {
             String newId = Minecraft.getInstance().hasSingleplayerServer() ?
                     "integrated:" + Minecraft.getInstance().getSingleplayerServer().getWorldData().getLevelName()
-                    : InstanceHelper.connectionFromClient() != null ? "server:" + InstanceHelper.connectionFromClient().getId()
+                    : InstanceHelper.connectionFromClient() != null && InstanceHelper.connectionFromClient().getServerData() != null
+                    ? "server:" + InstanceHelper.connectionFromClient().getServerData().ip
                     : "null";
             if (!newId.equals(prevId)) {
                 prevId = newId;

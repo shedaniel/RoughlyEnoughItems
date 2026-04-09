@@ -76,7 +76,7 @@ public class ScreenOverlayImplFabric extends ScreenOverlayImpl {
             return;
         }
         graphics.pose().pushMatrix();
-        graphics.setTooltipForNextFrameInternal(Minecraft.getInstance().font, lines, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, tooltipStyle, false);
+        graphics.tooltip(Minecraft.getInstance().font, lines, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, tooltipStyle);
         graphics.pose().popMatrix();
     }
 }

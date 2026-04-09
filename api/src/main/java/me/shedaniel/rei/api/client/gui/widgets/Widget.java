@@ -33,6 +33,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Matrix3x2f;
@@ -104,6 +105,14 @@ public abstract class Widget extends AbstractContainerEventHandler implements Re
     @Deprecated
     public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
         render(graphics, mouseX, mouseY, delta);
+    }
+
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        render(graphics instanceof GuiGraphics guiGraphics ? guiGraphics : new GuiGraphics(graphics), mouseX, mouseY, delta);
     }
     
     @ApiStatus.Experimental

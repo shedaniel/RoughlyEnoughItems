@@ -204,7 +204,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     
     @Override
     public Stream<? extends TagKey<?>> getTagsFor(EntryStack<ItemStack> entry, ItemStack value) {
-        Stream<? extends TagKey<?>> tags = value.getTags();
+        Stream<? extends TagKey<?>> tags = value.typeHolder().tags();
         if (value.getItem() instanceof BlockItem blockItem) {
             tags = Stream.concat(tags, blockItem.getBlock().builtInRegistryHolder().tags());
         }

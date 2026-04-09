@@ -54,7 +54,7 @@ import java.util.Collections;
 import java.util.List;
 
 @ApiStatus.Internal
-public class UncertainDisplayViewingScreen extends Screen {
+public class UncertainDisplayViewingScreen extends REIScreen {
     private static final Identifier DEFAULT = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/screenshot_default.png");
     private static final Identifier COMPOSITE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/screenshot_composite.png");
     private final List<Widget> widgets;

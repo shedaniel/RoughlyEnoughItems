@@ -105,7 +105,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
         ClientLevel world = Minecraft.getInstance().level;
         if (world.isThundering())
             return Weather.THUNDER;
-        if (world.getLevelData().isRaining())
+        if (world.isRaining())
             return Weather.RAIN;
         return Weather.CLEAR;
     }

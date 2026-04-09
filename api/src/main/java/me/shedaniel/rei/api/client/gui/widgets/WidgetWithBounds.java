@@ -43,6 +43,11 @@ public abstract class WidgetWithBounds extends Widget {
         render(graphics, mouseX, mouseY, delta);
         getBounds().setBounds(clone);
     }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        render(graphics, getBounds(), mouseX, mouseY, delta);
+    }
     
     @ApiStatus.Experimental
     public final WidgetWithBounds withPadding(int padding) {

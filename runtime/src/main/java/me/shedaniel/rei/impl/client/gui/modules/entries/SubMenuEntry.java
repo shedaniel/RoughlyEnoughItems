@@ -118,10 +118,7 @@ public class SubMenuEntry extends AbstractMenuEntry {
                     menu.bounds.setAs(new FloatingRectangle(facingRight ? createBounds.x : createBounds.getMaxX(), facingDownwards ? createBounds.y : createBounds.getMaxY(), 0.1, 0.1));
                 }
                 
-                GuiGraphics.ScissorStack tmp = graphics.scissorStack;
-                graphics.scissorStack = new GuiGraphics.ScissorStack();
-                menu.render(graphics, mouseX, mouseY, delta);
-                graphics.scissorStack = tmp;
+                graphics.withFreshScissorStack(() -> menu.render(graphics, mouseX, mouseY, delta));
             }
         } else {
             this.childMenu = null;

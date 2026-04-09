@@ -120,7 +120,7 @@ public class TimeFavoriteEntry extends FavoriteEntry {
     
     private Time nextTime() {
         ClientLevel level = Minecraft.getInstance().level;
-        long dayTime = level.getDayTime();
+        long dayTime = level.getGameTime() % 24000L;
         if (dayTime <= 1000) {
             return Time.MORN;
         } else if (dayTime <= 6000) {

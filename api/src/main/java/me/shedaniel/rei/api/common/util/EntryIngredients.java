@@ -33,6 +33,8 @@ import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.impl.common.InternalLogger;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
@@ -41,6 +43,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplayContext;
@@ -67,6 +70,10 @@ public final class EntryIngredients {
     
     public static EntryIngredient of(ItemStack stack) {
         return EntryIngredient.of(EntryStacks.of(stack));
+    }
+
+    public static EntryIngredient of(ItemStackTemplate stack) {
+        return EntryIngredient.of(EntryStacks.of(stack.create()));
     }
     
     public static EntryIngredient of(Fluid fluid) {
@@ -229,20 +236,33 @@ public final class EntryIngredients {
                 }
                 yield builder.build();
             }
-            // TODO: Bad idea
-            case SlotDisplay.AnyFuel s -> EntryIngredient.empty();
-            default -> {
-                RegistryAccess access = Internals.getRegistryAccess();
-                try {
-                    yield ofItemStacks(slot.resolveForStacks(new ContextMap.Builder()
-                            .withParameter(SlotDisplayContext.REGISTRIES, access)
-                            .create(SlotDisplayContext.CONTEXT)));
-                } catch (Exception e) {
-                    InternalLogger.getInstance().warn("Failed to resolve slot display: " + slot, e);
-                    yield EntryIngredient.empty();
-                }
-            }
+            case SlotDisplay.AnyFuel s -> resolveSlotDisplay(s);
+            default -> resolveSlotDisplay(slot);
         };
+    }
+
+    public static ContextMap slotDisplayContext() {
+        Minecraft client = Minecraft.getInstance();
+        if (client.level != null) {
+            return SlotDisplayContext.fromLevel(client.level);
+        }
+
+        ContextMap.Builder builder = new ContextMap.Builder()
+                .withParameter(SlotDisplayContext.REGISTRIES, Internals.getRegistryAccess());
+        ClientPacketListener connection = client.getConnection();
+        if (connection != null) {
+            builder.withParameter(SlotDisplayContext.FUEL_VALUES, connection.fuelValues());
+        }
+        return builder.create(SlotDisplayContext.CONTEXT);
+    }
+
+    private static EntryIngredient resolveSlotDisplay(SlotDisplay slot) {
+        try {
+            return ofItemStacks(slot.resolveForStacks(slotDisplayContext()));
+        } catch (Exception e) {
+            InternalLogger.getInstance().warn("Failed to resolve slot display: " + slot, e);
+            return EntryIngredient.empty();
+        }
     }
     
     public static List<EntryIngredient> ofSlotDisplays(Iterable<SlotDisplay> slots) {

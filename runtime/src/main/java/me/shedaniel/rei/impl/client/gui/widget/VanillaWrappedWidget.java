@@ -49,7 +49,7 @@ public class VanillaWrappedWidget extends Widget {
         } else {
             graphics.pose().pushMatrix();
             if (element instanceof Renderable widget)
-                widget.render(graphics, mouseX, mouseY, delta);
+                widget.extractRenderState(graphics, mouseX, mouseY, delta);
             graphics.pose().popMatrix();
         }
     }

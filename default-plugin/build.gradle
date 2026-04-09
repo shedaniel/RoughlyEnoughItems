@@ -1,13 +1,15 @@
-archivesBaseName = rootProject.name + "-" + project.name
+base {
+    archivesName = rootProject.name + "-" + project.name
+}
 
 loom {
     accessWidenerPath = gradle.rootProject.project("fabric").file("src/main/resources/roughlyenoughitems.accessWidener")
 }
 
 dependencies {
-    modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
-    modApi("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
-    modApi("dev.architectury:architectury:${architectury_version}")
+    compileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
+    api("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
+    api("dev.architectury:architectury:${architectury_version}")
     compileOnly(project(path: ":api", configuration: "namedElements"))
 }
 

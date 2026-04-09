@@ -29,7 +29,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.shedaniel.autoconfig.AutoConfig;
-import me.shedaniel.autoconfig.gui.ConfigScreenProvider;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Jankson;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonNull;
@@ -287,21 +286,6 @@ public class ConfigManagerImpl implements ConfigManager {
     @SuppressWarnings("deprecation")
     @Override
     public Screen getConfigScreen(Screen parent) {
-        if (true) return new REIConfigScreen(parent);
-        
-        try {
-            ConfigScreenProvider<ConfigObjectImpl> provider = (ConfigScreenProvider<ConfigObjectImpl>) AutoConfig.getConfigScreen(ConfigObjectImpl.class, parent);
-            provider.setBuildFunction(builder -> {
-                ConfigAddonRegistryImpl addonRegistry = (ConfigAddonRegistryImpl) ConfigAddonRegistry.getInstance();
-                if (!addonRegistry.getAddons().isEmpty()) {
-                    builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.basics")).getEntries().add(0, new ConfigAddonsEntry(220));
-                }
-                return null;
-            });
-            return provider.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return new REIConfigScreen(parent);
     }
 }

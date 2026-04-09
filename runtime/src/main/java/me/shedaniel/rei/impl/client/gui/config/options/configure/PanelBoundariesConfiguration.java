@@ -55,7 +55,7 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
         Minecraft.getInstance().setScreen(new BoundariesScreen(access, option, onClose));
     }
     
-    private static class BoundariesScreen extends Screen {
+    private static class BoundariesScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
         private final ConfigAccess access;
         private final CompositeOption<PanelBoundary> option;
         private final Runnable onClose;

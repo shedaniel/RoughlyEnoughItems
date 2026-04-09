@@ -44,8 +44,9 @@ public class REITestCommonPlugin implements REICommonPlugin {
                             .executes(context -> {
                                 try {
                                     Class<?> displayClass = Class.forName("me.shedaniel.rei.plugin.common.displays.DefaultPathingDisplay");
+                                    Item item = context.getArgument("item", ItemInput.class).item().value();
                                     Display display = (Display) displayClass.getDeclaredConstructor(EntryStack.class, EntryStack.class)
-                                            .newInstance(EntryStacks.of(context.getArgument("item", ItemInput.class).getItem()), EntryStacks.of(context.getArgument("item", ItemInput.class).getItem()));
+                                            .newInstance(EntryStacks.of(item), EntryStacks.of(item));
                                     ServerDisplayRegistry.getInstance().add(display);
                                 } catch (Throwable throwable) {
                                     throwable.printStackTrace();

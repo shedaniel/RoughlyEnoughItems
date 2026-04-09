@@ -47,7 +47,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
-public class CreditsScreen extends Screen {
+public class CreditsScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private Screen parent;
     private AbstractButton buttonDone;
     private CreditsEntryListWidget entryListWidget;
