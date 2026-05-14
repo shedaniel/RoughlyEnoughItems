@@ -104,6 +104,8 @@ public interface AllREIConfigOptions {
             .keybind();
     CompositeOption<ModifierKeyCode> BACK_KEYBIND = make("input.back", i -> i.basics.keyBindings.previousScreenKeybind.copy(), (i, v) -> i.basics.keyBindings.previousScreenKeybind = v)
             .keybind();
+    CompositeOption<ModifierKeyCode> COLLAPSE_KEYBIND = make("input.collapse", i -> i.basics.keyBindings.collapseGroupKeybind.copy(), (i, v) -> i.basics.keyBindings.collapseGroupKeybind = v)
+            .keybind();
     // TODO: NATIVE KEYBINDS
     CompositeOption<Boolean> USE_NATIVE_KEYBINDS = make("input.use_native_keybinds", i -> i.basics.keyBindings.useNativeKeybinds, (i, v) -> i.basics.keyBindings.useNativeKeybinds = v)
             .enabledDisabled();

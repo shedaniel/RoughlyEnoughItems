@@ -313,6 +313,8 @@ public interface ConfigObject {
     ModifierKeyCode getExportImageKeybind();
     
     ModifierKeyCode getPreviousScreenKeybind();
+
+    ModifierKeyCode getCollapseGroupKeybind();
     
     double getEntrySize();
     

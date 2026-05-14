@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingRectangle;
@@ -30,6 +31,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -40,7 +42,6 @@ import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
@@ -160,7 +161,11 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
     
     @Override
     protected boolean doAction(double mouseX, double mouseY, int button) {
-        if (collapsedStack != null && button == 0 && Screen.hasAltDown()) {
+        if (collapsedStack != null && button == 0 &&
+                InputConstants.isKeyDown(
+                        Minecraft.getInstance().getWindow().getWindow(),
+                        ConfigObject.getInstance().getCollapseGroupKeybind().getKeyCode().getValue()
+                )) {
             parent.updatedCount++;
             collapsedStack.setExpanded(!collapsedStack.isExpanded());
             parent.updateStacks();
@@ -209,7 +214,7 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
             if (!this.collapsedStack.isExpanded()) {
                 Tooltip tooltip = Tooltip.create(context.getPoint(), Component.translatable("text.rei.collapsed.entry", collapsedStack.getName()));
                 tooltip.add(new CollapsedEntriesTooltip(collapsedStack));
-                tooltip.add(Component.translatable(Minecraft.ON_OSX ? "text.rei.collapsed.entry.hint.expand.macos" : "text.rei.collapsed.entry.hint.expand", collapsedStack.getName(), collapsedStack.getIngredient().size())
+                tooltip.add(Component.translatable(Minecraft.ON_OSX ? "text.rei.collapsed.entry.hint.expand.macos" : "text.rei.collapsed.entry.hint.expand", ConfigObject.getInstance().getCollapseGroupKeybind().getLocalizedName(), collapsedStack.getName(), collapsedStack.getIngredient().size())
                         .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
                 ClientHelper.getInstance().appendModIdToTooltips(tooltip, collapsedStack.getModId());
                 return tooltip;
@@ -218,7 +223,7 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
         
         Tooltip tooltip = super.getCurrentTooltip(context);
         if (tooltip != null && this.collapsedStack != null) {
-            tooltip.entries().add(Mth.clamp(tooltip.entries().size() - 1, 0, tooltip.entries().size() - 1), Tooltip.entry(Component.translatable(Minecraft.ON_OSX ? "text.rei.collapsed.entry.hint.collapse.macos" : "text.rei.collapsed.entry.hint.collapse", collapsedStack.getName(), collapsedStack.getIngredient().size())
+            tooltip.entries().add(Mth.clamp(tooltip.entries().size() - 1, 0, tooltip.entries().size() - 1), Tooltip.entry(Component.translatable(Minecraft.ON_OSX ? "text.rei.collapsed.entry.hint.collapse.macos" : "text.rei.collapsed.entry.hint.collapse", ConfigObject.getInstance().getCollapseGroupKeybind().getLocalizedName(), collapsedStack.getName(), collapsedStack.getIngredient().size())
                     .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)));
         }
         return tooltip;

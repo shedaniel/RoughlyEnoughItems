@@ -51,7 +51,8 @@ public interface AllREIConfigGroups {
             .add(COPY_RECIPE_ID_KEYBIND)
             .add(FAVORITE_KEYBIND)
             /*.add(EXPORT_IMAGE_KEYBIND)*/
-            .add(BACK_KEYBIND);
+            .add(BACK_KEYBIND)
+            .add(COLLAPSE_KEYBIND);
     OptionGroup INPUT_ADVANCED = make("input.advanced")
             .add(USE_NATIVE_KEYBINDS);
     OptionGroup LAYOUT_WIDGETS = make("layout.widgets")
