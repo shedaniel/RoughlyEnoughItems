@@ -378,6 +378,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     public ModifierKeyCode getPreviousScreenKeybind() {
         return basics.keyBindings.previousScreenKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.previousScreenKeybind;
     }
+
+    @Override
+    public ModifierKeyCode getCollapseGroupKeybind() {
+        return basics.keyBindings.collapseGroupKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.collapseGroupKeybind;
+    }
     
     @Override
     public double getEntrySize() {
@@ -613,6 +618,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         public ModifierKeyCode favoriteKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_A), Modifier.none());
         public ModifierKeyCode exportImageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_F8), Modifier.none());
         public ModifierKeyCode previousScreenKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_BACKSPACE), Modifier.none());
+        public ModifierKeyCode collapseGroupKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_LALT), Modifier.none());
     }
     
     public static class Appearance {

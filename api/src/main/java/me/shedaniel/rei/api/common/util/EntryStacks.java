@@ -184,7 +184,7 @@ public final class EntryStacks {
      *
      * @param stack the stack to hash code
      * @param <T>   the type of the stack
-     * @return the hash code of the {@link ComparisonContext#EXACT} context
+     * @return the hash code of ofCondensedEntrythe {@link ComparisonContext#EXACT} context
      * @see #hash(EntryStack, ComparisonContext)
      */
     public static <T> long hashExact(EntryStack<T> stack) {
