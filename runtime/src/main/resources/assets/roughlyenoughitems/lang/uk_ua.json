@@ -503,7 +503,7 @@
   "config.roughlyenoughitems.filteredEntries.hide": "Сховати вибране",
   "config.roughlyenoughitems.filteredEntries.show": "Показати вибране",
   "rule.roughlyenoughitems.filtering.manual": "Ручне фільтрування",
-  "rule.roughlyenoughitems.filtering.manual.subtitle": "Виберіть вручну, що приховати і що показати.",
+  "rule.roughlyenoughitems.filtering.manual.subtitle": "Виберіть уручну, що приховати і показати.",
   "rule.roughlyenoughitems.filtering.search": "Фільтрація пошуку",
   "rule.roughlyenoughitems.filtering.search.subtitle": "Фільтр використовується в пошуку.",
   "rule.roughlyenoughitems.filtering.search.filter": "Фільтр пошуку:\n",
