@@ -54,6 +54,7 @@ public interface TextField {
     
     void setNotEditableColor(int notEditableColor);
     
+    @Unique
     boolean isFocused();
     
     void setFocused(boolean focused);
