@@ -47,6 +47,6 @@ public abstract class REIScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         super.extractRenderState(graphics, mouseX, mouseY, delta);
-        render(graphics instanceof GuiGraphics guiGraphics ? guiGraphics : new GuiGraphics(graphics), mouseX, mouseY, delta);
+        render(GuiGraphics.of(graphics), mouseX, mouseY, delta);
     }
 }

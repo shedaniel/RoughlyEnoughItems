@@ -38,6 +38,14 @@ public class GuiGraphics extends GuiGraphicsExtractor {
                 readIntField(MOUSE_X_FIELD, extractor), readIntField(MOUSE_Y_FIELD, extractor));
     }
 
+    /**
+     * Returns {@code graphics} as a {@link GuiGraphics} if it already is one, otherwise wraps it in a
+     * new compatibility instance. Used at Minecraft boundaries that hand us a {@link GuiGraphicsExtractor}.
+     */
+    public static GuiGraphics of(GuiGraphicsExtractor graphics) {
+        return graphics instanceof GuiGraphics existing ? existing : new GuiGraphics(graphics);
+    }
+
     public void drawString(Font font, FormattedCharSequence text, int x, int y, int color) {
         text(font, text, x, y, color);
     }

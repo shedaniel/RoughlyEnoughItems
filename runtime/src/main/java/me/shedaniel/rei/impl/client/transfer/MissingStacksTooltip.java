@@ -68,7 +68,7 @@ public class MissingStacksTooltip implements ClientTooltipComponent, TooltipComp
     
     @Override
     public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
-        GuiGraphics guiGraphics = graphics instanceof GuiGraphics existing ? existing : new GuiGraphics(graphics);
+        GuiGraphics guiGraphics = GuiGraphics.of(graphics);
         int entrySize = EntryListWidget.entrySize();
         int w = Math.max(1, MAX_WIDTH / entrySize);
         int i = 0;
@@ -92,7 +92,7 @@ public class MissingStacksTooltip implements ClientTooltipComponent, TooltipComp
     
     @Override
     public void extractText(GuiGraphicsExtractor graphics, Font font, int x, int y) {
-        GuiGraphics guiGraphics = graphics instanceof GuiGraphics existing ? existing : new GuiGraphics(graphics);
+        GuiGraphics guiGraphics = GuiGraphics.of(graphics);
         guiGraphics.drawString(font, Component.translatable("text.rei.missing").withStyle(ChatFormatting.GRAY), x, y + 2, -1);
     }
 }

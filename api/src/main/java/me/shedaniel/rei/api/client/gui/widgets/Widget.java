@@ -112,7 +112,7 @@ public abstract class Widget extends AbstractContainerEventHandler implements Re
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        render(graphics instanceof GuiGraphics guiGraphics ? guiGraphics : new GuiGraphics(graphics), mouseX, mouseY, delta);
+        render(GuiGraphics.of(graphics), mouseX, mouseY, delta);
     }
     
     @ApiStatus.Experimental

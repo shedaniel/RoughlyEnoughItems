@@ -270,7 +270,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        render(graphics instanceof GuiGraphics guiGraphics ? guiGraphics : new GuiGraphics(graphics), mouseX, mouseY, delta);
+        render(GuiGraphics.of(graphics), mouseX, mouseY, delta);
     }
     
     protected void renderScrollBar(GuiGraphics graphics, int maxScroll, int scrollbarPositionMinX, int scrollbarPositionMaxX) {

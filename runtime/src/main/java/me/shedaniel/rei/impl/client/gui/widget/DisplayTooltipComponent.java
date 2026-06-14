@@ -90,7 +90,7 @@ public class DisplayTooltipComponent implements TooltipComponent, ClientTooltipC
     
     @Override
     public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
-        GuiGraphics guiGraphics = graphics instanceof GuiGraphics existing ? existing : new GuiGraphics(graphics);
+        GuiGraphics guiGraphics = GuiGraphics.of(graphics);
         guiGraphics.pose().pushMatrix();
         guiGraphics.pose().translate(x + 2, y + 2);
         guiGraphics.pose().translate(-this.bounds.getX(), -this.bounds.getY());

@@ -81,7 +81,7 @@ public class CopyRecipeIdentifierToast implements Toast {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, Font font, long time) {
-        render(graphics instanceof GuiGraphics guiGraphics ? guiGraphics : new GuiGraphics(graphics), font, time);
+        render(GuiGraphics.of(graphics), font, time);
     }
     
     @Override

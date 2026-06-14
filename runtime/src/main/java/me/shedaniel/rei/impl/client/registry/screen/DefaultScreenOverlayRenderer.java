@@ -87,7 +87,7 @@ public enum DefaultScreenOverlayRenderer implements OverlayRendererProvider {
             rendered[0] = 1;
             resetFocused(screen);
             if (!(screen instanceof DisplayScreen)) {
-                sink.render(graphics instanceof GuiGraphics guiGraphics ? guiGraphics : new GuiGraphics(graphics), mouseX, mouseY, delta);
+                sink.render(GuiGraphics.of(graphics), mouseX, mouseY, delta);
             }
             resetFocused(screen);
         };
@@ -105,11 +105,11 @@ public enum DefaultScreenOverlayRenderer implements OverlayRendererProvider {
             }
             resetFocused(screen);
             if (rendered[0] == 0 && !(screen instanceof DisplayScreen) && (!(screen instanceof AbstractContainerScreen) || rendered[0] < 2)) {
-                sink.render(graphics instanceof GuiGraphics guiGraphics ? guiGraphics : new GuiGraphics(graphics), mouseX, mouseY, delta);
+                sink.render(GuiGraphics.of(graphics), mouseX, mouseY, delta);
             }
             rendered[0] = 1;
             if (rendered[0] == 1) {
-                sink.lateRender(graphics instanceof GuiGraphics guiGraphics ? guiGraphics : new GuiGraphics(graphics), mouseX, mouseY, delta);
+                sink.lateRender(GuiGraphics.of(graphics), mouseX, mouseY, delta);
             }
             resetFocused(screen);
         };

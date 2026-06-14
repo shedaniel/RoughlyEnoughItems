@@ -403,7 +403,7 @@ public abstract class AbstractDisplayViewingScreen extends REIScreen implements 
             
             @Override
             public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
-                GuiGraphics guiGraphics = graphics instanceof GuiGraphics existing ? existing : new GuiGraphics(graphics);
+                GuiGraphics guiGraphics = GuiGraphics.of(graphics);
                 int entrySize = EntryListWidget.entrySize();
                 int w = Math.max(1, MAX_WIDTH / entrySize);
                 int i = 0;
@@ -426,7 +426,7 @@ public abstract class AbstractDisplayViewingScreen extends REIScreen implements 
             
             @Override
             public void extractText(GuiGraphicsExtractor graphics, Font font, int x, int y) {
-                GuiGraphics guiGraphics = graphics instanceof GuiGraphics existing ? existing : new GuiGraphics(graphics);
+                GuiGraphics guiGraphics = GuiGraphics.of(graphics);
                 guiGraphics.drawString(font, Component.translatable("text.rei.accepts").withStyle(ChatFormatting.GRAY), x, y + 2, -1);
                 
                 if (widget.tagMatch != null) {

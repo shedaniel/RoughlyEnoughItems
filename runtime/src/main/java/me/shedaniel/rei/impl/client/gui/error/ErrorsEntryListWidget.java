@@ -98,7 +98,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
 
         @Override
         public void extractRenderState(GuiGraphicsExtractor graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            render(graphics instanceof GuiGraphics guiGraphics ? guiGraphics : new GuiGraphics(graphics), index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+            render(GuiGraphics.of(graphics), index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         }
 
         @Override
