@@ -80,7 +80,8 @@ public interface AllREIConfigGroups {
             .add(CUSTOMIZED_FILTERING);
     OptionGroup FILTERING_ADVANCED = make("filtering.advanced")
             .add(FILTER_DISPLAYS)
-            .add(MERGE_DISPLAYS);
+            .add(MERGE_DISPLAYS)
+            .add(FORCE_LOCAL_RECIPES);
     OptionGroup LIST_ENTRIES = make("list.entries")
             .add(DISPLAY_MODE)
             .add(ORDERING)

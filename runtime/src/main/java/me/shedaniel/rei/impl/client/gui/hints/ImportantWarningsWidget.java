@@ -26,6 +26,8 @@ package me.shedaniel.rei.impl.client.gui.hints;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.config.ForceLocalRecipesMode;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -63,7 +65,7 @@ public class ImportantWarningsWidget extends WidgetWithBounds {
                 prevId = newId;
                 dirty = true;
             }
-            dirty = dirty && !ClientHelper.getInstance().canUseMovePackets();
+            dirty = dirty && !ClientHelper.getInstance().canUseMovePackets() && ConfigObject.getInstance().getForceLocalRecipes() == ForceLocalRecipesMode.NEVER;
         }
         
         this.visible = dirty;
