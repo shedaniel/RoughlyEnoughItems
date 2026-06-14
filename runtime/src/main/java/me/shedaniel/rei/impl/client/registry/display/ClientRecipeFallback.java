@@ -56,7 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * server that does not synchronise recipe data (see {@link ForceLocalRecipesMode}).
  *
  * <p>This is purely client-side and additive: locally-loaded displays are injected
- * into {@link DisplayRegistryImpl} during reload with the {@link DisplayRegistryImpl#CLIENT_FALLBACK}
+ * into {@link DisplayRegistryImpl} during reload with a {@link DisplayRegistryImpl.ClientFallbackOrigin}
  * origin, deduplicated against any recipe-book entries the server did send, and removed
  * again if the server later pushes its own REI display sync.
  */
@@ -118,9 +118,29 @@ public final class ClientRecipeFallback {
         serverProvidedIds.clear();
     }
 
-    /** Records recipe-book ids the server advertised, so the fallback can dedup against them. */
+    /**
+     * Records recipe-book ids the server advertised, so the fallback can dedup against them.
+     * If the fallback already injected its displays (e.g. the player unlocked a recipe
+     * mid-session), the now-overlapping local displays are removed so the server's win and we
+     * don't render duplicates.
+     */
     public static void onServerRecipeBookAdd(List<RecipeDisplayId> ids) {
+        if (ids.isEmpty()) {
+            return;
+        }
+        boolean hadInjected = cachedEntriesForCurrentConnection() != null;
         serverProvidedIds.addAll(ids);
+        if (hadInjected && shouldInject()) {
+            Set<RecipeDisplayId> newlyAdded = Set.copyOf(ids);
+            try {
+                DisplayRegistry registry = DisplayRegistry.getInstance();
+                if (registry instanceof DisplayRegistryImpl impl) {
+                    impl.addJob(() -> impl.removeFallbackRecipes(newlyAdded));
+                }
+            } catch (Throwable throwable) {
+                InternalLogger.getInstance().error("[Local Recipes] Failed to remove overlapping fallback displays after server recipe add", throwable);
+            }
+        }
     }
 
     public static void onServerRecipeBookRemove(Set<RecipeDisplayId> ids) {
