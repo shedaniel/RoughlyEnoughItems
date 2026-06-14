@@ -1,5 +1,3 @@
-import net.fabricmc.loom.task.RemapJarTask
-
 base {
     archivesName = rootProject.name + "-" + project.name
 }
@@ -18,16 +16,12 @@ architectury {
     common(platforms.split(","))
 }
 
-remapJar {
-    archiveClassifier = "raw"
-}
-
-task fakeJar(type: Jar, dependsOn: remapJar) {
-    from remapJar.archiveFile.map { zipTree(it) }
+task fakeJar(type: Jar, dependsOn: jar) {
+    from jar.archiveFile.map { zipTree(it) }
     from(rootProject.file("fake/fabric.mod.json")) {
         into ""
     }
-    archiveClassifier = null
+    archiveClassifier = "fake"
 }
 
 task fakeForgeJar(type: Jar, dependsOn: jar) {
@@ -42,16 +36,6 @@ task fakeForgeJar(type: Jar, dependsOn: jar) {
         }
     }
     archiveClassifier = "fake-forge"
-}
-
-artifacts {
-    apiElements(fakeJar)
-    runtimeElements(fakeJar)
-}
-
-afterEvaluate {
-    configurations.apiElements.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(tasks.remapJar) }
-    configurations.runtimeElements.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(tasks.remapJar) }
 }
 
 publishing {

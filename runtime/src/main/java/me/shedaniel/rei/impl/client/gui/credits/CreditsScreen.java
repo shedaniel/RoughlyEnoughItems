@@ -133,7 +133,7 @@ public class CreditsScreen extends me.shedaniel.rei.impl.client.gui.screen.REISc
     
     private static void fillTranslators(Exception[] exception, List<Tuple<String, List<TranslatorEntry>>> translators) {
         try {
-            Class.forName("me.shedaniel.rei.impl.client.gui.credits.%s.CreditsScreenImpl".formatted(Platform.isForge() ? "forge" : "fabric"))
+            Class.forName("me.shedaniel.rei.impl.client.gui.credits.%s.CreditsScreenImpl".formatted(Platform.isNeoForge() ? "forge" : "fabric"))
                     .getDeclaredMethod("fillTranslators", Exception[].class, List.class)
                     .invoke(null, exception, translators);
         } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {

@@ -28,7 +28,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
-import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
@@ -104,11 +103,9 @@ public record DisplaySyncPacket(SyncType syncType, Collection<Display> displays,
     @Environment(EnvType.CLIENT)
     public void handle(NetworkManager.PacketContext context) {
         DisplayRegistryImpl registry = (DisplayRegistryImpl) DisplayRegistry.getInstance();
-        RoughlyEnoughItemsCoreClient.markReceivedServerDisplaySync();
         if (syncType() == SyncType.SET) {
             InternalLogger.getInstance().info("[REI Server Display Sync] Received server's request to set %d recipes.", displays().size());
             registry.addJob(() -> {
-                registry.removeClientFallbackRecipes();
                 registry.removeSyncedRecipes();
                 for (Display display : displays()) {
                     registry.add(display, DisplayRegistryImpl.SYNCED);
@@ -117,7 +114,6 @@ public record DisplaySyncPacket(SyncType syncType, Collection<Display> displays,
         } else if (syncType() == SyncType.APPEND) {
             InternalLogger.getInstance().info("[REI Server Display Sync] Received server's request to append %d recipes.", displays().size());
             registry.addJob(() -> {
-                registry.removeClientFallbackRecipes();
                 for (Display display : displays()) {
                     registry.add(display, DisplayRegistryImpl.SYNCED);
                 }

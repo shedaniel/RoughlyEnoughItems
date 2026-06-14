@@ -117,10 +117,10 @@
     }
   },
   "depends": {
-    "fabricloader": ">=0.18.5",
+    "fabricloader": ">=0.19.0",
     "minecraft": "~26.1",
     "java": ">=25",
     "fabric-api": "*",
-    "architectury": ">=19.0.1"
+    "architectury": ">=20.0.0"
   }
 }

@@ -30,7 +30,6 @@ import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
-import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
@@ -52,31 +51,23 @@ import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
 import me.shedaniel.rei.impl.client.registry.display.DisplayCache;
 import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
-import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.context.ContextMap;
-import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
-import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class ViewsImpl implements Views {
     private static final ThreadLocal<ViewSearchBuilder> BUILDER = new ThreadLocal<>();
-    private static final Map<String, Long> MISSING_RECIPE_LOGS = new ConcurrentHashMap<>();
-    private static final long MISSING_RECIPE_LOG_COOLDOWN_MS = 2000L;
     
     @Nullable
     @Override
@@ -114,9 +105,6 @@ public class ViewsImpl implements Views {
         List<EntryStack<?>> recipesForStacksWildcard = CollectionUtils.flatMap(recipesForStacks, wildcardFunction);
         List<EntryStack<?>> usagesForStacksWildcard = CollectionUtils.flatMap(usagesForStacks, wildcardFunction);
         DisplayRegistry displayRegistry = DisplayRegistry.getInstance();
-        if (!recipesForStacks.isEmpty() && !RoughlyEnoughItemsCoreClient.hasReceivedServerDisplaySync()) {
-            RoughlyEnoughItemsCoreClient.ensureClientRecipeFallbackSyncedForSearch();
-        }
         DisplayCache displayCache = ((DisplayRegistryImpl) displayRegistry).cache();
         
         Map<DisplayCategory<?>, Set<Display>> result = Maps.newHashMap();
@@ -135,7 +123,7 @@ public class ViewsImpl implements Views {
             for (Display display : displays) {
                 if (processingVisibilityHandlers && !displayRegistry.isDisplayVisible(configuration.getCategory(), display)) continue;
                 if (!recipesForStacks.isEmpty()) {
-                    if (isRecipesFor(displayRegistry, displayCache, recipesForStacks, display)) {
+                    if (isRecipesFor(displayCache, recipesForStacks, display)) {
                         set.add(display);
                         continue;
                     }
@@ -185,7 +173,7 @@ public class ViewsImpl implements Views {
                 for (Display display : displays) {
                     if (processingVisibilityHandlers && !displayRegistry.isDisplayVisible(configuration.getCategory(), display)) continue;
                     if (!recipesForStacksWildcard.isEmpty()) {
-                        if (isRecipesFor(displayRegistry, displayCache, recipesForStacksWildcard, display)) {
+                        if (isRecipesFor(displayCache, recipesForStacksWildcard, display)) {
                             set.add(display);
                             continue;
                         }
@@ -230,10 +218,6 @@ public class ViewsImpl implements Views {
         sortingStopwatch.start();
         Map<DisplayCategory<?>, List<DisplaySpec>> sorted = sortDisplays(merged);
         sortingStopwatch.stop();
-
-        if (!recipesForStacks.isEmpty() && CollectionUtils.allMatch(sorted.values(), List::isEmpty)) {
-            logMissingRecipeDiagnostics(builder, displayRegistry, displayCache, recipesForStacks);
-        }
         
         String message = String.format("Built Recipe View in %s for %d categories, %d recipes for, %d usages for and %d live recipe generators.",
                 stopwatch.stop(), categories.size(), recipesForStacks.size(), usagesForStacks.size(), generatorsCount);
@@ -284,29 +268,14 @@ public class ViewsImpl implements Views {
         return map.get(key);
     }
     
-    public static boolean isRecipesFor(DisplayRegistry displayRegistry, @Nullable DisplayCache displayCache, List<EntryStack<?>> stacks, Display display) {
+    public static boolean isRecipesFor(@Nullable DisplayCache displayCache, List<EntryStack<?>> stacks, Display display) {
         if (displayCache != null && displayCache.isCached(display)) {
             for (EntryStack<?> recipesFor : stacks) {
-                if (displayCache.getDisplaysByOutput(recipesFor).contains(display)) {
-                    return true;
-                }
+                return displayCache.getDisplaysByOutput(recipesFor).contains(display);
             }
         }
-
-        if (checkUsages(stacks, display, display.getOutputEntries())) {
-            return true;
-        }
-
-        Object origin = displayRegistry.getDisplayOrigin(display);
-        if (origin instanceof DisplayRegistryImpl.ClientFallbackOrigin fallbackOrigin) {
-            return checkFallbackRecipeOutputs(stacks, fallbackOrigin.entry());
-        }
-
-        return false;
-    }
-
-    public static boolean isRecipesFor(@Nullable DisplayCache displayCache, List<EntryStack<?>> stacks, Display display) {
-        return isRecipesFor(DisplayRegistry.getInstance(), displayCache, stacks, display);
+        
+        return checkUsages(stacks, display, display.getOutputEntries());
     }
     
     public static boolean isUsagesFor(@Nullable DisplayCache displayCache, List<EntryStack<?>> stacks, Display display) {
@@ -331,113 +300,6 @@ public class ViewsImpl implements Views {
         }
         
         return false;
-    }
-
-    private static boolean checkFallbackRecipeOutputs(List<EntryStack<?>> stacks, RecipeDisplayEntry entry) {
-        try {
-            ContextMap context = EntryIngredients.slotDisplayContext();
-            for (EntryStack<?> result : EntryIngredients.ofItemStacks(entry.resultItems(context))) {
-                for (EntryStack<?> stack : stacks) {
-                    if (EntryStacks.equalsFuzzy(result, stack)) {
-                        return true;
-                    }
-                }
-            }
-        } catch (Throwable throwable) {
-            InternalLogger.getInstance().debug("Failed to match fallback recipe output for %s", entry.id(), throwable);
-        }
-
-        return false;
-    }
-
-    private static void logMissingRecipeDiagnostics(ViewSearchBuilder builder, DisplayRegistry displayRegistry, @Nullable DisplayCache displayCache, List<EntryStack<?>> stacks) {
-        String query = stacks.stream()
-                .map(ViewsImpl::describeStack)
-                .collect(Collectors.joining(", "));
-        long now = System.currentTimeMillis();
-        Long previous = MISSING_RECIPE_LOGS.put(query, now);
-        if (previous != null && now - previous < MISSING_RECIPE_LOG_COOLDOWN_MS) {
-            return;
-        }
-
-        boolean processVisibility = builder.isProcessingVisibilityHandlers();
-        Set<CategoryIdentifier<?>> filteringCategories = builder.getFilteringCategories();
-        int totalDisplays = 0;
-        int visibleDisplays = 0;
-        int matchedDisplayOutputs = 0;
-        int matchedFallbackOutputs = 0;
-        int hiddenMatches = 0;
-        int cacheMismatches = 0;
-        int fallbackOutputMismatches = 0;
-        List<String> examples = new ArrayList<>();
-
-        for (CategoryRegistry.CategoryConfiguration<?> configuration : CategoryRegistry.getInstance()) {
-            CategoryIdentifier<?> categoryId = configuration.getCategoryIdentifier();
-            if (!filteringCategories.isEmpty() && !filteringCategories.contains(categoryId)) continue;
-            List<Display> displays = displayRegistry.get((CategoryIdentifier<Display>) categoryId);
-            for (Display display : displays) {
-                totalDisplays++;
-                boolean visible = !processVisibility || displayRegistry.isDisplayVisible(configuration.getCategory(), display);
-                if (visible) {
-                    visibleDisplays++;
-                }
-
-                boolean directMatch = checkUsages(stacks, display, display.getOutputEntries());
-                if (directMatch) {
-                    matchedDisplayOutputs++;
-                    if (!visible) {
-                        hiddenMatches++;
-                    }
-                    if (displayCache != null && displayCache.isCached(display) && !isCachedForAnyOutput(displayCache, stacks, display)) {
-                        cacheMismatches++;
-                    }
-                }
-
-                Object origin = displayRegistry.getDisplayOrigin(display);
-                if (origin instanceof DisplayRegistryImpl.ClientFallbackOrigin fallbackOrigin) {
-                    boolean fallbackMatch = checkFallbackRecipeOutputs(stacks, fallbackOrigin.entry());
-                    if (fallbackMatch) {
-                        matchedFallbackOutputs++;
-                        if (!directMatch) {
-                            fallbackOutputMismatches++;
-                            if (examples.size() < 5) {
-                                examples.add("fallback entry " + fallbackOrigin.entry().id()
-                                        + " -> display " + display.getClass().getName()
-                                        + " in " + display.getCategoryIdentifier()
-                                        + " resolved outputs do not match display outputs");
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        InternalLogger.getInstance().warn("Recipe lookup for [%s] produced 0 categories. displays=%d visible=%d matchedOutputs=%d matchedFallbackOutputs=%d hiddenMatches=%d cacheMismatches=%d fallbackOutputMismatches=%d filteringCategories=%s clientFallbackPresent=%s clientFallbackState=%s",
-                query, totalDisplays, visibleDisplays, matchedDisplayOutputs, matchedFallbackOutputs, hiddenMatches, cacheMismatches, fallbackOutputMismatches,
-                filteringCategories.isEmpty() ? "<all>" : filteringCategories,
-                ((DisplayRegistryImpl) displayRegistry).hasClientFallbackRecipes(),
-                RoughlyEnoughItemsCoreClient.describeClientRecipeFallbackSyncState());
-        for (String example : examples) {
-            InternalLogger.getInstance().warn("Recipe lookup diagnostic: %s", example);
-        }
-        if (matchedDisplayOutputs == 0 && matchedFallbackOutputs == 0) {
-            InternalLogger.getInstance().warn("Recipe lookup diagnostic: no registered display outputs matched [%s].", query);
-        } else if (hiddenMatches > 0) {
-            InternalLogger.getInstance().warn("Recipe lookup diagnostic: matched displays exist for [%s], but %d matching displays were hidden by visibility handlers.", query, hiddenMatches);
-        }
-    }
-
-    private static boolean isCachedForAnyOutput(DisplayCache displayCache, List<EntryStack<?>> stacks, Display display) {
-        for (EntryStack<?> stack : stacks) {
-            if (displayCache.getDisplaysByOutput(stack).contains(display)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static String describeStack(EntryStack<?> stack) {
-        return stack.getIdentifier() + " (" + stack.asFormattedText().getString() + ")";
     }
     
     private static Iterable<Display> sortAutoCrafting(Iterable<Display> displays) {

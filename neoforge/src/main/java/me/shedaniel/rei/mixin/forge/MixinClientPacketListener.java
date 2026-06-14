@@ -44,7 +44,6 @@ public abstract class MixinClientPacketListener {
     @Inject(method = "handleUpdateRecipes", at = @At("HEAD"))
     private void handleUpdateRecipes(ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket, CallbackInfo ci) {
         RoughlyEnoughItemsCoreClient.PRE_UPDATE_RECIPES.invoker().accept(recipes(), registryAccess());
-        RoughlyEnoughItemsCoreClient.handleClientRecipeDefinitionsUpdated();
     }
     
     @Inject(method = "handleUpdateTags", at = @At("HEAD"))

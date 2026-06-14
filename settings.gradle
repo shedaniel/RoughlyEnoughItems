@@ -3,6 +3,7 @@ pluginManagement {
         maven { url "https://maven.fabricmc.net/" }
         maven { url "https://maven.shedaniel.me/" }
         maven { url "https://maven.architectury.dev/" }
+        maven { url "https://maven.minecraftforge.net/" }
         gradlePluginPortal()
     }
 }
@@ -12,3 +13,10 @@ if (JavaVersion.current().ordinal() + 1 < 25) {
 }
 
 rootProject.name = "RoughlyEnoughItems"
+
+include "api"
+include "default-plugin"
+include "runtime"
+include "fabric"
+//include "forge"
+include "neoforge"

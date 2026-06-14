@@ -76,7 +76,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntrySerializer<FluidStack> {
-    private static final String FLUID_AMOUNT = Platform.isForge() ? "tooltip.rei.fluid_amount.forge" : "tooltip.rei.fluid_amount";
+    private static final String FLUID_AMOUNT = Platform.isNeoForge() ? "tooltip.rei.fluid_amount.forge" : "tooltip.rei.fluid_amount";
     @Environment(EnvType.CLIENT)
     private EntryRenderer<FluidStack> renderer;
     

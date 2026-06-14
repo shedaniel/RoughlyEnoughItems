@@ -47,7 +47,6 @@ public abstract class MixinClientPacketListener {
     private void handleUpdateRecipes(ClientboundUpdateRecipesPacket packet, CallbackInfo ci) {
         // Fire before vanilla swaps the client recipe data so REI can bracket its reload like the working unpacked build.
         RoughlyEnoughItemsCoreClient.PRE_UPDATE_RECIPES.invoker().accept(recipes(), registryAccess());
-        RoughlyEnoughItemsCoreClient.handleClientRecipeDefinitionsUpdated();
     }
 
     @Inject(method = "handleUpdateTags", at = @At("HEAD"))

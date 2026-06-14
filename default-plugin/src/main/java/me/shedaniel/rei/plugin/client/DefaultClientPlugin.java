@@ -188,7 +188,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     private static Map<CreativeModeTab, Collection<ItemStack>> collectTabs() {
         try {
-            return (Map<CreativeModeTab, Collection<ItemStack>>) Class.forName(Platform.isForge() ? "me.shedaniel.rei.impl.client.forge.CreativeModeTabCollectorImpl"
+            return (Map<CreativeModeTab, Collection<ItemStack>>) Class.forName(Platform.isNeoForge() ? "me.shedaniel.rei.impl.client.forge.CreativeModeTabCollectorImpl"
                             : "me.shedaniel.rei.impl.client.fabric.CreativeModeTabCollectorImpl")
                     .getDeclaredMethod("collectTabs")
                     .invoke(null);
