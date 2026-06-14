@@ -38,6 +38,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.tags.TagLoader;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -268,7 +269,8 @@ public final class ClientRecipeFallback {
             // RecipeDisplayEntry objects (with self-consistent RecipeDisplayIds) that a dedicated
             // server would send through the recipe book.
             RecipeManager recipeManager = new RecipeManager(registryAccess);
-            recipeManager.reload(CompletableFuture::completedFuture, dataManager, Runnable::run, Runnable::run).join();
+            recipeManager.reload(new PreparableReloadListener.SharedState(dataManager), Runnable::run,
+                    CompletableFuture::completedFuture, Runnable::run).join();
             // reload() only parses recipes; the recipe-display index is built separately by
             // finalizeRecipeLoading, exactly as the server does before sending the recipe book.
             recipeManager.finalizeRecipeLoading(enabledFeatures);
