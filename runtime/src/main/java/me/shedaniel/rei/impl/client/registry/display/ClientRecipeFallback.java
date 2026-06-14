@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import me.shedaniel.rei.impl.init.PlatformAdapter;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
@@ -236,21 +237,19 @@ public final class ClientRecipeFallback {
      */
     private static List<RecipeDisplayEntry> loadLocalRecipeDisplays(RegistryAccess registryAccess, FeatureFlagSet enabledFeatures) {
         InternalLogger.getInstance().info("[Local Recipes] Loading recipes from client data packs...");
-        List<PackResources> packs = new ArrayList<>();
-        // The vanilla JAR contains all recipe JSONs under data/<namespace>/recipe/.
-        packs.add(Minecraft.getInstance().getVanillaPackResources());
-
         List<RecipeDisplayEntry> entries = new ArrayList<>();
+
+        // The SERVER_DATA pack stack the client could load locally: vanilla data plus every mod's
+        // data pack. Gathering mod data packs is loader-specific, so it goes through the platform.
+        List<PackResources> packs = PlatformAdapter.get().gatherClientDataPacks();
+
         try (MultiPackResourceManager dataManager = new MultiPackResourceManager(PackType.SERVER_DATA, packs)) {
             // Recipe ingredients reference tags from builtin registries (e.g. #minecraft:planks).
-            // The connection's registryAccess only holds dynamic registries, so load builtin tags
-            // from the data packs first.
+            // Bind those from the loaded packs so tag ingredients resolve while parsing.
             int tagCount = 0;
             for (Registry<?> registry : BuiltInRegistries.REGISTRY) {
-                if (registry instanceof WritableRegistry) {
+                if (registry instanceof @SuppressWarnings({"unchecked", "rawtypes"})WritableRegistry writable) {
                     try {
-                        @SuppressWarnings({"unchecked", "rawtypes"})
-                        WritableRegistry writable = (WritableRegistry) registry;
                         TagLoader.loadTagsForRegistry(dataManager, writable);
                         tagCount++;
                     } catch (Exception e) {
@@ -265,14 +264,15 @@ public final class ClientRecipeFallback {
                 pt.apply();
             }
 
+            // Parse the recipes directly. This produces a RecipeManager holding the same
+            // RecipeDisplayEntry objects (with self-consistent RecipeDisplayIds) that a dedicated
+            // server would send through the recipe book.
             RecipeManager recipeManager = new RecipeManager(registryAccess);
             recipeManager.reload(CompletableFuture::completedFuture, dataManager, Runnable::run, Runnable::run).join();
             // reload() only parses recipes; the recipe-display index is built separately by
             // finalizeRecipeLoading, exactly as the server does before sending the recipe book.
             recipeManager.finalizeRecipeLoading(enabledFeatures);
 
-            // RecipeManager now holds the same RecipeDisplayEntry objects (with self-consistent
-            // RecipeDisplayIds) that a dedicated server would send through the recipe book.
             recipeManager.getRecipes().forEach(holder ->
                     recipeManager.listDisplaysForRecipe(holder.id(), entries::add));
         }
