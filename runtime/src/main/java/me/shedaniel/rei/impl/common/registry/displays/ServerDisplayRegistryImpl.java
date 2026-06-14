@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.common.registry.displays;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.event.events.common.TickEvent;
@@ -33,7 +34,6 @@ import it.unimi.dsi.fastutil.ints.IntIntPair;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.display.reason.DisplayAdditionReason;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
@@ -44,7 +44,6 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.networking.DisplaySyncPacket;
 import me.shedaniel.rei.impl.common.plugins.ReloadManagerImpl;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
@@ -53,27 +52,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommonPlugin, ServerDisplayRegistryImpl.ServerDisplaysHolder> implements ServerDisplayRegistry, DisplayConsumerImpl {
     private static final Comparator<RecipeHolder<?>> RECIPE_COMPARATOR = Comparator.comparing((RecipeHolder<?> o) -> o.id().location().getNamespace()).thenComparing(o -> o.id().location().getPath());
     private final Object2LongMap<UUID> playerVersionMap = new Object2LongOpenHashMap<>();
     private int reloadVersionHash = UUID.randomUUID().hashCode();
-    @Nullable
-    private static Supplier<List<RecipeHolder<?>>> clientRecipeSupplier;
-    @Nullable
-    private static List<Display> pendingForceLocalDisplays;
-    
-    public static void setClientRecipeSupplier(@Nullable Supplier<List<RecipeHolder<?>>> supplier) {
-        clientRecipeSupplier = supplier;
-    }
-    
-    @Nullable
-    public static List<Display> consumePendingForceLocalDisplays() {
-        List<Display> displays = pendingForceLocalDisplays;
-        pendingForceLocalDisplays = null;
-        return displays;
-    }
     
     public ServerDisplayRegistryImpl() {
         super(ServerDisplaysHolder::new);
@@ -224,24 +207,6 @@ public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommon
     public void endReload() {
         InternalLogger.getInstance().debug("Found preliminary %d displays", size());
         fillRecipes();
-        
-        // If force-local recipes were loaded, store displays for client registry injection
-        // On a remote server with forceLocalRecipes, the normal DisplaySyncPacket path won't work,
-        // so we need to pass displays directly to the client DisplayRegistryImpl.
-        try {
-            if (ConfigObject.getInstance().isForceLocalRecipes()
-                    && !Minecraft.getInstance().isLocalServer()
-                    && size() > 0) {
-                List<Display> allDisplays = new ArrayList<>();
-                for (List<Display> displays : getAll().values()) {
-                    allDisplays.addAll(displays);
-                }
-                pendingForceLocalDisplays = allDisplays;
-                InternalLogger.getInstance().info("[Force Local Recipes] Stored %d displays for client registry injection", allDisplays.size());
-            }
-        } catch (Exception e) {
-            InternalLogger.getInstance().debug("[Force Local Recipes] Could not check force-local state: %s", e.getMessage());
-        }
     }
     
     private void fillRecipes() {
@@ -262,27 +227,7 @@ public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommon
     }
     
     private List<RecipeHolder<?>> getAllSortedRecipes() {
-        try {
-            var server = GameInstance.getServer();
-            if (server != null) {
-                return server.getRecipeManager().getRecipes()
-                    .parallelStream().sorted(RECIPE_COMPARATOR).toList();
-            }
-        } catch (Exception e) {
-            InternalLogger.getInstance().error("Failed to get recipes from server: %s", e.getMessage());
-        }
-        if (clientRecipeSupplier != null) {
-            try {
-                List<RecipeHolder<?>> recipes = clientRecipeSupplier.get();
-                if (!recipes.isEmpty()) {
-                    InternalLogger.getInstance().info("[Force Local Recipes] Loaded %d recipes from client-side provider", recipes.size());
-                }
-                return recipes;
-            } catch (Exception e) {
-                InternalLogger.getInstance().error("[Force Local Recipes] Failed to get client-side recipes", e);
-            }
-        }
-        return Collections.emptyList();
+        return GameInstance.getServer().getRecipeManager().getRecipes().parallelStream().sorted(RECIPE_COMPARATOR).toList();
     }
     
     public static class ServerDisplaysHolder extends DisplaysHolderImpl {

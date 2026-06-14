@@ -45,7 +45,6 @@ import me.shedaniel.rei.impl.common.plugins.ReloadManagerImpl;
 import me.shedaniel.rei.impl.common.registry.displays.AbstractDisplayRegistry;
 import me.shedaniel.rei.impl.common.registry.displays.DisplayConsumerImpl;
 import me.shedaniel.rei.impl.common.registry.displays.DisplaysHolderImpl;
-import me.shedaniel.rei.impl.common.registry.displays.ServerDisplayRegistryImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
 import net.minecraft.world.item.crafting.display.RecipeDisplayId;
@@ -56,6 +55,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin, DisplayRegistryImpl.ClientDisplaysHolder> implements DisplayRegistry, DisplayConsumerImpl, DisplayGeneratorsRegistryImpl {
     public static final Object SYNCED = new Object();
+    public static final Object CLIENT_FALLBACK = new Object();
     private final Map<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> displayGenerators = new ConcurrentHashMap<>();
     private final List<DynamicDisplayGenerator<?>> globalDisplayGenerators = new ArrayList<>();
     private final List<DisplayVisibilityPredicate> visibilityPredicates = new ArrayList<>();
@@ -157,15 +157,10 @@ public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin
     
     @Override
     public void endReload() {
-        // Inject force-local recipe displays from ServerDisplayRegistryImpl
-        List<Display> forceLocalDisplays = ServerDisplayRegistryImpl.consumePendingForceLocalDisplays();
-        if (forceLocalDisplays != null && !forceLocalDisplays.isEmpty()) {
-            InternalLogger.getInstance().info("[Force Local Recipes] Injecting %d displays into client registry", forceLocalDisplays.size());
-            for (Display display : forceLocalDisplays) {
-                super.add(display, SYNCED);
-            }
-        }
-        
+        // Synthesize recipe displays from the client's own data packs for servers that
+        // do not sync recipe data (no-op unless the local-recipes fallback is active).
+        ClientRecipeFallback.injectInto(this);
+
         InternalLogger.getInstance().debug("Found %d displays", size());
         
         for (CategoryIdentifier<?> identifier : getAll().keySet()) {
@@ -205,7 +200,32 @@ public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin
         }
         InternalLogger.getInstance().debug("Filled %d displays from vanilla server in %s", size() - lastSize, stopwatch.stop());
     }
-    
+
+    /**
+     * Fills displays from locally-loaded recipes (the client-side fallback), tagging them with
+     * the {@link #CLIENT_FALLBACK} origin so they can be removed if the server later syncs its
+     * own displays. Entries whose id the server already advertised ({@code excludeIds}) are skipped.
+     */
+    public void addFallbackRecipes(List<RecipeDisplayEntry> entries, Set<RecipeDisplayId> excludeIds) {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        int lastSize = size();
+        if (!fillers().isEmpty()) {
+            for (RecipeDisplayEntry entry : entries) {
+                if (excludeIds.contains(entry.id())) {
+                    continue;
+                }
+                try {
+                    for (Display display : tryFillDisplay(entry.display(), DisplayAdditionReason.RECIPE_MANAGER, DisplayAdditionReason.withId(entry.id()))) {
+                        add(display, CLIENT_FALLBACK);
+                    }
+                } catch (Throwable e) {
+                    InternalLogger.getInstance().error("Failed to fill local fallback display for recipe: %s [%s]", entry.display(), entry.id(), e);
+                }
+            }
+        }
+        InternalLogger.getInstance().info("[Local Recipes] Filled %d local fallback displays in %s", size() - lastSize, stopwatch.stop());
+    }
+
     public void removeRecipes(Set<RecipeDisplayId> ids) {
         List<Display> toRemove = new LinkedList<>();
         WeakHashMap<Display, Object> origins = this.holder().origins();
@@ -235,7 +255,21 @@ public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin
             this.holder().remove(display);
         }
     }
-    
+
+    public void removeFallbackRecipes() {
+        List<Display> toRemove = new LinkedList<>();
+        WeakHashMap<Display, Object> origins = this.holder().origins();
+        for (Map.Entry<Display, Object> entry : origins.entrySet()) {
+            if (entry.getValue() == CLIENT_FALLBACK) {
+                toRemove.add(entry.getKey());
+            }
+        }
+
+        for (Display display : toRemove) {
+            this.holder().remove(display);
+        }
+    }
+
     private void removeFailedDisplays() {
         Multimap<CategoryIdentifier<?>, Display> failedDisplays = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
         for (List<Display> displays : getAll().values()) {
