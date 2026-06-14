@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.common.registry.displays;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.event.events.common.TickEvent;
@@ -54,17 +53,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommonPlugin, ServerDisplayRegistryImpl.ServerDisplaysHolder> implements ServerDisplayRegistry, DisplayConsumerImpl {
     private static final Comparator<RecipeHolder<?>> RECIPE_COMPARATOR = Comparator.comparing((RecipeHolder<?> o) -> o.id().location().getNamespace()).thenComparing(o -> o.id().location().getPath());
     private final Object2LongMap<UUID> playerVersionMap = new Object2LongOpenHashMap<>();
     private int reloadVersionHash = UUID.randomUUID().hashCode();
     @Nullable
-    private static java.util.function.Supplier<List<RecipeHolder<?>>> clientRecipeSupplier;
+    private static Supplier<List<RecipeHolder<?>>> clientRecipeSupplier;
     @Nullable
     private static List<Display> pendingForceLocalDisplays;
     
-    public static void setClientRecipeSupplier(@Nullable java.util.function.Supplier<List<RecipeHolder<?>>> supplier) {
+    public static void setClientRecipeSupplier(@Nullable Supplier<List<RecipeHolder<?>>> supplier) {
         clientRecipeSupplier = supplier;
     }
     

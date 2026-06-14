@@ -45,6 +45,7 @@ import me.shedaniel.rei.impl.common.plugins.ReloadManagerImpl;
 import me.shedaniel.rei.impl.common.registry.displays.AbstractDisplayRegistry;
 import me.shedaniel.rei.impl.common.registry.displays.DisplayConsumerImpl;
 import me.shedaniel.rei.impl.common.registry.displays.DisplaysHolderImpl;
+import me.shedaniel.rei.impl.common.registry.displays.ServerDisplayRegistryImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
 import net.minecraft.world.item.crafting.display.RecipeDisplayId;
@@ -157,7 +158,7 @@ public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin
     @Override
     public void endReload() {
         // Inject force-local recipe displays from ServerDisplayRegistryImpl
-        List<Display> forceLocalDisplays = me.shedaniel.rei.impl.common.registry.displays.ServerDisplayRegistryImpl.consumePendingForceLocalDisplays();
+        List<Display> forceLocalDisplays = ServerDisplayRegistryImpl.consumePendingForceLocalDisplays();
         if (forceLocalDisplays != null && !forceLocalDisplays.isEmpty()) {
             InternalLogger.getInstance().info("[Force Local Recipes] Injecting %d displays into client registry", forceLocalDisplays.size());
             for (Display display : forceLocalDisplays) {
