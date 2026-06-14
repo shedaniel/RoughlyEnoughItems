@@ -109,7 +109,10 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CraftingScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.WritableRegistry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundRecipeBookAddPacket;
@@ -546,11 +549,11 @@ public class RoughlyEnoughItemsCoreClient {
                 // dynamic registries, but recipe ingredients reference tags from builtin
                 // registries like minecraft:item (e.g. #minecraft:bundles, #minecraft:planks).
                 int tagCount = 0;
-                for (net.minecraft.core.Registry<?> registry : net.minecraft.core.registries.BuiltInRegistries.REGISTRY) {
-                    if (registry instanceof net.minecraft.core.WritableRegistry) {
+                for (Registry<?> registry : BuiltInRegistries.REGISTRY) {
+                    if (registry instanceof WritableRegistry) {
                         try {
                             @SuppressWarnings({"unchecked", "rawtypes"})
-                            net.minecraft.core.WritableRegistry writable = (net.minecraft.core.WritableRegistry) registry;
+                            WritableRegistry writable = (WritableRegistry) registry;
                             TagLoader.loadTagsForRegistry(dataManager, writable);
                             tagCount++;
                         } catch (Exception e) {
@@ -561,9 +564,9 @@ public class RoughlyEnoughItemsCoreClient {
                 InternalLogger.getInstance().info("[Force Local Recipes] Loaded tags for %d builtin registries from client data packs", tagCount);
                 
                 // Also load tags for dynamic registries from the connection's registryAccess
-                List<net.minecraft.core.Registry.PendingTags<?>> pendingTags =
+                List<Registry.PendingTags<?>> pendingTags =
                         TagLoader.loadTagsForExistingRegistries(dataManager, registryAccess);
-                for (net.minecraft.core.Registry.PendingTags<?> pt : pendingTags) {
+                for (Registry.PendingTags<?> pt : pendingTags) {
                     pt.apply();
                 }
                 if (!pendingTags.isEmpty()) {

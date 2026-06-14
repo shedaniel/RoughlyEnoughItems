@@ -35,6 +35,7 @@ import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -103,7 +104,7 @@ public record DisplaySyncPacket(SyncType syncType, Collection<Display> displays,
     
     @Environment(EnvType.CLIENT)
     public void handle(NetworkManager.PacketContext context) {
-        if (ConfigObject.getInstance().isForceLocalRecipes() && !net.minecraft.client.Minecraft.getInstance().isLocalServer()) {
+        if (ConfigObject.getInstance().isForceLocalRecipes() && !Minecraft.getInstance().isLocalServer()) {
             InternalLogger.getInstance().info("[REI Server Display Sync] Ignoring server display sync because forceLocalRecipes is enabled.");
             return;
         }

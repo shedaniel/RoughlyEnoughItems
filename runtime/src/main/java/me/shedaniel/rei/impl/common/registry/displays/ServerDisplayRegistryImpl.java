@@ -34,6 +34,7 @@ import it.unimi.dsi.fastutil.ints.IntIntPair;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.display.reason.DisplayAdditionReason;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
@@ -44,6 +45,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.networking.DisplaySyncPacket;
 import me.shedaniel.rei.impl.common.plugins.ReloadManagerImpl;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
@@ -227,8 +229,8 @@ public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommon
         // On a remote server with forceLocalRecipes, the normal DisplaySyncPacket path won't work,
         // so we need to pass displays directly to the client DisplayRegistryImpl.
         try {
-            if (me.shedaniel.rei.api.client.config.ConfigObject.getInstance().isForceLocalRecipes()
-                    && !net.minecraft.client.Minecraft.getInstance().isLocalServer()
+            if (ConfigObject.getInstance().isForceLocalRecipes()
+                    && !Minecraft.getInstance().isLocalServer()
                     && size() > 0) {
                 List<Display> allDisplays = new ArrayList<>();
                 for (List<Display> displays : getAll().values()) {
