@@ -278,6 +278,16 @@ public interface ConfigObject {
     @ApiStatus.Experimental
     boolean doesCacheDisplayLookup();
     
+    /**
+     * Returns the mode controlling whether REI synthesizes recipe displays from
+     * the client's own data packs, for servers that do not send recipe data.
+     * Useful for multiplayer servers that do not synchronize recipes.
+     *
+     * @return the force local recipes mode
+     */
+    @ApiStatus.Experimental
+    ForceLocalRecipesMode getForceLocalRecipes();
+    
     boolean doDebugRenderTimeRequired();
     
     boolean doMergeDisplayUnderOne();
