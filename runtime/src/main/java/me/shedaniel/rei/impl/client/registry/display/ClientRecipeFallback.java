@@ -38,6 +38,7 @@ import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.tags.TagLoader;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
 import net.minecraft.world.item.crafting.display.RecipeDisplayId;
@@ -187,7 +188,8 @@ public final class ClientRecipeFallback {
         int gen = generation;
         loading = true;
         RegistryAccess registryAccess = connection.registryAccess();
-        CompletableFuture.supplyAsync(() -> loadLocalRecipeDisplays(registryAccess))
+        FeatureFlagSet enabledFeatures = connection.enabledFeatures();
+        CompletableFuture.supplyAsync(() -> loadLocalRecipeDisplays(registryAccess, enabledFeatures))
                 .whenComplete((entries, throwable) -> {
                     if (throwable != null) {
                         InternalLogger.getInstance().error("[Local Recipes] Failed to load recipes from client data packs", throwable);
@@ -212,7 +214,7 @@ public final class ClientRecipeFallback {
      * Loads the client's data-pack recipes and converts them into {@link RecipeDisplayEntry}
      * objects, mirroring what a dedicated server sends through the recipe book. Runs off-thread.
      */
-    private static List<RecipeDisplayEntry> loadLocalRecipeDisplays(RegistryAccess registryAccess) {
+    private static List<RecipeDisplayEntry> loadLocalRecipeDisplays(RegistryAccess registryAccess, FeatureFlagSet enabledFeatures) {
         InternalLogger.getInstance().info("[Local Recipes] Loading recipes from client data packs...");
         List<PackResources> packs = new ArrayList<>();
         // The vanilla JAR contains all recipe JSONs under data/<namespace>/recipe/.
@@ -245,8 +247,11 @@ public final class ClientRecipeFallback {
 
             RecipeManager recipeManager = new RecipeManager(registryAccess);
             recipeManager.reload(CompletableFuture::completedFuture, dataManager, Runnable::run, Runnable::run).join();
+            // reload() only parses recipes; the recipe-display index is built separately by
+            // finalizeRecipeLoading, exactly as the server does before sending the recipe book.
+            recipeManager.finalizeRecipeLoading(enabledFeatures);
 
-            // RecipeManager builds the same RecipeDisplayEntry objects (with self-consistent
+            // RecipeManager now holds the same RecipeDisplayEntry objects (with self-consistent
             // RecipeDisplayIds) that a dedicated server would send through the recipe book.
             recipeManager.getRecipes().forEach(holder ->
                     recipeManager.listDisplaysForRecipe(holder.id(), entries::add));
