@@ -20,6 +20,7 @@ dependencies {
     compileOnly(files(project(":api").tasks.named("jar")))
     testImplementation(project(path: ":api"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 test {
