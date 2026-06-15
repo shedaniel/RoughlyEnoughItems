@@ -40,11 +40,32 @@ task fakeForgeJar(type: Jar, dependsOn: jar) {
     archiveClassifier = "fake-forge"
 }
 
+def productionJar = tasks.register("productionJar", Jar) {
+    dependsOn tasks.named("jar")
+    from { zipTree(tasks.named("jar").flatMap { it.archiveFile }) }
+    archiveClassifier = ""
+}
+
 publishing {
     publications {
         mavenCommon(MavenPublication) {
             artifactId = rootProject.name + "-" + project.name
-            from components.java
+            artifact(productionJar)
+            artifact(tasks.named("sourcesJar")) {
+                classifier = "sources"
+            }
+            pom.withXml {
+                def depsNode = asNode().appendNode("dependencies")
+                configurations.api.allDependencies.each { dep ->
+                    if (dep.group != null && dep.version != null) {
+                        def d = depsNode.appendNode("dependency")
+                        d.appendNode("groupId", dep.group)
+                        d.appendNode("artifactId", dep.name)
+                        d.appendNode("version", dep.version)
+                        d.appendNode("scope", "compile")
+                    }
+                }
+            }
         }
     }
 }
