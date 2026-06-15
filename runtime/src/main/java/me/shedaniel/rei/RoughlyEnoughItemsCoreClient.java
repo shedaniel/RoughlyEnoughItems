@@ -39,6 +39,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
+import me.shedaniel.rei.api.client.gui.config.ForceLocalRecipesMode;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
@@ -77,6 +78,7 @@ import me.shedaniel.rei.impl.client.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.client.gui.widget.TooltipContextImpl;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.client.registry.category.CategoryRegistryImpl;
+import me.shedaniel.rei.impl.client.registry.display.ClientRecipeFallback;
 import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
 import me.shedaniel.rei.impl.client.registry.screen.ScreenRegistryImpl;
 import me.shedaniel.rei.impl.client.search.SearchProviderImpl;
@@ -93,6 +95,7 @@ import me.shedaniel.rei.impl.common.entry.type.types.EmptyEntryDefinition;
 import me.shedaniel.rei.impl.common.networking.DisplaySyncPacket;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.plugins.ReloadManagerImpl;
+import me.shedaniel.rei.impl.common.registry.displays.ServerDisplayRegistryImpl;
 import me.shedaniel.rei.impl.common.util.InstanceHelper;
 import me.shedaniel.rei.impl.common.util.IssuesDetector;
 import me.shedaniel.rei.plugin.test.REITestCommonPlugin;
@@ -289,7 +292,15 @@ public class RoughlyEnoughItemsCoreClient {
                 }*/
             }
         });
-        NetworkManager.registerReceiver(NetworkManager.s2c(), DisplaySyncPacket.TYPE, DisplaySyncPacket.STREAM_CODEC, List.of(new SplitPacketTransformer()), DisplaySyncPacket::handle);
+        NetworkManager.registerReceiver(NetworkManager.s2c(), DisplaySyncPacket.TYPE, DisplaySyncPacket.STREAM_CODEC, List.of(new SplitPacketTransformer()), (payload, context) -> {
+            ClientRecipeFallback.onServerDisplaySync();
+            if (ConfigObject.getInstance().getForceLocalRecipes() == ForceLocalRecipesMode.ALWAYS && !Minecraft.getInstance().isLocalServer()) {
+                // Local recipes take precedence in ALWAYS mode; ignore the server's display sync.
+                InternalLogger.getInstance().info("[Local Recipes] Ignoring server display sync because local recipes mode is ALWAYS.");
+                return;
+            }
+            payload.handle(context);
+        });
     }
     
     private void loadTestPlugins() {
@@ -337,26 +348,30 @@ public class RoughlyEnoughItemsCoreClient {
             if (ClientHelperImpl.getInstance().canUsePackets()) {
                 return;
             }
-            
+
             InternalLogger.getInstance().debug("Received server's request to add %d recipes.", entries.size());
             DisplayRegistryImpl registry = (DisplayRegistryImpl) DisplayRegistry.getInstance();
             List<RecipeDisplayEntry> mapped = CollectionUtils.map(entries, ClientboundRecipeBookAddPacket.Entry::contents);
+            // Record the server-advertised ids so the local fallback can dedup against them.
+            ClientRecipeFallback.onServerRecipeBookAdd(CollectionUtils.map(mapped, RecipeDisplayEntry::id));
             registry.addJob(() -> registry.addRecipes(mapped));
         });
         ClientRecipeUpdateEvent.REMOVE.register((recipeAccess, entries) -> {
             if (ClientHelperImpl.getInstance().canUsePackets()) {
                 return;
             }
-            
+
             InternalLogger.getInstance().debug("Received server's request to remove %d recipes.", entries.size());
             DisplayRegistryImpl registry = (DisplayRegistryImpl) DisplayRegistry.getInstance();
             Set<RecipeDisplayId> ids = new HashSet<>(entries);
+            ClientRecipeFallback.onServerRecipeBookRemove(ids);
             registry.addJob(() -> registry.removeRecipes(ids));
         });
         ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> {
             InternalLogger.getInstance().debug("Player quit, clearing reload tasks!");
             endReload.setValue(-1);
             ReloadManagerImpl.terminateReloadTasks();
+            ClientRecipeFallback.reset();
         });
         ClientGuiEvent.INIT_PRE.register((screen, access) -> {
             List<ReloadStage> stages = ((PluginManagerImpl<REICommonPlugin>) PluginManager.getInstance()).getObservedStages();

@@ -21,29 +21,36 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.init;
+package me.shedaniel.rei.api.client.gui.config;
 
-import me.shedaniel.rei.api.common.entry.EntryIngredient;
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.client.resources.language.I18n;
 
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.Locale;
 
-public interface PlatformAdapter {
-    ServiceLoader<PlatformAdapter> LOADER = ServiceLoader.load(PlatformAdapter.class);
-
-    static PlatformAdapter get() {
-        return LOADER.findFirst().orElseThrow();
-    }
-
-    EntryIngredient fromIngredient(Ingredient ingredient);
-
+/**
+ * Controls whether REI synthesizes recipe displays from the client's own data
+ * packs when connected to a server, for servers that do not sync recipe data.
+ */
+public enum ForceLocalRecipesMode {
     /**
-     * Gathers the {@code SERVER_DATA} pack resources the client could load locally: the vanilla
-     * data pack plus every installed mod's data pack. Used by the local-recipes fallback to
-     * synthesise recipe displays when connected to a server that does not sync recipes. This is
-     * loader-specific because mod data packs are registered differently on Fabric and NeoForge.
+     * Never load recipes locally; only display what the server sends (REI display
+     * sync or vanilla recipe book entries).
      */
-    List<PackResources> gatherClientDataPacks();
+    NEVER,
+    /**
+     * Additively load recipes locally as a fallback while the server has not sent
+     * an REI display sync. Locally-loaded displays are superseded once the server
+     * syncs its own displays.
+     */
+    AUTO,
+    /**
+     * Always load recipes locally, even when the server provides its own displays.
+     */
+    ALWAYS,
+    ;
+
+    @Override
+    public String toString() {
+        return I18n.get("config.rei.value.filtering.force_local_recipes." + name().toLowerCase(Locale.ROOT));
+    }
 }

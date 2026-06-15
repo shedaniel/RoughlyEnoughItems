@@ -232,6 +232,11 @@ public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommon
     }
     
     private List<RecipeHolder<?>> getAllSortedRecipes() {
+        // No integrated/dedicated server (e.g. a client connected to a remote server): the server-side
+        // registry has no recipe source. Client-side recipe display is handled by DisplayRegistryImpl.
+        if (GameInstance.getServer() == null) {
+            return List.of();
+        }
         return GameInstance.getServer().getRecipeManager().getRecipes().parallelStream().sorted(RECIPE_COMPARATOR).toList();
     }
     

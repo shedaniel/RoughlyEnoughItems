@@ -304,6 +304,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public ForceLocalRecipesMode getForceLocalRecipes() {
+        return advanced.miscellaneous.forceLocalRecipes;
+    }
+    
+    @Override
     public boolean doDebugRenderTimeRequired() {
         return advanced.layout.debugRenderTimeRequired;
     }
@@ -729,6 +734,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             public boolean registerRecipesInAnotherThread = true;
             public boolean cachingFastEntryRendering = false;
             public boolean cachingDisplayLookup = true;
+            @Comment("Controls whether REI synthesizes recipe displays from the client's own data packs, for servers that do not sync recipe data. NEVER: off; AUTO: load locally as a fallback until the server syncs displays; ALWAYS: load locally even when the server provides displays.")
+            public ForceLocalRecipesMode forceLocalRecipes = ForceLocalRecipesMode.AUTO;
             public CategorySettings categorySettings = new CategorySettings();
             
             public static class CategorySettings {

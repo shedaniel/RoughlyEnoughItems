@@ -254,6 +254,8 @@ public interface AllREIConfigOptions {
             .ofBoolean(translatable("config.rei.values.performance.reload_thread.main_thread"), translatable("config.rei.values.performance.reload_thread.rei_thread"));
     CompositeOption<Boolean> CACHED_DISPLAY_LOOKUP = make("performance.cached_display_lookup", i -> i.advanced.miscellaneous.cachingDisplayLookup, (i, v) -> i.advanced.miscellaneous.cachingDisplayLookup = v)
             .enabledDisabled();
+    CompositeOption<ForceLocalRecipesMode> FORCE_LOCAL_RECIPES = make("filtering.force_local_recipes", i -> i.advanced.miscellaneous.forceLocalRecipes, (i, v) -> i.advanced.miscellaneous.forceLocalRecipes = v)
+            .enumOptions();
     CompositeOption<Object> PLUGINS_PERFORMANCE = make("debug.plugins_performance", i -> null, (i, v) -> new Object())
             .details((access, option, onClose) -> Minecraft.getInstance().setScreen(new PerformanceScreen(onClose)))
             .requiresLevel();
