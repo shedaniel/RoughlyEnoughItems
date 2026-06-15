@@ -32,7 +32,7 @@ import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.Holder;

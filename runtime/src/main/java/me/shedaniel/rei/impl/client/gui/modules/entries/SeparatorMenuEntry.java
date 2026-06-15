@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.modules.entries;
 
 import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import java.util.Collections;

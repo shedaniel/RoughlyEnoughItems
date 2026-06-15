@@ -32,7 +32,7 @@ import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;

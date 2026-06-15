@@ -31,6 +31,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.util.*;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;

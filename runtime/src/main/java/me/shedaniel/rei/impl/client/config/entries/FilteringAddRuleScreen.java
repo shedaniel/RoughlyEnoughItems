@@ -28,7 +28,7 @@ import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;

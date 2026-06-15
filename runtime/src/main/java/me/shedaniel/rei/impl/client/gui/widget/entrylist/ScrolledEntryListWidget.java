@@ -37,7 +37,7 @@ import me.shedaniel.rei.impl.client.gui.widget.EntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;

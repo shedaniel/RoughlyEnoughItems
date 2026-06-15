@@ -42,7 +42,7 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import me.shedaniel.rei.impl.client.gui.widget.EntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;

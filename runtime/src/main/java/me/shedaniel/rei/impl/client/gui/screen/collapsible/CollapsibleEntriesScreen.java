@@ -46,7 +46,7 @@ import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistr
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;

@@ -38,7 +38,7 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.entries.SubMenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.ApiStatus;
 

@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.utils.PanelTextures;
 import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;

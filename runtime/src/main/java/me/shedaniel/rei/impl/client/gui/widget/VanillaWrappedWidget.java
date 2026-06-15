@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;

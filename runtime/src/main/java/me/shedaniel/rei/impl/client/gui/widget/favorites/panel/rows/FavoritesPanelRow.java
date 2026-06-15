@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl.client.gui.widget.favorites.panel.rows;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 
 public abstract class FavoritesPanelRow extends AbstractContainerEventHandler {
     public abstract int getRowHeight();

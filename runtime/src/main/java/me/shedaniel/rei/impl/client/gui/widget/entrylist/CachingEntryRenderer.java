@@ -29,7 +29,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import org.jetbrains.annotations.Nullable;
 

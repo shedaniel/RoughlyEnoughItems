@@ -49,7 +49,7 @@ import me.shedaniel.rei.impl.client.search.argument.type.ArgumentTypesRegistry;
 import me.shedaniel.rei.impl.client.search.argument.type.TextArgumentType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;

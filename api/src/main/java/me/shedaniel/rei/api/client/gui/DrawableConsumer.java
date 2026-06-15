@@ -25,7 +25,7 @@ package me.shedaniel.rei.api.client.gui;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 
 /**
  * Consumer of a {@link GuiGraphics} and information of mouse and delta.

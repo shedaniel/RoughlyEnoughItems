@@ -33,7 +33,7 @@ import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.input.MouseButtonEvent;
 import org.joml.Vector3f;
 

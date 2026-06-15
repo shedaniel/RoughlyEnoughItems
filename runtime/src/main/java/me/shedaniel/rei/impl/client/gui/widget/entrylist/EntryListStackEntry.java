@@ -39,7 +39,7 @@ import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.*;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;

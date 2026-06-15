@@ -37,7 +37,7 @@ import me.shedaniel.rei.impl.client.gui.config.options.OptionValueEntry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.screens.Screen;

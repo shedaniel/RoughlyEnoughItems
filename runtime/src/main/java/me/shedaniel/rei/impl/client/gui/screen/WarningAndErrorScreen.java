@@ -30,7 +30,7 @@ import me.shedaniel.rei.impl.client.gui.widget.DynamicErrorFreeEntryListWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarratableEntry;

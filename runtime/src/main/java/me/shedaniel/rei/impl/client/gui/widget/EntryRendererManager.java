@@ -30,7 +30,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
 import net.minecraft.CrashReport;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.NotNull;

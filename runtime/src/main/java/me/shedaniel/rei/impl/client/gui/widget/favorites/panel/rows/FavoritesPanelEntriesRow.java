@@ -41,7 +41,7 @@ import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.FavoritesPanel;
 import me.shedaniel.rei.impl.client.gui.widget.region.EntryStacksRegionWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionDraggableStack;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;

@@ -1,9 +1,11 @@
-package net.minecraft.client.gui;
+package me.shedaniel.rei.api.client.gui.compat;
 
 import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.chat.Component;
