@@ -35,6 +35,8 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.client.categories.crafting.filler.*;
 import me.shedaniel.rei.plugin.client.displays.ClientsidedCookingDisplay;
 import me.shedaniel.rei.plugin.client.displays.ClientsidedCraftingDisplay;
+import me.shedaniel.rei.plugin.client.displays.ClientsidedSmithingDisplay;
+import me.shedaniel.rei.plugin.client.displays.ClientsidedStoneCuttingDisplay;
 import me.shedaniel.rei.plugin.common.displays.*;
 import me.shedaniel.rei.plugin.common.displays.anvil.DefaultAnvilDisplay;
 import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconBaseDisplay;
@@ -63,13 +65,10 @@ import java.util.stream.Stream;
 @ApiStatus.Internal
 public class DefaultPlugin implements BuiltinPlugin, REICommonPlugin {
     private static final CraftingRecipeFiller<?>[] CRAFTING_RECIPE_FILLERS = new CraftingRecipeFiller[]{
-            new TippedArrowRecipeFiller(),
             new BannerDuplicateRecipeFiller(),
             new ShieldDecorationRecipeFiller(),
             new BookCloningRecipeFiller(),
             new FireworkRocketRecipeFiller(),
-            new ArmorDyeRecipeFiller(),
-            new MapCloningRecipeFiller(),
             new MapExtendingRecipeFiller()
     };
     
@@ -147,6 +146,8 @@ public class DefaultPlugin implements BuiltinPlugin, REICommonPlugin {
         registry.register(id("client/smelting"), ClientsidedCookingDisplay.Smelting.SERIALIZER);
         registry.register(id("client/smoking"), ClientsidedCookingDisplay.Smoking.SERIALIZER);
         registry.register(id("client/blasting"), ClientsidedCookingDisplay.Blasting.SERIALIZER);
+        registry.register(id("client/stone_cutting"), ClientsidedStoneCuttingDisplay.SERIALIZER);
+        registry.register(id("client/smithing"), ClientsidedSmithingDisplay.SERIALIZER);
         registry.register(id("default/crafting/shaped"), DefaultShapedDisplay.SERIALIZER);
         registry.register(id("default/crafting/shapeless"), DefaultShapelessDisplay.SERIALIZER);
         registry.register(id("default/crafting/custom"), DefaultCustomDisplay.SERIALIZER);

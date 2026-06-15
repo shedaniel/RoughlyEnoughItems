@@ -42,7 +42,7 @@ import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;

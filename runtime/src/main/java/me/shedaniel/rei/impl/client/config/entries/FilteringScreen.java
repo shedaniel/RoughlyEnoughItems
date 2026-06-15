@@ -45,7 +45,7 @@ import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -67,7 +67,7 @@ import java.util.function.Predicate;
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 @ApiStatus.Internal
-public class FilteringScreen extends Screen {
+public class FilteringScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     protected List<EntryStack<?>> selected = Lists.newArrayList();
     protected final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
@@ -237,11 +237,11 @@ public class FilteringScreen extends Screen {
         manager.render(graphics, mouseX, mouseY, delta);
         updatePosition(delta);
         scrolling.renderScrollBar(graphics, 0, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8F : 1F);
-        this.searchField.render(graphics, mouseX, mouseY, delta);
-        this.selectAllButton.render(graphics, mouseX, mouseY, delta);
-        this.selectNoneButton.render(graphics, mouseX, mouseY, delta);
-        this.hideButton.render(graphics, mouseX, mouseY, delta);
-        this.showButton.render(graphics, mouseX, mouseY, delta);
+        this.searchField.extractRenderState(graphics, mouseX, mouseY, delta);
+        this.selectAllButton.extractRenderState(graphics, mouseX, mouseY, delta);
+        this.selectNoneButton.extractRenderState(graphics, mouseX, mouseY, delta);
+        this.hideButton.extractRenderState(graphics, mouseX, mouseY, delta);
+        this.showButton.extractRenderState(graphics, mouseX, mouseY, delta);
         
         graphics.disableScissor();
         // TODO: add back border
@@ -254,7 +254,7 @@ public class FilteringScreen extends Screen {
             buffer.addVertex(matrix, 0, bounds.y, 0.0F).setColor(0, 0, 0, 255);
         });*/
         
-        this.backButton.render(graphics, mouseX, mouseY, delta);
+        this.backButton.extractRenderState(graphics, mouseX, mouseY, delta);
         
         if (tooltip != null) {
             ((ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().get()).renderTooltip(graphics, tooltip);

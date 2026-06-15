@@ -24,13 +24,13 @@
 package me.shedaniel.rei.impl.client.gui.screen;
 
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-public class ScreenWithMenu extends Screen {
+public class ScreenWithMenu extends REIScreen {
     @Nullable
     private Menu menu;
     

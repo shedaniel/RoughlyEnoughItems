@@ -30,6 +30,8 @@ import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.*;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.util.*;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -76,6 +78,10 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
     public void _addEntry(Entry entry) {
         addItem(entry);
     }
+
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        extractRenderState(graphics, mouseX, mouseY, delta);
+    }
     
     @Override
     public int getItemWidth() {
@@ -88,6 +94,14 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
     }
     
     public static abstract class Entry extends DynamicEntryListWidget.Entry<Entry> {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        }
+
+        @Override
+        public void extractRenderState(GuiGraphicsExtractor graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+            render(GuiGraphics.of(graphics), index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+        }
+
         @Override
         public List<? extends NarratableEntry> narratables() {
             return Collections.emptyList();
@@ -423,7 +437,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
             width = (entryWidth - 6) / 2;
             this.height = (int) ((double) width * ((double) image.getHeight() / (double) image.getWidth()));
             graphics.fill(x, y, x + width, y + height + 2, 0xFFFFFFFF);
-            graphics.innerBlit(RenderPipelines.GUI_TEXTURED, id, x + 1, x + width - 1, y + 1, y + height + 1, 0, 0, 1, 0, 1);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, id, x + 1, y + 1, 0, 0, width - 2, height, width - 2, height);
         }
         
         @Override

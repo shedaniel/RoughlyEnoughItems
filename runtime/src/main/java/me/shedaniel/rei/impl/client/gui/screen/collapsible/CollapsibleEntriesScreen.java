@@ -46,7 +46,7 @@ import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistr
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -58,7 +58,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class CollapsibleEntriesScreen extends Screen {
+public class CollapsibleEntriesScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private final Runnable onClose;
     private final CollapsibleConfigManager.CollapsibleConfigObject configObject;
     private final List<CollapsibleEntryWidget> widgets = new ArrayList<>();

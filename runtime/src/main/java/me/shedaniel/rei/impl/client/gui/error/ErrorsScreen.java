@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl.client.gui.error;
 
 import me.shedaniel.rei.impl.client.gui.error.ErrorsEntryListWidget.TextEntry;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -39,7 +39,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class ErrorsScreen extends Screen {
+public class ErrorsScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private List<Object> components;
     private AbstractButton doneButton;
     private ErrorsEntryListWidget listWidget;

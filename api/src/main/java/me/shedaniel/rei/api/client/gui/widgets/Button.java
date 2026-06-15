@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api.client.gui.widgets;
 
 import me.shedaniel.math.Point;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 

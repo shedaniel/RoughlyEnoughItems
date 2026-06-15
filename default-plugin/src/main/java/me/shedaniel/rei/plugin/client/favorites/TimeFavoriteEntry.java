@@ -37,7 +37,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -120,7 +120,7 @@ public class TimeFavoriteEntry extends FavoriteEntry {
     
     private Time nextTime() {
         ClientLevel level = Minecraft.getInstance().level;
-        long dayTime = level.getDayTime();
+        long dayTime = level.getGameTime() % 24000L;
         if (dayTime <= 1000) {
             return Time.MORN;
         } else if (dayTime <= 6000) {

@@ -69,6 +69,7 @@ import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -85,13 +86,13 @@ public class RoughlyEnoughItemsCore {
                 logger.info("Minecraft: " + adapter.getMinecraftVersion());
                 logger.info("Side: " + (adapter.isClient() ? "client" : "server"));
                 logger.info("Development: " + adapter.isDev());
-                logger.info("Version: " + Platform.getOptionalMod("roughlyenoughitems").map(Mod::getVersion).orElse(null));
+                logger.info("Version: " + getOptionalMod("roughlyenoughitems").map(Mod::getVersion).orElse(null));
                 logger.info("Loader:");
-                logger.info("- " + (fabric ? "Fabric" : "Forge") + ": " + Platform.getOptionalMod(fabric ? "fabricloader" : "forge").map(Mod::getVersion).orElse(null));
-                if (fabric) logger.info("- Fabric API: " + Platform.getOptionalMod("fabric").map(Mod::getVersion).orElse(null));
+                logger.info("- " + (fabric ? "Fabric" : "Forge") + ": " + getOptionalMod(fabric ? "fabricloader" : "forge").map(Mod::getVersion).orElse(null));
+                if (fabric) logger.info("- Fabric API: " + getOptionalMod("fabric-api", "fabric").map(Mod::getVersion).orElse(null));
                 logger.info("Dependencies:");
-                logger.info("- Cloth Config: " + Platform.getOptionalMod(fabric ? "cloth-config2" : "cloth_config").map(Mod::getVersion).orElse(null));
-                logger.info("- Architectury: " + Platform.getOptionalMod("architectury").map(Mod::getVersion).orElse(null));
+                logger.info("- Cloth Config: " + getOptionalMod(fabric ? "cloth-config" : "cloth_config", fabric ? "cloth-config2" : "cloth_config").map(Mod::getVersion).orElse(null));
+                logger.info("- Architectury: " + getOptionalMod("architectury").map(Mod::getVersion).orElse(null));
                 String mixin = "null";
                 try {
                     mixin = (String) Class.forName("org.spongepowered.asm.launch.MixinBootstrap").getDeclaredField("VERSION").get(null);
@@ -116,6 +117,17 @@ public class RoughlyEnoughItemsCore {
     private static <T> T make(T object, Consumer<T> consumer) {
         consumer.accept(object);
         return object;
+    }
+
+    private static Optional<Mod> getOptionalMod(String... ids) {
+        for (String id : ids) {
+            try {
+                return Platform.getOptionalMod(id);
+            } catch (Throwable ignored) {
+            }
+        }
+
+        return Optional.empty();
     }
     
     static {

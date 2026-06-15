@@ -30,7 +30,7 @@ import me.shedaniel.rei.impl.client.gui.widget.DynamicErrorFreeEntryListWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -53,7 +53,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class WarningAndErrorScreen extends Screen {
+public class WarningAndErrorScreen extends REIScreen {
     private AbstractWidget buttonExit;
     private StringEntryListWidget listWidget;
     private String action;
@@ -142,7 +142,7 @@ public class WarningAndErrorScreen extends Screen {
         } else {
             graphics.drawCenteredString(this.font, "Errors during Roughly Enough Items' " + action, this.width / 2, 16, 0xFFFFFFFF);
         }
-        this.buttonExit.render(graphics, int_1, int_2, float_1);
+        this.buttonExit.extractRenderState(graphics, int_1, int_2, float_1);
     }
     
     private static class StringEntryListWidget extends DynamicErrorFreeEntryListWidget<StringItem> {

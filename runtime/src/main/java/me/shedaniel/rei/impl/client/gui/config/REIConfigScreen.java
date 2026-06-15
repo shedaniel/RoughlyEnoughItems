@@ -54,7 +54,7 @@ import me.shedaniel.rei.impl.client.gui.widget.basewidgets.TextFieldWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
@@ -72,7 +72,7 @@ import java.util.function.BiConsumer;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
-public class REIConfigScreen extends Screen implements ConfigAccess {
+public class REIConfigScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen implements ConfigAccess {
     private final Screen parent;
     private final List<OptionCategory> categories;
     private final List<Widget> widgets = new ArrayList<>();

@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api.client.registry.screen;
 
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import org.jetbrains.annotations.ApiStatus;
 
 /**

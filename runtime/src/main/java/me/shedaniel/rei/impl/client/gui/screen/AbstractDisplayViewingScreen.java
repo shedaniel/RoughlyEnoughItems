@@ -60,7 +60,8 @@ import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -82,7 +83,7 @@ import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-public abstract class AbstractDisplayViewingScreen extends Screen implements DisplayScreen {
+public abstract class AbstractDisplayViewingScreen extends REIScreen implements DisplayScreen {
     protected final Map<DisplayCategory<?>, List<DisplaySpec>> categoryMap;
     protected final List<DisplayCategory<?>> categories;
     protected final TabContainerWidget tabs = new TabContainerWidget();
@@ -401,7 +402,8 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             }
             
             @Override
-            public void renderImage(Font font, int x, int y, int width, int height, GuiGraphics graphics) {
+            public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
+                GuiGraphics guiGraphics = GuiGraphics.of(graphics);
                 int entrySize = EntryListWidget.entrySize();
                 int w = Math.max(1, MAX_WIDTH / entrySize);
                 int i = 0;
@@ -411,25 +413,26 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                     i++;
                     if (i / w > 5) {
                         Component text = Component.literal("+" + (widget.getEntries().size() - w * 6 + 1)).withStyle(ChatFormatting.GRAY);
-                        graphics.pose().pushMatrix();
-                        graphics.pose().translate(x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1);
-                        graphics.drawString(font, text, 0, 0, -1, true);
-                        graphics.pose().popMatrix();
+                        guiGraphics.pose().pushMatrix();
+                        guiGraphics.pose().translate(x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1);
+                        guiGraphics.drawString(font, text, 0, 0, -1, true);
+                        guiGraphics.pose().popMatrix();
                         break;
                     } else {
-                        entry.render(graphics, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
+                        entry.render(guiGraphics, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
                     }
                 }
             }
             
             @Override
-            public void renderText(GuiGraphics graphics, Font font, int x, int y) {
-                graphics.drawString(font, Component.translatable("text.rei.accepts").withStyle(ChatFormatting.GRAY), x, y + 2, -1);
+            public void extractText(GuiGraphicsExtractor graphics, Font font, int x, int y) {
+                GuiGraphics guiGraphics = GuiGraphics.of(graphics);
+                guiGraphics.drawString(font, Component.translatable("text.rei.accepts").withStyle(ChatFormatting.GRAY), x, y + 2, -1);
                 
                 if (widget.tagMatch != null) {
                     int entrySize = EntryListWidget.entrySize();
                     int w = Math.max(1, MAX_WIDTH / entrySize);
-                    graphics.drawString(font, Component.translatable("text.rei.tag_accept", widget.tagMatch.toString())
+                    guiGraphics.drawString(font, Component.translatable("text.rei.tag_accept", widget.tagMatch.toString())
                                     .withStyle(ChatFormatting.GRAY),
                             x, y + 16 + Math.min(6, Mth.ceil(widget.getEntries().size() / (float) w)) * entrySize,
                             -1);

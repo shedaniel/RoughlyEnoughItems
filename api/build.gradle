@@ -1,31 +1,27 @@
-import net.fabricmc.loom.task.RemapJarTask
-
-archivesBaseName = rootProject.name + "-" + project.name
+base {
+    archivesName = rootProject.name + "-" + project.name
+}
 
 loom {
     accessWidenerPath = gradle.rootProject.project("fabric").file("src/main/resources/roughlyenoughitems.accessWidener")
 }
 
 dependencies {
-    modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
-    modApi("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
-    modApi("dev.architectury:architectury:${architectury_version}")
+    compileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
+    api("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
+    api("dev.architectury:architectury:${architectury_version}")
 }
 
 architectury {
     common(platforms.split(","))
 }
 
-remapJar {
-    archiveClassifier = "raw"
-}
-
-task fakeJar(type: Jar, dependsOn: remapJar) {
-    from remapJar.archiveFile.map { zipTree(it) }
+task fakeJar(type: Jar, dependsOn: jar) {
+    from jar.archiveFile.map { zipTree(it) }
     from(rootProject.file("fake/fabric.mod.json")) {
         into ""
     }
-    archiveClassifier = null
+    archiveClassifier = "fake"
 }
 
 task fakeForgeJar(type: Jar, dependsOn: jar) {
@@ -42,21 +38,32 @@ task fakeForgeJar(type: Jar, dependsOn: jar) {
     archiveClassifier = "fake-forge"
 }
 
-artifacts {
-    apiElements(fakeJar)
-    runtimeElements(fakeJar)
-}
-
-afterEvaluate {
-    configurations.apiElements.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(tasks.remapJar) }
-    configurations.runtimeElements.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(tasks.remapJar) }
+def productionJar = tasks.register("productionJar", Jar) {
+    dependsOn tasks.named("jar")
+    from { zipTree(tasks.named("jar").flatMap { it.archiveFile }) }
+    archiveClassifier = ""
 }
 
 publishing {
     publications {
         mavenCommon(MavenPublication) {
             artifactId = rootProject.name + "-" + project.name
-            from components.java
+            artifact(productionJar)
+            artifact(tasks.named("sourcesJar")) {
+                classifier = "sources"
+            }
+            pom.withXml {
+                def depsNode = asNode().appendNode("dependencies")
+                configurations.api.allDependencies.each { dep ->
+                    if (dep.group != null && dep.version != null) {
+                        def d = depsNode.appendNode("dependency")
+                        d.appendNode("groupId", dep.group)
+                        d.appendNode("artifactId", dep.name)
+                        d.appendNode("version", dep.version)
+                        d.appendNode("scope", "compile")
+                    }
+                }
+            }
         }
     }
 }

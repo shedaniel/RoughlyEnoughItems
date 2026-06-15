@@ -44,7 +44,7 @@ import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -67,7 +67,7 @@ import java.util.function.Supplier;
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 @ApiStatus.Internal
-public class CustomCollapsibleEntrySelectionScreen extends Screen {
+public class CustomCollapsibleEntrySelectionScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private final List<EntryStack<?>> selectedStacks;
     protected List<EntryStack<?>> selected = Lists.newArrayList();
     protected final ScrollingContainer scrolling = new ScrollingContainer() {
@@ -225,16 +225,16 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         }
         updatePosition(delta);
         scrolling.renderScrollBar(graphics, 0, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8F : 1F);
-        this.searchField.render(graphics, mouseX, mouseY, delta);
-        this.selectAllButton.render(graphics, mouseX, mouseY, delta);
-        this.selectNoneButton.render(graphics, mouseX, mouseY, delta);
-        this.addButton.render(graphics, mouseX, mouseY, delta);
-        this.removeButton.render(graphics, mouseX, mouseY, delta);
+        this.searchField.extractRenderState(graphics, mouseX, mouseY, delta);
+        this.selectAllButton.extractRenderState(graphics, mouseX, mouseY, delta);
+        this.selectNoneButton.extractRenderState(graphics, mouseX, mouseY, delta);
+        this.addButton.extractRenderState(graphics, mouseX, mouseY, delta);
+        this.removeButton.extractRenderState(graphics, mouseX, mouseY, delta);
         
         graphics.disableScissor();
         graphics.fillGradient(0, bounds.y, width, bounds.y + 4, 0xFF000000, 0x00000000);
         
-        this.backButton.render(graphics, mouseX, mouseY, delta);
+        this.backButton.extractRenderState(graphics, mouseX, mouseY, delta);
         
         if (tooltip != null) {
             ScreenOverlayImpl.getInstance().renderTooltip(graphics, tooltip);

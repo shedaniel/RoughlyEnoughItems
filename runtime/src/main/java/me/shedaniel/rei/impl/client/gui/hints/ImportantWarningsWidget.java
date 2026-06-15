@@ -37,7 +37,7 @@ import me.shedaniel.rei.impl.common.entry.type.EntryRegistryListener;
 import me.shedaniel.rei.impl.common.util.InstanceHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -59,7 +59,8 @@ public class ImportantWarningsWidget extends WidgetWithBounds {
         if (((EntryRegistryImpl) EntryRegistry.getInstance()).listeners.add(LISTENER)) {
             String newId = Minecraft.getInstance().hasSingleplayerServer() ?
                     "integrated:" + Minecraft.getInstance().getSingleplayerServer().getWorldData().getLevelName()
-                    : InstanceHelper.connectionFromClient() != null ? "server:" + InstanceHelper.connectionFromClient().getId()
+                    : InstanceHelper.connectionFromClient() != null && InstanceHelper.connectionFromClient().getServerData() != null
+                    ? "server:" + InstanceHelper.connectionFromClient().getServerData().ip
                     : "null";
             if (!newId.equals(prevId)) {
                 prevId = newId;

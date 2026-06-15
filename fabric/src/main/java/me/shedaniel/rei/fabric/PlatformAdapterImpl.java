@@ -59,17 +59,6 @@ public class PlatformAdapterImpl implements PlatformAdapter {
     @Override
     public EntryIngredient fromIngredient(Ingredient ingredient) {
         if (ingredient.isEmpty()) return EntryIngredient.empty();
-        if (ingredient.getCustomIngredient() != null) {
-            EntryIngredient.Builder result = EntryIngredient.builder();
-            ingredient.items().forEach(item -> {
-                EntryStack<?> stack = EntryStacks.ofItemHolder(item);
-                if (!stack.isEmpty()) {
-                    result.add(stack);
-                }
-            });
-            return result.build();
-        } else {
-            return EntryIngredients.ofItemsHolderSet(ingredient.values);
-        }
+        return EntryIngredients.ofSlotDisplay(ingredient.display());
     }
 }

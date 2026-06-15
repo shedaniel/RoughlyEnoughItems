@@ -32,7 +32,7 @@ import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -118,10 +118,7 @@ public class SubMenuEntry extends AbstractMenuEntry {
                     menu.bounds.setAs(new FloatingRectangle(facingRight ? createBounds.x : createBounds.getMaxX(), facingDownwards ? createBounds.y : createBounds.getMaxY(), 0.1, 0.1));
                 }
                 
-                GuiGraphics.ScissorStack tmp = graphics.scissorStack;
-                graphics.scissorStack = new GuiGraphics.ScissorStack();
-                menu.render(graphics, mouseX, mouseY, delta);
-                graphics.scissorStack = tmp;
+                graphics.withFreshScissorStack(() -> menu.render(graphics, mouseX, mouseY, delta));
             }
         } else {
             this.childMenu = null;

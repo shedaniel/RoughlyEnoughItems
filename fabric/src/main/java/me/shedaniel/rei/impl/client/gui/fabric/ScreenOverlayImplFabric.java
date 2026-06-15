@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.client.gui.fabric;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
@@ -76,7 +76,7 @@ public class ScreenOverlayImplFabric extends ScreenOverlayImpl {
             return;
         }
         graphics.pose().pushMatrix();
-        graphics.setTooltipForNextFrameInternal(Minecraft.getInstance().font, lines, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, tooltipStyle, false);
+        graphics.tooltip(Minecraft.getInstance().font, lines, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, tooltipStyle);
         graphics.pose().popMatrix();
     }
 }

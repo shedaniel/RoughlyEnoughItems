@@ -21,35 +21,36 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.client.categories.crafting.filler;
+package me.shedaniel.rei.impl.client.forge;
 
-import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.util.EntryIngredients;
-import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomShapelessDisplay;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.MapCloningRecipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-
-public class MapCloningRecipeFiller implements CraftingRecipeFiller<MapCloningRecipe> {
-    @Override
-    public Collection<Display> apply(RecipeHolder<MapCloningRecipe> recipe) {
-        List<Display> displays = new ArrayList<>();
-        
-        displays.add(new DefaultCustomShapelessDisplay(
-                List.of(EntryIngredients.of(Items.FILLED_MAP), EntryIngredients.of(Items.MAP)),
-                List.of(EntryIngredients.of(Items.FILLED_MAP, 2)),
-                Optional.of(recipe.id().identifier())));
-        
-        return displays;
+public final class MobEffectLayoutHandlerImpl {
+    private MobEffectLayoutHandlerImpl() {
     }
-    
-    @Override
-    public Class<MapCloningRecipe> getRecipeClass() {
-        return MapCloningRecipe.class;
+
+    public static void register() {
+        NeoForge.EVENT_BUS.addListener(MobEffectLayoutHandlerImpl::onRenderInventoryMobEffects);
+    }
+
+    private static void onRenderInventoryMobEffects(ScreenEvent.RenderInventoryMobEffects event) {
+        if (!ConfigObject.getInstance().isLeftSideMobEffects()) {
+            return;
+        }
+
+        Screen screen = event.getScreen();
+        if (!(screen instanceof AbstractContainerScreen<?> containerScreen)) {
+            return;
+        }
+
+        int left = containerScreen.leftPos;
+        boolean wide = left >= 120;
+
+        event.setCompact(!wide);
+        event.setHorizontalOffset(wide ? left - 120 - 4 : left - 32 - 4);
     }
 }

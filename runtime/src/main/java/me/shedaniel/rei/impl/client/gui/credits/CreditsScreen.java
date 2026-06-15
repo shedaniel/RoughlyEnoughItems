@@ -29,7 +29,7 @@ import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TextCredi
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -47,7 +47,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
-public class CreditsScreen extends Screen {
+public class CreditsScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private Screen parent;
     private AbstractButton buttonDone;
     private CreditsEntryListWidget entryListWidget;
@@ -133,7 +133,7 @@ public class CreditsScreen extends Screen {
     
     private static void fillTranslators(Exception[] exception, List<Tuple<String, List<TranslatorEntry>>> translators) {
         try {
-            Class.forName("me.shedaniel.rei.impl.client.gui.credits.%s.CreditsScreenImpl".formatted(Platform.isForge() ? "forge" : "fabric"))
+            Class.forName("me.shedaniel.rei.impl.client.gui.credits.%s.CreditsScreenImpl".formatted(Platform.isNeoForge() ? "forge" : "fabric"))
                     .getDeclaredMethod("fillTranslators", Exception[].class, List.class)
                     .invoke(null, exception, translators);
         } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {

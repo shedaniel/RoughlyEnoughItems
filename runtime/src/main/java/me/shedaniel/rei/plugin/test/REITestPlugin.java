@@ -65,7 +65,7 @@ public class REITestPlugin implements REIClientPlugin {
                     .then(Commands.argument("item", ItemArgument.item(registry))
                             .executes(context -> {
                                 BasicFilteringRule<?> basic = FilteringRuleTypeRegistry.getInstance().basic();
-                                basic.hide(EntryStacks.of(context.getArgument("item", ItemInput.class).createItemStack(1, false)));
+                                basic.hide(EntryStacks.of(context.getArgument("item", ItemInput.class).createItemStack(1)));
                                 return 0;
                             }))
                     .executes(context -> {

@@ -47,6 +47,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.plugin.autocrafting.InventoryCraftingTransferHandler;
 import me.shedaniel.rei.plugin.autocrafting.recipebook.DefaultRecipeBookHandler;
@@ -59,6 +60,8 @@ import me.shedaniel.rei.plugin.client.categories.crafting.DefaultCraftingCategor
 import me.shedaniel.rei.plugin.client.categories.tag.DefaultTagCategory;
 import me.shedaniel.rei.plugin.client.displays.ClientsidedCookingDisplay;
 import me.shedaniel.rei.plugin.client.displays.ClientsidedCraftingDisplay;
+import me.shedaniel.rei.plugin.client.displays.ClientsidedSmithingDisplay;
+import me.shedaniel.rei.plugin.client.displays.ClientsidedStoneCuttingDisplay;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultPotionEffectExclusionZones;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultRecipeBookExclusionZones;
 import me.shedaniel.rei.plugin.client.favorites.GameModeFavoriteEntry;
@@ -97,8 +100,11 @@ import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.display.FurnaceRecipeDisplay;
+import net.minecraft.world.item.crafting.display.RecipeDisplayId;
 import net.minecraft.world.item.crafting.display.ShapedCraftingRecipeDisplay;
 import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
+import net.minecraft.world.item.crafting.display.SmithingRecipeDisplay;
+import net.minecraft.world.item.crafting.display.StonecutterRecipeDisplay;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
@@ -123,6 +129,8 @@ import java.util.stream.Stream;
 @Environment(EnvType.CLIENT)
 @ApiStatus.Internal
 public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin {
+    private static Boolean fluidEntriesAvailable;
+
     public DefaultClientPlugin() {
         ClientInternals.attachInstance((Supplier<Object>) () -> this, "builtinClientPlugin");
     }
@@ -168,17 +176,19 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             }
         }
         
-        for (Fluid fluid : BuiltInRegistries.FLUID) {
-            FluidState state = fluid.defaultFluidState();
-            if (!state.isEmpty() && state.isSource()) {
-                registry.addEntry(EntryStacks.of(fluid));
+        if (canUseFluidEntries()) {
+            for (Fluid fluid : BuiltInRegistries.FLUID) {
+                FluidState state = fluid.defaultFluidState();
+                if (!state.isEmpty() && state.isSource()) {
+                    registry.addEntry(EntryStacks.of(fluid));
+                }
             }
         }
     }
     
     private static Map<CreativeModeTab, Collection<ItemStack>> collectTabs() {
         try {
-            return (Map<CreativeModeTab, Collection<ItemStack>>) Class.forName(Platform.isForge() ? "me.shedaniel.rei.impl.client.forge.CreativeModeTabCollectorImpl"
+            return (Map<CreativeModeTab, Collection<ItemStack>>) Class.forName(Platform.isNeoForge() ? "me.shedaniel.rei.impl.client.forge.CreativeModeTabCollectorImpl"
                             : "me.shedaniel.rei.impl.client.fabric.CreativeModeTabCollectorImpl")
                     .getDeclaredMethod("collectTabs")
                     .invoke(null);
@@ -288,29 +298,56 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     private static EntryIngredient getTag(Identifier tagId) {
         return EntryIngredients.ofItemTag(TagKey.create(Registries.ITEM, tagId));
     }
+
+    private static boolean hasCraftingStation(FurnaceRecipeDisplay display, Item station) {
+        return EntryIngredients.testFuzzy(EntryIngredients.ofSlotDisplay(display.craftingStation()), EntryStacks.of(station));
+    }
+
+    private static ClientsidedCookingDisplay createCookingFallbackDisplay(FurnaceRecipeDisplay display, Optional<RecipeDisplayId> id) {
+        if (hasCraftingStation(display, Items.SMOKER)) {
+            return new ClientsidedCookingDisplay.Smoking(display, id);
+        }
+        if (hasCraftingStation(display, Items.BLAST_FURNACE)) {
+            return new ClientsidedCookingDisplay.Blasting(display, id);
+        }
+        // Mojang can omit or flatten the workstation slot in recipe-book fallback displays on multiplayer.
+        // When that happens, keep the recipe visible by treating it as a normal furnace recipe.
+        return new ClientsidedCookingDisplay.Smelting(display, id);
+    }
+
+    private static boolean canUseFluidEntries() {
+        if (fluidEntriesAvailable != null) {
+            return fluidEntriesAvailable;
+        }
+
+        try {
+            EntryStacks.of(BuiltInRegistries.FLUID.getValue(Identifier.withDefaultNamespace("water")));
+            fluidEntriesAvailable = true;
+        } catch (Throwable throwable) {
+            fluidEntriesAvailable = false;
+            InternalLogger.getInstance().warn("Disabling REI fluid entries because Architectury FluidStack failed to initialize.", throwable);
+        }
+
+        return fluidEntriesAvailable;
+    }
     
     @Override
     public void registerDisplays(DisplayRegistry registry) {
         CategoryRegistry.getInstance().add(new DefaultInformationCategory(), new DefaultTagCategory());
         
         registry.beginRecipeFiller(ShapedCraftingRecipeDisplay.class)
-                .filterType(ShapedCraftingRecipeDisplay.TYPE)
                 .fill(ClientsidedCraftingDisplay.Shaped::new);
         registry.beginRecipeFiller(ShapelessCraftingRecipeDisplay.class)
-                .filterType(ShapelessCraftingRecipeDisplay.TYPE)
                 .fill(ClientsidedCraftingDisplay.Shapeless::new);
         registry.beginRecipeFiller(FurnaceRecipeDisplay.class)
                 .filterType(FurnaceRecipeDisplay.TYPE)
-                .filter((display, r) -> EntryIngredients.ofSlotDisplay(display.craftingStation()).contains(EntryStacks.of(Items.FURNACE)))
-                .fill(ClientsidedCookingDisplay.Smelting::new);
-        registry.beginRecipeFiller(FurnaceRecipeDisplay.class)
-                .filterType(FurnaceRecipeDisplay.TYPE)
-                .filter((display, r) -> EntryIngredients.ofSlotDisplay(display.craftingStation()).contains(EntryStacks.of(Items.SMOKER)))
-                .fill(ClientsidedCookingDisplay.Smoking::new);
-        registry.beginRecipeFiller(FurnaceRecipeDisplay.class)
-                .filterType(FurnaceRecipeDisplay.TYPE)
-                .filter((display, r) -> EntryIngredients.ofSlotDisplay(display.craftingStation()).contains(EntryStacks.of(Items.BLAST_FURNACE)))
-                .fill(ClientsidedCookingDisplay.Blasting::new);
+                .fill(DefaultClientPlugin::createCookingFallbackDisplay);
+        registry.beginRecipeFiller(StonecutterRecipeDisplay.class)
+                .filterType(StonecutterRecipeDisplay.TYPE)
+                .fill(ClientsidedStoneCuttingDisplay::new);
+        registry.beginRecipeFiller(SmithingRecipeDisplay.class)
+                .filterType(SmithingRecipeDisplay.TYPE)
+                .fill(ClientsidedSmithingDisplay::new);
         registry.beginFiller(AnvilRecipe.class)
                 .fill(DefaultAnvilDisplay::new);
         registry.beginFiller(BrewingRecipe.class)
@@ -322,6 +359,9 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                     } else if (tagKey.isFor(Registries.BLOCK)) {
                         return DefaultTagDisplay.ofItems(tagKey);
                     } else if (tagKey.isFor(Registries.FLUID)) {
+                        if (!canUseFluidEntries()) {
+                            return null;
+                        }
                         return DefaultTagDisplay.ofFluids(tagKey);
                     }
                     

@@ -25,7 +25,8 @@ package me.shedaniel.rei.impl.client.gui.toast;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -68,7 +69,6 @@ public class ExportRecipeIdentifierToast implements Toast {
         this.wantedVisibility = (double) m < d ? Visibility.SHOW : Visibility.HIDE;
     }
     
-    @Override
     public void render(GuiGraphics graphics, Font font, long var2) {
         graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, 0, 0, 160, 32, 256, 256);
         if (this.subtitle == null) {
@@ -77,6 +77,11 @@ public class ExportRecipeIdentifierToast implements Toast {
             graphics.drawString(font, this.title, 18, 7, 11141120, false);
             graphics.drawString(font, this.subtitle, 18, 18, -16777216, false);
         }
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor graphics, Font font, long time) {
+        render(GuiGraphics.of(graphics), font, time);
     }
     
     @Override

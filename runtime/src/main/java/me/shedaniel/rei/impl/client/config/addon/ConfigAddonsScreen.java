@@ -29,7 +29,8 @@ import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -45,7 +46,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class ConfigAddonsScreen extends Screen {
+public class ConfigAddonsScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private AddonsList rulesList;
     private final Screen parent;
     
@@ -128,7 +129,7 @@ public class ConfigAddonsScreen extends Screen {
                 Minecraft.getInstance().setScreen(this.addon.createScreen(Minecraft.getInstance().screen));
             }, Supplier::get) {
                 @Override
-                public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+                public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
                     graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, getX() + 3, getY() + 3, 0, 0, 14, 14, 256, 256);
                 }
             };
@@ -159,7 +160,7 @@ public class ConfigAddonsScreen extends Screen {
             }
             configureButton.setX(x + entryWidth - 25);
             configureButton.setY(y + 1);
-            configureButton.render(graphics, mouseX, mouseY, delta);
+            configureButton.extractRenderState(graphics, mouseX, mouseY, delta);
         }
         
         @Override

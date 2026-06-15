@@ -38,7 +38,7 @@ import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;

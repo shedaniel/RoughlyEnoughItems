@@ -29,7 +29,8 @@ import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.impl.client.config.addon.ConfigAddonsScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -72,16 +73,19 @@ public class ConfigAddonsEntry extends AbstractConfigListEntry<Unit> {
     public void save() {
     }
     
-    @Override
     public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-        super.render(graphics, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = REIRuntime.getInstance().getPreviousContainerScreen() != null && Minecraft.getInstance().getConnection() != null
                                    && Minecraft.getInstance().getConnection().registryAccess() != null && this.isEditable();
         this.buttonWidget.setY(y);
         this.buttonWidget.setX(x + entryWidth / 2 - width / 2);
         this.buttonWidget.setWidth(width);
-        this.buttonWidget.render(graphics, mouseX, mouseY, delta);
+        this.buttonWidget.extractRenderState(graphics, mouseX, mouseY, delta);
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        render(GuiGraphics.of(graphics), index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
     }
     
     @Override

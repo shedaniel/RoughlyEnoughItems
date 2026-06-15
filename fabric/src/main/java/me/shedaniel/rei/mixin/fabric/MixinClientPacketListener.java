@@ -29,8 +29,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
 import net.minecraft.world.item.crafting.RecipeAccess;
-import net.minecraft.world.item.crafting.RecipeManager;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,15 +37,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPacketListener.class)
 public abstract class MixinClientPacketListener {
-    @Shadow public abstract RecipeAccess recipes();
-    
-    @Shadow public abstract RegistryAccess.Frozen registryAccess();
-    
+    @Shadow
+    public abstract RecipeAccess recipes();
+
+    @Shadow
+    public abstract RegistryAccess.Frozen registryAccess();
+
     @Inject(method = "handleUpdateRecipes", at = @At("HEAD"))
-    private void handleUpdateRecipes(ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket, CallbackInfo ci) {
+    private void handleUpdateRecipes(ClientboundUpdateRecipesPacket packet, CallbackInfo ci) {
+        // Fire before vanilla swaps the client recipe data so REI can bracket its reload like the working unpacked build.
         RoughlyEnoughItemsCoreClient.PRE_UPDATE_RECIPES.invoker().accept(recipes(), registryAccess());
     }
-    
+
     @Inject(method = "handleUpdateTags", at = @At("HEAD"))
     private void handleUpdateTags(ClientboundUpdateTagsPacket packet, CallbackInfo ci) {
         RoughlyEnoughItemsCoreClient.POST_UPDATE_TAGS.invoker().run();

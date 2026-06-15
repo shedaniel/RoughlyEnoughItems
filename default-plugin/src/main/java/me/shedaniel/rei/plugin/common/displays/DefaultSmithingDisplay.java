@@ -91,7 +91,7 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
                         EntryIngredients.ofIngredient(recipe.value().baseIngredient()),
                         recipe.value().additionIngredient().map(EntryIngredients::ofIngredient).orElse(EntryIngredient.empty())
                 ),
-                List.of(EntryIngredients.ofSlotDisplay(recipe.value().result.display())),
+                List.of(EntryIngredients.ofSlotDisplay(recipe.value().display().getFirst().result())),
                 Optional.of(SmithingRecipeType.TRANSFORM),
                 Optional.of(recipe.id().identifier())
         );
@@ -150,7 +150,7 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
         ItemStack baseItem = base.castValue();
         ItemStack additionItem = addition.castValue();
         if (trimPattern == null) return EntryIngredient.empty();
-        Holder<TrimMaterial> trimMaterial = TrimMaterials.getFromIngredient(registryAccess, additionItem)
+        Holder<TrimMaterial> trimMaterial = getMaterialFromIngredient(registryAccess, additionItem.typeHolder())
                 .orElse(null);
         if (trimMaterial == null) return EntryIngredient.empty();
         ArmorTrim armorTrim = new ArmorTrim(trimMaterial, trimPattern);
@@ -162,8 +162,8 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
     }
     
     private static Optional<Holder<TrimMaterial>> getMaterialFromIngredient(HolderLookup.Provider provider, Holder<Item> item) {
-        ProvidesTrimMaterial providesTrimMaterial = new ItemStack(item).get(DataComponents.PROVIDES_TRIM_MATERIAL);
-        return providesTrimMaterial != null ? providesTrimMaterial.unwrap(provider) : Optional.empty();
+        Holder<TrimMaterial> material = new ItemStack(item).get(DataComponents.PROVIDES_TRIM_MATERIAL);
+        return Optional.ofNullable(material);
     }
     
     public static class Trimming extends DefaultSmithingDisplay implements SmithingDisplay.Trimming {

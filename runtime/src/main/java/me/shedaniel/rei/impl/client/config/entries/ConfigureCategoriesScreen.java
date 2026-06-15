@@ -32,7 +32,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -47,7 +47,7 @@ import net.minecraft.sounds.SoundEvents;
 import java.util.*;
 import java.util.function.Supplier;
 
-public class ConfigureCategoriesScreen extends Screen {
+public class ConfigureCategoriesScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private final Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories;
     private final Set<CategoryIdentifier<?>> hiddenCategories;
     private final List<CategoryIdentifier<?>> categoryOrdering;
@@ -291,10 +291,10 @@ public class ConfigureCategoriesScreen extends Screen {
             }
             upButton.setX(x + entryWidth - 20);
             upButton.setY(y + entryHeight / 2 - 21);
-            upButton.render(graphics, mouseX, mouseY, delta);
+            upButton.extractRenderState(graphics, mouseX, mouseY, delta);
             downButton.setX(x + entryWidth - 20);
             downButton.setY(y + entryHeight / 2 + 1);
-            downButton.render(graphics, mouseX, mouseY, delta);
+            downButton.extractRenderState(graphics, mouseX, mouseY, delta);
         }
         
         @Override

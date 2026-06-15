@@ -1,5 +1,9 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "com.gradleup.shadow" version "9.4.2"
+}
+
+base {
+    archivesName = rootProject.name
 }
 
 architectury {
@@ -48,50 +52,39 @@ processServerComponentResources {
     inputs.property "version", project.version
 }
 
-loom {
-}
-
 def depProjects = [":api", ":runtime", ":default-plugin"]
 
 dependencies {
     neoForge("net.neoforged:neoforge:${rootProject.neoforge_version}")
-    modApi("me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}")
-    modApi("dev.architectury:architectury-neoforge:${architectury_version}")
+    api("me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}")
+    api("dev.architectury:architectury-neoforge:${architectury_version}")
 
     depProjects.forEach {
-        common(project(path: it, configuration: "namedElements")) { transitive false }
+        common(project(path: it)) { transitive false }
         shadowCommon(project(path: it, configuration: "transformProductionNeoForge")) { transitive false }
     }
 }
 
 def modRuntime(str) {
-    dependencies.modLocalRuntime(str)
+    dependencies.localRuntime(str)
+}
+
+jar {
+    archiveClassifier = "raw"
 }
 
 shadowJar {
+    dependsOn(jar)
+    // Loom modifies the jar output, so build on top of it rather than rebuilding from the raw source set.
+    mainSpec.sourcePaths.clear()
+    from(zipTree(jar.archiveFile))
+
     configurations = [project.configurations.shadowCommon]
-    archiveClassifier = "dev-shadow"
-}
-
-remapJar {
-    input.set shadowJar.archiveFile
-    dependsOn shadowJar
     archiveClassifier = null
+    from rootProject.file("LICENSE")
 }
 
-task renameJarForPublication(type: Zip, dependsOn: remapJar) {
-    from remapJar.archiveFile.map { zipTree(it) }
-    metadataCharset "UTF-8"
-    archiveExtension = "jar"
-    destinationDirectory = base.libsDirectory
-    archiveClassifier = project.name
-}
-
-assemble.dependsOn renameJarForPublication
-
-jar {
-    archiveClassifier = "dev"
-}
+assemble.dependsOn shadowJar
 
 java {
     withSourcesJar()
@@ -107,9 +100,9 @@ sourcesJar {
     }
 }
 
-task serverOnlyJar(type: Jar, dependsOn: [remapJar]) {
+task serverOnlyJar(type: Jar, dependsOn: [shadowJar]) {
     archiveClassifier = "server-only"
-    from(zipTree(remapJar.archiveFile.get().asFile)) {
+    from(zipTree(shadowJar.archiveFile.get().asFile)) {
         exclude "META-INF/neoforge.mods.toml", "mezz/**", "me/shedaniel/rei/forge/RoughlyEnoughItemsForge.class", "me/shedaniel/rei/forge/JEIStub.class"
     }
     from(sourceSets.serverComponent.output)
@@ -119,9 +112,15 @@ tasks.build {
     dependsOn tasks.serverOnlyJar
 }
 
-components.java {
-    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
-        skip()
+// Redirect the published variants to use the shadow jar while keeping POM metadata from components.java.
+configurations {
+    apiElements {
+        outgoing.artifacts.clear()
+        outgoing.artifact(shadowJar)
+    }
+    runtimeElements {
+        outgoing.artifacts.clear()
+        outgoing.artifact(shadowJar)
     }
 }
 
@@ -132,25 +131,15 @@ publishing {
             from components.java
         }
         ["api", "default-plugin"].forEach { projectName ->
-            def remapMojang = tasks.create("remapMojangJarFor$projectName", net.fabricmc.loom.task.RemapJarTask) {
-                inputFile = project(":" + projectName).tasks.jar.archiveFile
-                archiveClassifier = "mojang-remapped-$projectName"
-                targetNamespace = "mojang"
-            }
-            def remapMojangSourcesJar = tasks.create("remapMojangSourcesFor$projectName", net.fabricmc.loom.task.RemapSourcesJarTask) {
-                inputFile = project(":" + projectName).tasks.sourcesJar.archiveFile
-                archiveClassifier = "mojang-remapped-$projectName-sources"
-                targetNamespace = "mojang"
-            }
             create(projectName + "NeoForge", MavenPublication.class) { publication ->
                 publication.artifactId = rootProject.name + "-" + projectName + "-neoforge"
                 project.afterEvaluate {
-                    def project = project(":" + projectName)
-                    remapMojang.inputFile = project.fakeForgeJar.archiveFile
+                    def depProject = project(":" + projectName)
                     def normalArtifact, sourceArtifact
-                    publication.artifact(remapMojang) { classifier null; normalArtifact = it }
-                    publication.artifact(remapMojangSourcesJar) {
-                        builtBy remapMojangSourcesJar
+                    publication.artifact(depProject.fakeForgeJar) { classifier null; normalArtifact = it }
+                    def depSourcesJar = depProject.sourcesJar
+                    publication.artifact(depSourcesJar) {
+                        builtBy depSourcesJar
                         classifier "sources"
                         sourceArtifact = it
                     }
@@ -168,11 +157,11 @@ unifiedPublishing {
     project {
         displayName = "[NeoForge $rootProject.supported_version] v$project.version"
         releaseType = "beta"
-        gameVersions = ["1.21.11"]
+        gameVersions = ["26.1.2"]
         gameLoaders = ["neoforge"]
         changelog = rootProject.releaseChangelog
 
-        mainPublication renameJarForPublication
+        mainPublication shadowJar
 
         relations {
             depends {
@@ -189,7 +178,7 @@ unifiedPublishing {
             curseforge {
                 token = project.hasProperty("danielshe_curse_api_key") ? project.property("danielshe_curse_api_key") : System.getenv("danielshe_curse_api_key")
                 id = "310111"
-                gameVersions.addAll "Java 17"
+                gameVersions.addAll "Java 25"
 
                 relations {
                     depends "roughly-enough-items-hacks"
@@ -208,7 +197,7 @@ unifiedPublishing {
     project {
         displayName = "[NeoForge $rootProject.supported_version] v$project.version"
         releaseType = "release"
-        gameVersions = ["1.21.11"]
+        gameVersions = ["26.1.2"]
         gameLoaders = ["neoforge"]
         changelog = rootProject.releaseChangelog
 
@@ -229,7 +218,7 @@ unifiedPublishing {
             curseforge {
                 token = project.hasProperty("danielshe_curse_api_key") ? project.property("danielshe_curse_api_key") : System.getenv("danielshe_curse_api_key")
                 id = "567899"
-                gameVersions.addAll "Java 17"
+                gameVersions.addAll "Java 25"
             }
         }
 

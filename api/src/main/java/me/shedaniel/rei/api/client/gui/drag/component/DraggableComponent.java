@@ -26,7 +26,7 @@ package me.shedaniel.rei.api.client.gui.drag.component;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 
 import java.util.Optional;
 import java.util.function.Consumer;

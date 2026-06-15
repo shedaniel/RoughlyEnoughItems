@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
@@ -68,9 +68,7 @@ public class ScreenOverlayImplForge extends ScreenOverlayImpl {
         if (!itemStack.isEmpty()) {
             font = ClientHooks.getTooltipFont(itemStack, font);
         }
-        graphics.tooltipStack = itemStack;
-        graphics.setTooltipForNextFrameInternal(font, components, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, tooltip.getTooltipStyle(), false);
-        graphics.tooltipStack = ItemStack.EMPTY;
+        graphics.tooltip(font, components, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, tooltip.getTooltipStyle());
         graphics.pose().popMatrix();
     }
 }

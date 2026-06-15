@@ -28,7 +28,7 @@ import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -43,7 +43,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class FilteringAddRuleScreen extends Screen {
+public class FilteringAddRuleScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private final List<FilteringRule<?>> rules;
     private RulesList rulesList;
     Screen parent;
@@ -167,7 +167,7 @@ public class FilteringAddRuleScreen extends Screen {
             }
             addButton.setX(x + entryWidth - 25);
             addButton.setY(y + 1);
-            addButton.render(graphics, mouseX, mouseY, delta);
+            addButton.extractRenderState(graphics, mouseX, mouseY, delta);
         }
         
         @Override

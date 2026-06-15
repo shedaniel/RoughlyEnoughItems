@@ -77,7 +77,7 @@ public class RoughlyEnoughItemsNetwork {
         NetworkManager.registerReceiver(NetworkManager.c2s(), DELETE_ITEMS_PACKET, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
             if (!player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS))) {
-                player.displayClientMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
+                player.sendSystemMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED));
                 return;
             }
             AbstractContainerMenu menu = player.containerMenu;
@@ -90,7 +90,7 @@ public class RoughlyEnoughItemsNetwork {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
 
             if (!player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS))) {
-                player.displayClientMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
+                player.sendSystemMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED));
                 return;
             }
             ItemStack stack = buf.readLenientJsonWithCodec(ItemStack.OPTIONAL_CODEC);
@@ -100,13 +100,13 @@ public class RoughlyEnoughItemsNetwork {
                 newBuf.writeUtf(player.getScoreboardName(), 32767);
                 NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, newBuf);
             } else {
-                player.displayClientMessage(Component.translatable("text.rei.failed_cheat_items"), false);
+                player.sendSystemMessage(Component.translatable("text.rei.failed_cheat_items"));
             }
         });
         NetworkManager.registerReceiver(NetworkManager.c2s(), CREATE_ITEMS_GRAB_PACKET, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
             if (!player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS))) {
-                player.displayClientMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
+                player.sendSystemMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED));
                 return;
             }
             
@@ -128,7 +128,7 @@ public class RoughlyEnoughItemsNetwork {
         NetworkManager.registerReceiver(NetworkManager.c2s(), CREATE_ITEMS_HOTBAR_PACKET, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
             if (!player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS))) {
-                player.displayClientMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
+                player.sendSystemMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED));
                 return;
             }
             ItemStack stack = buf.readLenientJsonWithCodec(ItemStack.OPTIONAL_CODEC);
@@ -142,7 +142,7 @@ public class RoughlyEnoughItemsNetwork {
                 newBuf.writeUtf(player.getScoreboardName(), 32767);
                 NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, newBuf);
             } else {
-                player.displayClientMessage(Component.translatable("text.rei.failed_cheat_items"), false);
+                player.sendSystemMessage(Component.translatable("text.rei.failed_cheat_items"));
             }
         });
         NetworkManager.registerReceiver(NetworkManager.c2s(), MOVE_ITEMS_NEW_PACKET, Collections.singletonList(new SplitPacketTransformer()), (packetByteBuf, context) -> {

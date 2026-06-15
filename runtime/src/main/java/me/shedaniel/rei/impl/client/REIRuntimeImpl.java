@@ -153,7 +153,7 @@ public class REIRuntimeImpl implements REIRuntime {
     public Optional<ScreenOverlay> getOverlay(boolean reset, boolean init) {
         if ((overlay == null && init) || reset) {
             try {
-                overlay = (ScreenOverlayImpl) Class.forName(Platform.isForge() ? "me.shedaniel.rei.impl.client.gui.forge.ScreenOverlayImplForge"
+                overlay = (ScreenOverlayImpl) Class.forName(Platform.isNeoForge() ? "me.shedaniel.rei.impl.client.gui.forge.ScreenOverlayImplForge"
                                 : "me.shedaniel.rei.impl.client.gui.fabric.ScreenOverlayImplFabric")
                         .getDeclaredConstructor()
                         .newInstance();

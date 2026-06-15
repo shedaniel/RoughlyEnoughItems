@@ -21,57 +21,56 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.common.displays;
+package me.shedaniel.rei.plugin.client.displays;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializer;
-import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
-import me.shedaniel.rei.plugin.common.BuiltinPlugin;
+import me.shedaniel.rei.plugin.common.displays.DefaultStoneCuttingDisplay;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.StonecutterRecipe;
+import net.minecraft.world.item.crafting.display.RecipeDisplayId;
+import net.minecraft.world.item.crafting.display.StonecutterRecipeDisplay;
 
 import java.util.List;
 import java.util.Optional;
 
-public class DefaultStoneCuttingDisplay extends BasicDisplay {
-    public static final DisplaySerializer<DefaultStoneCuttingDisplay> SERIALIZER = DisplaySerializer.of(
+public class ClientsidedStoneCuttingDisplay extends DefaultStoneCuttingDisplay implements ClientsidedRecipeBookDisplay {
+    public static final DisplaySerializer<ClientsidedStoneCuttingDisplay> SERIALIZER = DisplaySerializer.of(
             RecordCodecBuilder.mapCodec(instance -> instance.group(
-                    EntryIngredient.codec().listOf().fieldOf("inputs").forGetter(DefaultStoneCuttingDisplay::getInputEntries),
-                    EntryIngredient.codec().listOf().fieldOf("outputs").forGetter(DefaultStoneCuttingDisplay::getOutputEntries),
-                    Identifier.CODEC.optionalFieldOf("location").forGetter(DefaultStoneCuttingDisplay::getDisplayLocation)
-            ).apply(instance, DefaultStoneCuttingDisplay::new)),
+                    EntryIngredient.codec().listOf().fieldOf("inputs").forGetter(ClientsidedStoneCuttingDisplay::getInputEntries),
+                    EntryIngredient.codec().listOf().fieldOf("outputs").forGetter(ClientsidedStoneCuttingDisplay::getOutputEntries),
+                    Codec.INT.xmap(RecipeDisplayId::new, RecipeDisplayId::index).optionalFieldOf("id").forGetter(ClientsidedStoneCuttingDisplay::recipeDisplayId)
+            ).apply(instance, ClientsidedStoneCuttingDisplay::new)),
             StreamCodec.composite(
                     EntryIngredient.streamCodec().apply(ByteBufCodecs.list()),
-                    DefaultStoneCuttingDisplay::getInputEntries,
+                    ClientsidedStoneCuttingDisplay::getInputEntries,
                     EntryIngredient.streamCodec().apply(ByteBufCodecs.list()),
-                    DefaultStoneCuttingDisplay::getOutputEntries,
-                    ByteBufCodecs.optional(Identifier.STREAM_CODEC),
-                    DefaultStoneCuttingDisplay::getDisplayLocation,
-                    DefaultStoneCuttingDisplay::new
-            ));
-    
-    public DefaultStoneCuttingDisplay(RecipeHolder<StonecutterRecipe> recipe) {
-        this(List.of(EntryIngredients.ofIngredient(recipe.value().input())),
-                List.of(EntryIngredients.ofSlotDisplay(recipe.value().resultDisplay())),
-                Optional.of(recipe.id().identifier()));
+                    ClientsidedStoneCuttingDisplay::getOutputEntries,
+                    ByteBufCodecs.optional(ByteBufCodecs.INT.map(RecipeDisplayId::new, RecipeDisplayId::index)),
+                    ClientsidedStoneCuttingDisplay::recipeDisplayId,
+                    ClientsidedStoneCuttingDisplay::new
+            ), false);
+
+    private final Optional<RecipeDisplayId> id;
+
+    public ClientsidedStoneCuttingDisplay(StonecutterRecipeDisplay recipe, Optional<RecipeDisplayId> id) {
+        this(List.of(EntryIngredients.ofSlotDisplay(recipe.input())), List.of(EntryIngredients.ofSlotDisplay(recipe.result())), id);
     }
-    
-    public DefaultStoneCuttingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<Identifier> location) {
-        super(inputs, outputs, location);
+
+    public ClientsidedStoneCuttingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<RecipeDisplayId> id) {
+        super(inputs, outputs, Optional.empty());
+        this.id = id;
     }
-    
+
     @Override
-    public CategoryIdentifier<?> getCategoryIdentifier() {
-        return BuiltinPlugin.STONE_CUTTING;
+    public Optional<RecipeDisplayId> recipeDisplayId() {
+        return id;
     }
-    
+
     @Override
     public DisplaySerializer<? extends Display> getSerializer() {
         return SERIALIZER;

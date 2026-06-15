@@ -37,7 +37,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -54,7 +54,7 @@ import java.util.Collections;
 import java.util.List;
 
 @ApiStatus.Internal
-public class UncertainDisplayViewingScreen extends Screen {
+public class UncertainDisplayViewingScreen extends REIScreen {
     private static final Identifier DEFAULT = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/screenshot_default.png");
     private static final Identifier COMPOSITE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/screenshot_composite.png");
     private final List<Widget> widgets;

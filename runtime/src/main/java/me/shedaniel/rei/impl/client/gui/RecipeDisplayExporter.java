@@ -36,7 +36,7 @@ import me.shedaniel.rei.impl.client.gui.toast.ExportRecipeIdentifierToast;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;

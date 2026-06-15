@@ -42,7 +42,8 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import me.shedaniel.rei.impl.client.gui.widget.EntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -114,7 +115,7 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
                 CollapsibleEntriesScreen.setupCustom(this.id, this.component.getString(), new ArrayList<>(stacks), this.configObject, markDirty);
             }, Supplier::get) {
                 @Override
-                protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+                protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
                     graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, getX() + 3, getY() + 3, 0, 0, 14, 14, 256, 256);
                 }
             };
@@ -196,20 +197,20 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
         
         this.toggleButton.setX(bounds.getMaxX() - 4 - toggleButton.getWidth());
         this.toggleButton.setY(bounds.getMaxY() - 4 - toggleButton.getHeight());
-        this.toggleButton.render(graphics, mouseX, mouseY, delta);
+        this.toggleButton.extractRenderState(graphics, mouseX, mouseY, delta);
         if (this.toggleButton.isMouseOver(mouseX, mouseY)) {
             ScreenOverlayImpl.getInstance().clearTooltips();
         }
         if (this.custom) {
             this.deleteButton.setX(toggleButton.getX() - 2 - deleteButton.getWidth());
             this.deleteButton.setY(bounds.getMaxY() - 4 - deleteButton.getHeight());
-            this.deleteButton.render(graphics, mouseX, mouseY, delta);
+            this.deleteButton.extractRenderState(graphics, mouseX, mouseY, delta);
             if (this.deleteButton.isMouseOver(mouseX, mouseY)) {
                 ScreenOverlayImpl.getInstance().clearTooltips();
             }
             this.configureButton.setX(deleteButton.getX() - 2 - configureButton.getWidth());
             this.configureButton.setY(bounds.getMaxY() - 4 - configureButton.getHeight());
-            this.configureButton.render(graphics, mouseX, mouseY, delta);
+            this.configureButton.extractRenderState(graphics, mouseX, mouseY, delta);
             if (this.configureButton.isMouseOver(mouseX, mouseY)) {
                 ScreenOverlayImpl.getInstance().clearTooltips();
             }

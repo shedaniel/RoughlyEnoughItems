@@ -40,7 +40,8 @@ import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import me.shedaniel.rei.impl.common.entry.type.FilteringLogic;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -59,7 +60,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class FilteringRulesScreen extends Screen {
+public class FilteringRulesScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private final FilteringScreen filteringScreen;
     private final List<FilteringRule<?>> rules;
     private RulesList rulesList;
@@ -186,7 +187,7 @@ public class FilteringRulesScreen extends Screen {
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(Minecraft.getInstance().screen));
             }, Supplier::get) {
                 @Override
-                public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+                public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
                     graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, getX() + 3, getY() + 3, 0, 0, 14, 14, 256, 256);
                 }
             };
@@ -227,10 +228,10 @@ public class FilteringRulesScreen extends Screen {
             }
             configureButton.setX(x + entryWidth - 25);
             configureButton.setY(y + 1);
-            configureButton.render(graphics, mouseX, mouseY, delta);
+            configureButton.extractRenderState(graphics, mouseX, mouseY, delta);
             deleteButton.setX(x + entryWidth - 27 - deleteButton.getWidth());
             deleteButton.setY(y + 1);
-            deleteButton.render(graphics, mouseX, mouseY, delta);
+            deleteButton.extractRenderState(graphics, mouseX, mouseY, delta);
         }
         
         @Override

@@ -25,8 +25,8 @@ package me.shedaniel.rei.impl.client.fabric;
 
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.impl.common.InternalLogger;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTabOutput;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.flag.FeatureFlagSet;
@@ -65,9 +65,9 @@ public class CreativeModeTabCollectorImpl {
     private static Collection<ItemStack> postFabricEvents(CreativeModeTab tab, CreativeModeTab.ItemDisplayParameters parameters, ResourceKey<CreativeModeTab> resourceKey, Collection<ItemStack> tabContents) {
         try {
             // Sorry!
-            FabricItemGroupEntries entries = new FabricItemGroupEntries(parameters, new LinkedList<>(tabContents), new LinkedList<>());
-            ItemGroupEvents.modifyEntriesEvent(resourceKey).invoker().modifyEntries(entries);
-            ItemGroupEvents.MODIFY_ENTRIES_ALL.invoker().modifyEntries(tab, entries);
+            FabricCreativeModeTabOutput entries = new FabricCreativeModeTabOutput(parameters, new LinkedList<>(tabContents), new LinkedList<>());
+            CreativeModeTabEvents.modifyOutputEvent(resourceKey).invoker().modifyOutput(entries);
+            CreativeModeTabEvents.MODIFY_OUTPUT_ALL.invoker().modifyOutput(tab, entries);
             return entries.getDisplayStacks();
         } catch (Throwable throwable) {
             InternalLogger.getInstance().error("Failed to collect fabric's creative tab: " + tab, throwable);

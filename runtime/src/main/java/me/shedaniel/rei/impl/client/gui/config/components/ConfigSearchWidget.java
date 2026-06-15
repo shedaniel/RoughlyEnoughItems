@@ -35,7 +35,7 @@ import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionGroup;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.resources.Identifier;

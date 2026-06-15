@@ -37,7 +37,8 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
@@ -88,22 +89,23 @@ public class DisplayTooltipComponent implements TooltipComponent, ClientTooltipC
     }
     
     @Override
-    public void renderImage(Font font, int x, int y, int width, int height, GuiGraphics graphics) {
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(x + 2, y + 2);
-        graphics.pose().translate(-this.bounds.getX(), -this.bounds.getY());
-        widget.render(graphics, -1000, -1000, 0);
+    public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
+        GuiGraphics guiGraphics = GuiGraphics.of(graphics);
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().translate(x + 2, y + 2);
+        guiGraphics.pose().translate(-this.bounds.getX(), -this.bounds.getY());
+        widget.render(guiGraphics, -1000, -1000, 0);
         
         AutoCraftingEvaluator.AutoCraftingResult craftingResult = autoCraftingResult.get();
         if (craftingResult.hasApplicable && craftingResult.renderer != null) {
-            graphics.pose().pushMatrix();
-            Rectangle transformedBounds = MatrixUtils.transform(MatrixUtils.inverse(graphics.pose()), new Rectangle(x + 2, y + 2, bounds.width, bounds.height));
-            Point mouse = MatrixUtils.transform(graphics.pose(), PointHelper.ofMouse());
-            craftingResult.renderer.render(graphics, mouse.x, mouse.y, Minecraft.getInstance().getDeltaTracker().getRealtimeDeltaTicks(),
+            guiGraphics.pose().pushMatrix();
+            Rectangle transformedBounds = MatrixUtils.transform(MatrixUtils.inverse(guiGraphics.pose()), new Rectangle(x + 2, y + 2, bounds.width, bounds.height));
+            Point mouse = MatrixUtils.transform(guiGraphics.pose(), PointHelper.ofMouse());
+            craftingResult.renderer.render(guiGraphics, mouse.x, mouse.y, Minecraft.getInstance().getDeltaTracker().getRealtimeDeltaTicks(),
                     widgets, transformedBounds, display.provideInternalDisplay());
-            graphics.pose().popMatrix();
+            guiGraphics.pose().popMatrix();
         }
         
-        graphics.pose().popMatrix();
+        guiGraphics.pose().popMatrix();
     }
 }

@@ -62,6 +62,7 @@ import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
@@ -102,6 +103,9 @@ import me.shedaniel.rei.plugin.test.REITestPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.util.context.ContextMap;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -138,6 +142,19 @@ public class RoughlyEnoughItemsCoreClient {
     
     public static void attachClientInternals() {
         InternalWidgets.attach();
+        Internals.attachInstance((Supplier<ContextMap>) () -> {
+            Minecraft client = Minecraft.getInstance();
+            if (client.level != null) {
+                return SlotDisplayContext.fromLevel(client.level);
+            }
+            ContextMap.Builder builder = new ContextMap.Builder()
+                    .withParameter(SlotDisplayContext.REGISTRIES, Internals.getRegistryAccess());
+            ClientPacketListener connection = client.getConnection();
+            if (connection != null) {
+                builder.withParameter(SlotDisplayContext.FUEL_VALUES, connection.fuelValues());
+            }
+            return builder.create(SlotDisplayContext.CONTEXT);
+        }, "slotDisplayContext");
         EmptyEntryDefinition.EmptyRenderer emptyEntryRenderer = new EmptyEntryDefinition.EmptyRenderer();
         ClientInternals.attachInstance((Supplier<EntryRenderer<?>>) () -> emptyEntryRenderer, "emptyEntryRenderer");
         ClientInternals.attachInstance((BiFunction<Supplier<DataResult<FavoriteEntry>>, Supplier<CompoundTag>, FavoriteEntry>) DelegatingFavoriteEntryProviderImpl::new, "delegateFavoriteEntry");
@@ -242,7 +259,7 @@ public class RoughlyEnoughItemsCoreClient {
             ItemStack stack = buf.readLenientJsonWithCodec(ItemStack.OPTIONAL_CODEC);
             String player = buf.readUtf(32767);
             if (client.player != null) {
-                client.player.displayClientMessage(Component.literal(I18n.get("text.rei.cheat_items").replaceAll("\\{item_name}", EntryStacks.of(stack.copy()).asFormattedText().getString()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
+                client.player.sendSystemMessage(Component.literal(I18n.get("text.rei.cheat_items").replaceAll("\\{item_name}", EntryStacks.of(stack.copy()).asFormattedText().getString()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)));
             }
         });
         NetworkManager.registerReceiver(NetworkManager.s2c(), RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (buf, context) -> {

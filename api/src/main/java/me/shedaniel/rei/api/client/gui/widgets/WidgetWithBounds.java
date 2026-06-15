@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api.client.gui.widgets;
 
 import me.shedaniel.math.Rectangle;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import org.jetbrains.annotations.ApiStatus;
 
 public abstract class WidgetWithBounds extends Widget {
@@ -42,6 +42,11 @@ public abstract class WidgetWithBounds extends Widget {
         getBounds().setBounds(bounds);
         render(graphics, mouseX, mouseY, delta);
         getBounds().setBounds(clone);
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        render(graphics, getBounds(), mouseX, mouseY, delta);
     }
     
     @ApiStatus.Experimental

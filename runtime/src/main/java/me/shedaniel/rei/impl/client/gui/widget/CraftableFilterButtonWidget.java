@@ -52,12 +52,9 @@ import me.shedaniel.rei.impl.client.search.method.DefaultInputMethod;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -71,8 +68,6 @@ public class CraftableFilterButtonWidget {
     public static Widget create(ScreenOverlayImpl overlay) {
         Rectangle bounds = getCraftableFilterBounds();
         MenuAccess access = overlay.menuAccess();
-        ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-        ItemStack icon = new ItemStack(Blocks.CRAFTING_TABLE);
         Button filterButton = Widgets.createButton(bounds, Component.empty())
                 .focusable(false)
                 .onClick(button -> {
@@ -86,13 +81,7 @@ public class CraftableFilterButtonWidget {
                 })
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y))
                 .tooltipLineSupplier(button -> Component.translatable(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all"));
-        Widget overlayWidget = Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
-            graphics.pose().pushMatrix();
-            graphics.pose().translate(bounds.x + 2, bounds.y + 2);
-            graphics.renderItem(icon, 0, 0);
-            graphics.pose().popMatrix();
-        });
-        return Widgets.concat(filterButton, overlayWidget);
+        return filterButton;
     }
     
     private static Collection<FavoriteMenuEntry> menuEntries(MenuAccess access) {

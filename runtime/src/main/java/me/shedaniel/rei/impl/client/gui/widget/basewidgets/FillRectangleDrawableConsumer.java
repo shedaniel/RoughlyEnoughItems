@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 
 public final class FillRectangleDrawableConsumer implements DrawableConsumer {
     private Rectangle rectangle;

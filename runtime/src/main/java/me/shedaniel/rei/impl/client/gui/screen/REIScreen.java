@@ -21,33 +21,32 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.widget;
+package me.shedaniel.rei.impl.client.gui.screen;
 
-import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
-import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
-import java.util.Collections;
-import java.util.List;
-
-public class NoOpWidget extends WidgetWithBounds {
-    public static final NoOpWidget INSTANCE = new NoOpWidget();
-    
-    private NoOpWidget() {
+public abstract class REIScreen extends Screen {
+    protected REIScreen(Component title) {
+        super(title);
     }
-    
-    @Override
+
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
     }
-    
-    @Override
-    public List<? extends GuiEventListener> children() {
-        return Collections.emptyList();
+
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        extractBackground(graphics, mouseX, mouseY, delta);
     }
-    
+
+    public void renderTransparentBackground(GuiGraphics graphics) {
+        extractTransparentBackground(graphics);
+    }
+
     @Override
-    public Rectangle getBounds() {
-        return new Rectangle();
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
+        render(GuiGraphics.of(graphics), mouseX, mouseY, delta);
     }
 }
