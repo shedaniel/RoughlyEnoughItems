@@ -38,7 +38,9 @@ import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Unit;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Field;
@@ -56,7 +58,10 @@ public final class Internals {
     private static Function<String, CategoryIdentifier<?>> categoryIdentifier = (object) -> throwNotSetup();
     private static Supplier<InternalLogger> logger = Internals::throwNotSetup;
     private static Supplier<RegistryAccess> registryAccess = Internals::throwNotSetup;
-    
+    private static Supplier<ContextMap> slotDisplayContext = () -> new ContextMap.Builder()
+            .withParameter(SlotDisplayContext.REGISTRIES, getRegistryAccess())
+            .create(SlotDisplayContext.CONTEXT);
+
     private static <T> T throwNotSetup() {
         throw new AssertionError("REI Internals have not been initialized!");
     }
@@ -120,6 +125,10 @@ public final class Internals {
     
     public static RegistryAccess getRegistryAccess() {
         return registryAccess.get();
+    }
+
+    public static ContextMap getSlotDisplayContext() {
+        return slotDisplayContext.get();
     }
     
     public interface EntryStackProvider {
