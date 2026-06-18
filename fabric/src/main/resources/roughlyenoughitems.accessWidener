@@ -30,6 +30,7 @@ accessible field net/minecraft/client/gui/GuiGraphicsExtractor mouseY I
 accessible field net/minecraft/client/gui/GuiGraphicsExtractor scissorStack Lnet/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack;
 mutable field net/minecraft/client/gui/GuiGraphicsExtractor scissorStack Lnet/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack;
 accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerBlit (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lcom/mojang/blaze3d/textures/GpuTextureView;Lcom/mojang/blaze3d/textures/GpuSampler;IIIIFFFFI)V
+accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerBlit (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIIIFFFFI)V
 accessible class net/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack
 accessible method net/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack <init> ()V
 accessible field net/minecraft/tags/TagEntry tag Z

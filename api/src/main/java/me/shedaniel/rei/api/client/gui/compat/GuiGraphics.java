@@ -1,13 +1,10 @@
 package me.shedaniel.rei.api.client.gui.compat;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
-import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 
@@ -97,11 +94,6 @@ public class GuiGraphics extends GuiGraphicsExtractor {
 
     public void renderItemDecorations(Font font, ItemStack stack, int x, int y, String text) {
         itemDecorations(font, stack, x, y, text);
-    }
-
-    public void innerBlit(RenderPipeline pipeline, Identifier location, int xStart, int xEnd, int yStart, int yEnd, float u0, float u1, float v0, float v1, int color) {
-        AbstractTexture texture = this.minecraft.getTextureManager().getTexture(location);
-        innerBlit(pipeline, texture.getTextureView(), texture.getSampler(), xStart, yStart, xEnd, yEnd, u0, u1, v0, v1, color);
     }
 
     public void withFreshScissorStack(Runnable runnable) {
