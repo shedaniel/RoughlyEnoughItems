@@ -131,7 +131,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             if (element.keyPressed(event))
                 return true;
         if (event.isEscape()) {
-            Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
+            Minecraft.getInstance().setScreenAndShow(REIRuntime.getInstance().getPreviousScreen());
             return true;
         }
         return super.keyPressed(event);
@@ -415,7 +415,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         for (TabWidget tab : getTabs()) {
             Rectangle bounds = tab.getBounds();
             if (bounds.contains(PointHelper.ofMouse())) {
-                minecraft.setScreen(new ConfirmScreen(confirmed -> {
+                minecraft.setScreenAndShow(new ConfirmScreen(confirmed -> {
                     if (confirmed) {
                         for (DisplaySpec spec : categoryMap.getOrDefault(tab.category, Collections.emptyList())) {
                             Display display = spec.provideInternalDisplay();
@@ -445,7 +445,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                         }
                         ExportRecipeIdentifierToast.addToast(I18n.get("msg.rei.exported_recipe"), I18n.get("msg.rei.exported_recipe.desc"));
                     }
-                    minecraft.setScreen(null);
+                    minecraft.setScreenAndShow(null);
                 }, Component.translatable("text.rei.ask_to_export", tab.categoryName),
                         Component.translatable("text.rei.ask_to_export.subtitle", categoryMap.getOrDefault(tab.category, Collections.emptyList()).size())));
             }
@@ -484,9 +484,9 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             return recipeBack.isEnabled();
         } else if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesMouse(event.button())) {
             if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+                minecraft.setScreenAndShow(REIRuntimeImpl.getInstance().getLastDisplayScreen());
             } else {
-                minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
+                minecraft.setScreenAndShow(REIRuntime.getInstance().getPreviousScreen());
             }
             return true;
         }

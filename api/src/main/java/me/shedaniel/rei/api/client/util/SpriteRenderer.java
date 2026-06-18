@@ -30,7 +30,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.rendertype.*;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -70,7 +69,6 @@ public class SpriteRenderer {
         private float nZ = 0;
         private TextureAtlasSprite sprite;
         private VertexConsumer consumer;
-        private MultiBufferSource consumers;
         private Matrix3x2fStack matrices;
         private Matrix4f model;
         private Matrix3f normal;
@@ -79,25 +77,9 @@ public class SpriteRenderer {
         private RenderPass() {
         }
         
-        public RenderPass setup(MultiBufferSource consumers, RenderType type) {
-            this.consumers = consumers;
-            this.setup(consumers.getBuffer(type), type);
-            
-            return this;
-        }
-        
         public RenderPass setup(VertexConsumer consumer, RenderType type) {
             this.consumer = consumer;
             this.matrices = new Matrix3x2fStack();
-            this.layer = type;
-            
-            return this;
-        }
-        
-        public RenderPass setup(MultiBufferSource consumers, GuiGraphics graphics, RenderType type) {
-            this.consumers = consumers;
-            this.consumer = consumers.getBuffer(type);
-            this.matrices = graphics.pose();
             this.layer = type;
             
             return this;

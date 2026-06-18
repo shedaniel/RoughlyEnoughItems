@@ -4,7 +4,7 @@
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
+ * in the Software without restriction, including limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
@@ -27,7 +27,6 @@ import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.transformers.SplitPacketTransformer;
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
-import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
@@ -37,6 +36,7 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessorRegistry;
 import me.shedaniel.rei.impl.common.networking.DisplaySyncPacket;
+import me.shedaniel.rei.impl.common.networking.REIPackets;
 import me.shedaniel.rei.impl.common.transfer.InputSlotCrafter;
 import me.shedaniel.rei.impl.common.transfer.NewInputSlotCrafter;
 import net.minecraft.ChatFormatting;
@@ -45,12 +45,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.*;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.permissions.*;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
@@ -60,7 +59,6 @@ import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class RoughlyEnoughItemsNetwork {
@@ -72,9 +70,9 @@ public class RoughlyEnoughItemsNetwork {
     public static final Identifier MOVE_ITEMS_NEW_PACKET = Identifier.fromNamespaceAndPath("roughlyenoughitems", "move_items_new");
     public static final Identifier NOT_ENOUGH_ITEMS_PACKET = Identifier.fromNamespaceAndPath("roughlyenoughitems", "og_not_enough");
     public static final Identifier SYNC_DISPLAYS_PACKET = Identifier.fromNamespaceAndPath("roughlyenoughitems", "sync_displays");
-    
+
     public static void onInitialize() {
-        NetworkManager.registerReceiver(NetworkManager.c2s(), DELETE_ITEMS_PACKET, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
+        NetworkManager.registerReceiver(NetworkManager.c2s(), REIPackets.DeleteItems.TYPE, REIPackets.DeleteItems.STREAM_CODEC, List.of(new SplitPacketTransformer()), (payload, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
             if (!player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS))) {
                 player.sendSystemMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED));
@@ -86,33 +84,29 @@ public class RoughlyEnoughItemsNetwork {
                 menu.broadcastChanges();
             }
         });
-        NetworkManager.registerReceiver(NetworkManager.c2s(), CREATE_ITEMS_PACKET, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
+        NetworkManager.registerReceiver(NetworkManager.c2s(), REIPackets.CreateItems.TYPE, REIPackets.CreateItems.STREAM_CODEC, List.of(new SplitPacketTransformer()), (payload, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
 
             if (!player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS))) {
                 player.sendSystemMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED));
                 return;
             }
-            ItemStack stack = buf.readLenientJsonWithCodec(ItemStack.OPTIONAL_CODEC);
+            ItemStack stack = payload.stack();
             if (player.getInventory().add(stack.copy())) {
-                RegistryFriendlyByteBuf newBuf = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.registryAccess());
-                newBuf.writeJsonWithCodec(ItemStack.OPTIONAL_CODEC, stack.copy());
-                newBuf.writeUtf(player.getScoreboardName(), 32767);
-                NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, newBuf);
+                NetworkManager.sendToPlayer(player, new REIPackets.CreateItemsMessage(stack.copy(), player.getScoreboardName()));
             } else {
                 player.sendSystemMessage(Component.translatable("text.rei.failed_cheat_items"));
             }
         });
-        NetworkManager.registerReceiver(NetworkManager.c2s(), CREATE_ITEMS_GRAB_PACKET, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
+        NetworkManager.registerReceiver(NetworkManager.c2s(), REIPackets.CreateItemsGrab.TYPE, REIPackets.CreateItemsGrab.STREAM_CODEC, List.of(new SplitPacketTransformer()), (payload, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
             if (!player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS))) {
                 player.sendSystemMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED));
                 return;
             }
-            
+
             AbstractContainerMenu menu = player.containerMenu;
-            ItemStack itemStack = buf.readLenientJsonWithCodec(ItemStack.OPTIONAL_CODEC);
-            ItemStack stack = itemStack.copy();
+            ItemStack stack = payload.stack().copy();
             if (!menu.getCarried().isEmpty() && ItemStack.isSameItemSameComponents(menu.getCarried(), stack)) {
                 stack.setCount(Mth.clamp(stack.getCount() + menu.getCarried().getCount(), 1, stack.getMaxStackSize()));
             } else if (!menu.getCarried().isEmpty()) {
@@ -120,40 +114,34 @@ public class RoughlyEnoughItemsNetwork {
             }
             menu.setCarried(stack.copy());
             menu.broadcastChanges();
-            RegistryFriendlyByteBuf newBuf = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.registryAccess());
-            newBuf.writeJsonWithCodec(ItemStack.OPTIONAL_CODEC, stack.copy());
-            newBuf.writeUtf(player.getScoreboardName(), 32767);
-            NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, newBuf);
+            NetworkManager.sendToPlayer(player, new REIPackets.CreateItemsMessage(stack.copy(), player.getScoreboardName()));
         });
-        NetworkManager.registerReceiver(NetworkManager.c2s(), CREATE_ITEMS_HOTBAR_PACKET, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
+        NetworkManager.registerReceiver(NetworkManager.c2s(), REIPackets.CreateItemsHotbar.TYPE, REIPackets.CreateItemsHotbar.STREAM_CODEC, List.of(new SplitPacketTransformer()), (payload, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
             if (!player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS))) {
                 player.sendSystemMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED));
                 return;
             }
-            ItemStack stack = buf.readLenientJsonWithCodec(ItemStack.OPTIONAL_CODEC);
-            int hotbarSlotId = buf.readVarInt();
+            ItemStack stack = payload.stack();
+            int hotbarSlotId = payload.hotbarSlot();
             if (hotbarSlotId >= 0 && hotbarSlotId < 9) {
                 AbstractContainerMenu menu = player.containerMenu;
                 player.getInventory().setItem(hotbarSlotId, stack.copy());
                 menu.broadcastChanges();
-                RegistryFriendlyByteBuf newBuf = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.registryAccess());
-                newBuf.writeJsonWithCodec(ItemStack.OPTIONAL_CODEC, stack.copy());
-                newBuf.writeUtf(player.getScoreboardName(), 32767);
-                NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, newBuf);
+                NetworkManager.sendToPlayer(player, new REIPackets.CreateItemsMessage(stack.copy(), player.getScoreboardName()));
             } else {
                 player.sendSystemMessage(Component.translatable("text.rei.failed_cheat_items"));
             }
         });
-        NetworkManager.registerReceiver(NetworkManager.c2s(), MOVE_ITEMS_NEW_PACKET, Collections.singletonList(new SplitPacketTransformer()), (packetByteBuf, context) -> {
+        NetworkManager.registerReceiver(NetworkManager.c2s(), REIPackets.MoveItemsNew.TYPE, REIPackets.MoveItemsNew.STREAM_CODEC, List.of(new SplitPacketTransformer()), (payload, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
-            CategoryIdentifier<Display> category = CategoryIdentifier.of(packetByteBuf.readIdentifier());
+            CategoryIdentifier<Display> category = CategoryIdentifier.of(payload.category());
             AbstractContainerMenu container = player.containerMenu;
             InventoryMenu playerContainer = player.inventoryMenu;
             try {
-                boolean shift = packetByteBuf.readBoolean();
+                boolean shift = payload.shift();
                 try {
-                    CompoundTag nbt = packetByteBuf.readNbt();
+                    CompoundTag nbt = payload.data();
                     int version = nbt.getInt("Version").orElse(-1);
                     if (version != 1) throw new IllegalStateException("Server and client REI protocol version mismatch! Server: 1, Client: " + version);
                     List<InputIngredient<ItemStack>> inputs = readInputs(context.registryAccess(), nbt.getListOrEmpty("Inputs"));
@@ -176,10 +164,12 @@ public class RoughlyEnoughItemsNetwork {
             }
         });
         if (Platform.getEnvironment() == Env.SERVER) {
+            NetworkManager.registerS2CPayloadType(REIPackets.CreateItemsMessage.TYPE, REIPackets.CreateItemsMessage.STREAM_CODEC);
+            NetworkManager.registerS2CPayloadType(REIPackets.NotEnoughItems.TYPE, REIPackets.NotEnoughItems.STREAM_CODEC);
             NetworkManager.registerS2CPayloadType(DisplaySyncPacket.TYPE, DisplaySyncPacket.STREAM_CODEC, List.of(new SplitPacketTransformer()));
         }
     }
-    
+
     private static List<SlotAccessor> readSlots(AbstractContainerMenu menu, Player player, ListTag tag) {
         List<SlotAccessor> slots = new ArrayList<>();
         for (Tag t : tag) {
@@ -187,7 +177,7 @@ public class RoughlyEnoughItemsNetwork {
         }
         return slots;
     }
-    
+
     private static List<InputIngredient<ItemStack>> readInputs(RegistryAccess registryAccess, ListTag tag) {
         List<InputIngredient<ItemStack>> inputs = new ArrayList<>();
         for (Tag t : tag) {

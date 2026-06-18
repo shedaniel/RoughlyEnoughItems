@@ -127,7 +127,7 @@ public class CollapsibleEntriesScreen extends me.shedaniel.rei.impl.client.gui.s
     }
     
     public static void setupCustom(Identifier id, String name, List<EntryStack<?>> stacks, CollapsibleConfigManager.CollapsibleConfigObject configObject, Runnable markDirty) {
-        Minecraft.getInstance().setScreen(new OptionEntriesScreen(Component.translatable("text.rei.collapsible.entries.custom.title"), Minecraft.getInstance().screen) {
+        Minecraft.getInstance().setScreenAndShow(new OptionEntriesScreen(Component.translatable("text.rei.collapsible.entries.custom.title"), Minecraft.getInstance().gui.screen()) {
             private TextFieldListEntry entry;
             
             @Override
@@ -145,8 +145,8 @@ public class CollapsibleEntriesScreen extends me.shedaniel.rei.impl.client.gui.s
                 addEmpty(entryConsumer, 10);
                 entryConsumer.accept(new ButtonListEntry(width - 36, $ -> Component.translatable("text.rei.collapsible.entries.custom.select"), ($, button) -> {
                     CustomCollapsibleEntrySelectionScreen screen = new CustomCollapsibleEntrySelectionScreen(stacks);
-                    screen.parent = this.minecraft.screen;
-                    this.minecraft.setScreen(screen);
+                    screen.parent = this.minecraft.gui.screen();
+                    this.minecraft.setScreenAndShow(screen);
                 }));
             }
             
@@ -179,9 +179,9 @@ public class CollapsibleEntriesScreen extends me.shedaniel.rei.impl.client.gui.s
         if (ConfigObject.getInstance().doDebugRenderTimeRequired()) {
             Component debugText = Component.literal(String.format("%s fps", minecraft.getFps()));
             int stringWidth = font.width(debugText);
-            graphics.fillGradient(minecraft.screen.width - stringWidth - 2, 32, minecraft.screen.width, 32 + font.lineHeight + 2, -16777216, -16777216);
+            graphics.fillGradient(minecraft.gui.screen().width - stringWidth - 2, 32, minecraft.gui.screen().width, 32 + font.lineHeight + 2, -16777216, -16777216);
             graphics.pose().pushMatrix();
-            graphics.drawString(font, debugText.getVisualOrderText(), minecraft.screen.width - stringWidth, 32 + 2, -1, false);
+            graphics.drawString(font, debugText.getVisualOrderText(), minecraft.gui.screen().width - stringWidth, 32 + 2, -1, false);
             graphics.pose().popMatrix();
         }
     }

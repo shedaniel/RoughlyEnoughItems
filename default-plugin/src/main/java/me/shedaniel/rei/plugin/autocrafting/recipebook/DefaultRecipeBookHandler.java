@@ -73,7 +73,7 @@ public class DefaultRecipeBookHandler implements TransferHandler {
                     return Result.createFailed(Component.translatable("error.rei.transfer.too_small", h, w));
                 if (!context.isActuallyCrafting())
                     return Result.createSuccessful();
-                context.getMinecraft().setScreen(context.getContainerScreen());
+                context.getMinecraft().setScreenAndShow(context.getContainerScreen());
                 if (context.getContainerScreen() instanceof AbstractRecipeBookScreen<?> screen)
                     screen.recipeBookComponent.ghostSlots.clear();
                 context.getMinecraft().gameMode.handlePlaceRecipe(container.containerId, id, context.isStackedCrafting());
@@ -84,7 +84,7 @@ public class DefaultRecipeBookHandler implements TransferHandler {
                 RecipeDisplayId id = defaultDisplay.recipeDisplayId().get();
                 if (!context.isActuallyCrafting())
                     return Result.createSuccessful();
-                context.getMinecraft().setScreen(context.getContainerScreen());
+                context.getMinecraft().setScreenAndShow(context.getContainerScreen());
                 if (context.getContainerScreen() instanceof AbstractRecipeBookScreen<?> screen)
                     screen.recipeBookComponent.ghostSlots.clear();
                 context.getMinecraft().gameMode.handlePlaceRecipe(container.containerId, id, context.isStackedCrafting());

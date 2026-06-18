@@ -186,7 +186,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     @Override
     public Screen getScreen() {
-        return Minecraft.getInstance().screen;
+        return Minecraft.getInstance().gui.screen();
     }
     
     @Override

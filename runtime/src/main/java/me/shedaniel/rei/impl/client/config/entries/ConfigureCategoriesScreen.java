@@ -86,7 +86,7 @@ public class ConfigureCategoriesScreen extends me.shedaniel.rei.impl.client.gui.
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             addRenderableWidget(new Button.Plain(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
-                minecraft.setScreen(parent);
+                minecraft.setScreenAndShow(parent);
                 this.parent = null;
             }, Supplier::get) {});
         }
@@ -115,7 +115,7 @@ public class ConfigureCategoriesScreen extends me.shedaniel.rei.impl.client.gui.
     
     @Override
     public void onClose() {
-        this.minecraft.setScreen(parent);
+        this.minecraft.setScreenAndShow(parent);
     }
     
     private static class ListWidget extends UpdatedListWidget<ListEntry> {

@@ -59,7 +59,7 @@ public class FilteringAddRuleScreen extends me.shedaniel.rei.impl.client.gui.scr
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             addRenderableWidget(new Button.Plain(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
-                minecraft.setScreen(parent);
+                minecraft.setScreenAndShow(parent);
                 this.parent = null;
             }, Supplier::get) {});
         }
@@ -80,7 +80,7 @@ public class FilteringAddRuleScreen extends me.shedaniel.rei.impl.client.gui.scr
     
     @Override
     public void onClose() {
-        this.minecraft.setScreen(parent);
+        this.minecraft.setScreenAndShow(parent);
     }
     
     public static class RulesList extends UpdatedListWidget<RuleEntry> {
@@ -136,7 +136,7 @@ public class FilteringAddRuleScreen extends me.shedaniel.rei.impl.client.gui.scr
             super(rule);
             this.screenFunction = (screenFunction == null ? ((FilteringRuleType<FilteringRule<?>>) rule.getType()).createEntryScreen(rule) : screenFunction);
             addButton = new Button.Plain(0, 0, 20, 20, Component.nullToEmpty(" + "), button -> {
-                Minecraft.getInstance().setScreen(this.screenFunction.apply(parent));
+                Minecraft.getInstance().setScreenAndShow(this.screenFunction.apply(parent));
                 rules.add(0, rule);
             }, Supplier::get) {};
             addButton.active = this.screenFunction != null;

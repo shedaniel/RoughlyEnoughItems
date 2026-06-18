@@ -47,7 +47,7 @@ import java.util.function.Supplier;
 public class ConfigAddonsEntry extends AbstractConfigListEntry<Unit> {
     private int width;
     private AbstractWidget buttonWidget = new Button.Plain(0, 0, 0, 20, Component.empty(), button -> {
-        Minecraft.getInstance().setScreen(new ConfigAddonsScreen(Minecraft.getInstance().screen));
+        Minecraft.getInstance().setScreenAndShow(new ConfigAddonsScreen(Minecraft.getInstance().gui.screen()));
     }, Supplier::get) {};
     private List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     

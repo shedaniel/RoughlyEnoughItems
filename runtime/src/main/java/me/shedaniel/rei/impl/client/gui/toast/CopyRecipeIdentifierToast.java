@@ -49,7 +49,7 @@ public class CopyRecipeIdentifierToast implements Toast {
     }
     
     public static void addToast(String title, @Nullable String subtitleNullable) {
-        Minecraft.getInstance().getToastManager().addToast(new CopyRecipeIdentifierToast(title, subtitleNullable));
+        Minecraft.getInstance().gui.toastManager().addToast(new CopyRecipeIdentifierToast(title, subtitleNullable));
     }
     
     @Override

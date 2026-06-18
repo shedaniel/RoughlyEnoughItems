@@ -26,11 +26,11 @@ package me.shedaniel.rei.impl.client;
 import com.google.common.base.Suppliers;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
-import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongMaps;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
+import me.shedaniel.rei.impl.common.networking.REIPackets;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -57,7 +57,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.permissions.*;
@@ -182,13 +181,13 @@ public class ClientHelperImpl implements ClientHelper {
     
     @Override
     public void sendDeletePacket() {
-        if (Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen inventoryScreen) {
+        if (Minecraft.getInstance().gui.screen() instanceof CreativeModeInventoryScreen inventoryScreen) {
             Minecraft.getInstance().player.containerMenu.setCarried(ItemStack.EMPTY);
             inventoryScreen.isQuickCrafting = false;
             return;
         }
-        NetworkManager.sendToServer(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new RegistryFriendlyByteBuf(Unpooled.buffer(), Minecraft.getInstance().player.registryAccess()));
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> containerScreen) {
+        NetworkManager.sendToServer(new REIPackets.DeleteItems());
+        if (Minecraft.getInstance().gui.screen() instanceof AbstractContainerScreen<?> containerScreen) {
             containerScreen.isQuickCrafting = false;
         }
     }
@@ -201,7 +200,7 @@ public class ClientHelperImpl implements ClientHelper {
         if (Minecraft.getInstance().player == null) return false;
         if (Minecraft.getInstance().player.getInventory() == null) return false;
         ItemStack cheatedStack = entry.getValue().copy();
-        if (ConfigObject.getInstance().isGrabbingItems() && Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
+        if (ConfigObject.getInstance().isGrabbingItems() && Minecraft.getInstance().gui.screen() instanceof CreativeModeInventoryScreen) {
             AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
             EntryStack<ItemStack> copy = entry.copy();
             if (!menu.getCarried().isEmpty() && EntryStacks.equalsExact(EntryStacks.of(menu.getCarried()), copy)) {
@@ -218,9 +217,7 @@ public class ClientHelperImpl implements ClientHelper {
                 return false;
             }
             try {
-                RegistryFriendlyByteBuf newBuf = new RegistryFriendlyByteBuf(Unpooled.buffer(), Minecraft.getInstance().player.registryAccess());
-                newBuf.writeJsonWithCodec(ItemStack.OPTIONAL_CODEC, cheatedStack);
-                NetworkManager.sendToServer(ConfigObject.getInstance().isGrabbingItems() ? RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET : RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, newBuf);
+                NetworkManager.sendToServer(ConfigObject.getInstance().isGrabbingItems() ? new REIPackets.CreateItemsGrab(cheatedStack) : new REIPackets.CreateItems(cheatedStack));
                 return true;
             } catch (Exception exception) {
                 return false;
@@ -249,7 +246,7 @@ public class ClientHelperImpl implements ClientHelper {
         EntryStack<ItemStack> entry = (EntryStack<ItemStack>) e;
         if (Minecraft.getInstance().player == null) return false;
         if (Minecraft.getInstance().player.getInventory() == null) return false;
-        if (Minecraft.getInstance().gameMode != null && Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
+        if (Minecraft.getInstance().gameMode != null && Minecraft.getInstance().gui.screen() instanceof CreativeModeInventoryScreen) {
             AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
             EntryStack<ItemStack> stack = entry.copy();
             if (menu.getCarried().isEmpty()) {
@@ -265,10 +262,7 @@ public class ClientHelperImpl implements ClientHelper {
                 return false;
             }
             try {
-                RegistryFriendlyByteBuf newBuf = new RegistryFriendlyByteBuf(Unpooled.buffer(), Minecraft.getInstance().player.registryAccess());
-                newBuf.writeJsonWithCodec(ItemStack.OPTIONAL_CODEC, stack.getValue().copy());
-                newBuf.writeVarInt(hotbarSlotId);
-                NetworkManager.sendToServer(RoughlyEnoughItemsNetwork.CREATE_ITEMS_HOTBAR_PACKET, newBuf);
+                NetworkManager.sendToServer(new REIPackets.CreateItemsHotbar(stack.getValue().copy(), hotbarSlotId));
                 return true;
             } catch (Exception exception) {
                 return false;
@@ -356,10 +350,10 @@ public class ClientHelperImpl implements ClientHelper {
                 displayScreen.addResultToNotice(stack);
             }
         }
-        if (Minecraft.getInstance().screen instanceof DisplayScreen displayScreen) {
+        if (Minecraft.getInstance().gui.screen() instanceof DisplayScreen displayScreen) {
             REIRuntimeImpl.getInstance().storeDisplayScreen(displayScreen);
         }
-        Minecraft.getInstance().setScreen(screen);
+        Minecraft.getInstance().setScreenAndShow(screen);
         return true;
     }
     
@@ -376,7 +370,7 @@ public class ClientHelperImpl implements ClientHelper {
     private static abstract class AbstractViewSearchBuilder implements ViewSearchBuilder {
         public ViewSearchBuilder fillPreferredOpenedCategory() {
             if (getPreferredOpenedCategory() == null) {
-                Screen currentScreen = Minecraft.getInstance().screen;
+                Screen currentScreen = Minecraft.getInstance().gui.screen();
                 if (currentScreen instanceof DisplayScreen displayScreen) {
                     setPreferredOpenedCategory(displayScreen.getCurrentCategoryId());
                 }

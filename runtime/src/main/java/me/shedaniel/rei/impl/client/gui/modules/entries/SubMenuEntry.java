@@ -98,8 +98,8 @@ public class SubMenuEntry extends AbstractMenuEntry {
                 
                 Rectangle menuStart = new Rectangle(parent.getBounds().x, getY(), parent.getBounds().width, getEntryHeight());
                 
-                int fullWidth = Minecraft.getInstance().screen.width;
-                int fullHeight = Minecraft.getInstance().screen.height;
+                int fullWidth = Minecraft.getInstance().gui.screen().width;
+                int fullHeight = Minecraft.getInstance().gui.screen().height;
                 boolean facingRight = parent.facingRight;
                 int menuWidth = menu.getMaxEntryWidth() + 2 + (menu.hasScrollBar() ? 6 : 0);
                 if (facingRight && fullWidth - menuStart.getMaxX() < menuWidth + 10) {

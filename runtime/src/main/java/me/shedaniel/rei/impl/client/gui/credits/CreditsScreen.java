@@ -35,9 +35,11 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.resources.language.I18n;
+import me.shedaniel.rei.api.common.util.Pair;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.InvocationTargetException;
@@ -88,12 +90,12 @@ public class CreditsScreen extends me.shedaniel.rei.impl.client.gui.screen.REISc
     public void init() {
         addWidget(entryListWidget = new CreditsEntryListWidget(minecraft, width, height, 32, height - 32));
         entryListWidget.creditsClearEntries();
-        List<Tuple<String, List<TranslatorEntry>>> translators = Lists.newArrayList();
+        List<Pair<String, List<TranslatorEntry>>> translators = Lists.newArrayList();
         Exception[] exception = {null};
         fillTranslators(exception, translators);
-        List<Tuple<String, List<TranslatorEntry>>> translatorsMapped = translators.stream().map(pair -> {
-            return new Tuple<>(
-                    "  " + (I18n.exists("language.roughlyenoughitems." + pair.getA().toLowerCase(Locale.ROOT).replace(' ', '_')) ? I18n.get("language.roughlyenoughitems." + pair.getA().toLowerCase(Locale.ROOT).replace(' ', '_')) : pair.getA()),
+        List<Pair<String, List<TranslatorEntry>>> translatorsMapped = translators.stream().map(pair -> {
+            return new Pair<>(
+                    "  " + (Language.getInstance().has("language.roughlyenoughitems." + pair.getA().toLowerCase(Locale.ROOT).replace(' ', '_')) ? I18n.get("language.roughlyenoughitems." + pair.getA().toLowerCase(Locale.ROOT).replace(' ', '_')) : pair.getA()),
                     pair.getB()
             );
         }).collect(Collectors.toList());
@@ -106,7 +108,7 @@ public class CreditsScreen extends me.shedaniel.rei.impl.client.gui.screen.REISc
                         entryListWidget.creditsAddEntry(new TextCreditsItem(Component.literal("  at " + traceElement)));
                 } else {
                     int maxWidth = translatorsMapped.stream().mapToInt(pair -> font.width(pair.getA())).max().orElse(0) + 5;
-                    for (Tuple<String, List<TranslatorEntry>> pair : translatorsMapped) {
+                    for (Pair<String, List<TranslatorEntry>> pair : translatorsMapped) {
                         MutableComponent text = Component.literal("");
                         boolean isFirst = true;
                         for (TranslatorEntry entry : pair.getB()) {
@@ -131,7 +133,7 @@ public class CreditsScreen extends me.shedaniel.rei.impl.client.gui.screen.REISc
         addRenderableWidget(buttonDone = new Button.Plain(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> openPrevious(), Supplier::get) {});
     }
     
-    private static void fillTranslators(Exception[] exception, List<Tuple<String, List<TranslatorEntry>>> translators) {
+    private static void fillTranslators(Exception[] exception, List<Pair<String, List<TranslatorEntry>>> translators) {
         try {
             Class.forName("me.shedaniel.rei.impl.client.gui.credits.%s.CreditsScreenImpl".formatted(Platform.isNeoForge() ? "forge" : "fabric"))
                     .getDeclaredMethod("fillTranslators", Exception[].class, List.class)
@@ -142,7 +144,7 @@ public class CreditsScreen extends me.shedaniel.rei.impl.client.gui.screen.REISc
     }
     
     private void openPrevious() {
-        Minecraft.getInstance().setScreen(parent);
+        Minecraft.getInstance().setScreenAndShow(parent);
     }
     
     @Override

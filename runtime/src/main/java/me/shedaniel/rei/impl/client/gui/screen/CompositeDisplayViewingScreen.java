@@ -209,9 +209,9 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             return true;
         } else if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesMouse(event.button())) {
             if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+                minecraft.setScreenAndShow(REIRuntimeImpl.getInstance().getLastDisplayScreen());
             } else {
-                minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
+                minecraft.setScreenAndShow(REIRuntime.getInstance().getPreviousScreen());
             }
             return true;
         }
@@ -362,7 +362,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             if (element.keyPressed(event))
                 return true;
         if (event.isEscape()) {
-            Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
+            Minecraft.getInstance().setScreenAndShow(REIRuntime.getInstance().getPreviousScreen());
             return true;
         }
         return super.keyPressed(event);

@@ -210,7 +210,7 @@ public class REIRuntimeImpl implements REIRuntime {
     public SearchFieldLocation getContextualSearchFieldLocation() {
         SearchFieldLocation location = ConfigObject.getInstance().getSearchFieldLocation();
         Window window = Minecraft.getInstance().getWindow();
-        Rectangle screenBounds = ScreenRegistry.getInstance().getScreenBounds(Minecraft.getInstance().screen);
+        Rectangle screenBounds = ScreenRegistry.getInstance().getScreenBounds(Minecraft.getInstance().gui.screen());
         if (location == SearchFieldLocation.CENTER && window.getGuiScaledHeight() - 20 <= screenBounds.getMaxY()) {
             return SearchFieldLocation.BOTTOM_SIDE;
         }
@@ -232,7 +232,7 @@ public class REIRuntimeImpl implements REIRuntime {
     
     @Override
     public Rectangle calculateFavoritesListArea() {
-        Rectangle bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation().mirror(), Minecraft.getInstance().screen);
+        Rectangle bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation().mirror(), Minecraft.getInstance().gui.screen());
         
         int yOffset = 8;
         if (!ConfigObject.getInstance().isLowerConfigButton()) yOffset += 25;

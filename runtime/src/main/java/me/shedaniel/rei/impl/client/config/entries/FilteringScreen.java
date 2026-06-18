@@ -164,7 +164,7 @@ public class FilteringScreen extends me.shedaniel.rei.impl.client.gui.screen.REI
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             this.backButton = Button.builder(backText, button -> {
-                        minecraft.setScreen(parent);
+                        minecraft.setScreenAndShow(parent);
                         this.parent = null;
                     })
                     .bounds(0, 0, Minecraft.getInstance().font.width(backText) + 10, 20)
@@ -175,7 +175,7 @@ public class FilteringScreen extends me.shedaniel.rei.impl.client.gui.screen.REI
     
     @Override
     public void onClose() {
-        this.minecraft.setScreen(parent);
+        this.minecraft.setScreenAndShow(parent);
         this.parent = null;
     }
     

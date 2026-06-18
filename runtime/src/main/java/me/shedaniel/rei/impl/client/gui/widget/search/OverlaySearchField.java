@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.widget.search;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.datafixers.util.Pair;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Color;
@@ -60,7 +59,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.Tuple;
+import me.shedaniel.rei.api.common.util.Pair;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.glfw.GLFW;
 
@@ -80,7 +79,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
     public boolean isMain = true;
-    protected Tuple<Long, Point> lastClickedDetails = null;
+    protected Pair<Long, Point> lastClickedDetails = null;
     private final List<String> history = Lists.newArrayListWithCapacity(100);
     private final NumberAnimator<Double> progress = ValueAnimator.ofDouble();
     
@@ -285,15 +284,15 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
             setText("");
         if (contains && event.button() == 0 && isMain && ConfigObject.getInstance().isInventoryHighlightingAllowed())
             if (lastClickedDetails == null)
-                lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(event.x(), event.y()));
-            else if (System.currentTimeMillis() - lastClickedDetails.getA() > 1500)
+                lastClickedDetails = new Pair<>(System.currentTimeMillis(), new Point(event.x(), event.y()));
+            else if (System.currentTimeMillis() - lastClickedDetails.getFirst() > 1500)
                 lastClickedDetails = null;
-            else if (getManhattanDistance(lastClickedDetails.getB(), new Point(event.x(), event.y())) <= 25) {
+            else if (getManhattanDistance(lastClickedDetails.getSecond(), new Point(event.x(), event.y())) <= 25) {
                 lastClickedDetails = null;
                 isHighlighting = !isHighlighting;
                 minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             } else {
-                lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(event.x(), event.y()));
+                lastClickedDetails = new Pair<>(System.currentTimeMillis(), new Point(event.x(), event.y()));
             }
         return super.mouseClicked(event, doubleClick);
     }

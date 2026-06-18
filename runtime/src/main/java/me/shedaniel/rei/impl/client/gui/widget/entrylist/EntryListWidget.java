@@ -83,7 +83,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     
     public static boolean notSteppingOnExclusionZones(int left, int top, int width, int height) {
         Minecraft instance = Minecraft.getInstance();
-        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(instance.screen)) {
+        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(instance.gui.screen())) {
             InteractionResult fit = canItemSlotWidgetFit(left, top, width, height, decider);
             if (fit != InteractionResult.PASS)
                 return fit == InteractionResult.SUCCESS;
@@ -126,7 +126,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
             if (!containsMouse(x, y)) return false;
         }
         Minecraft instance = Minecraft.getInstance();
-        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(instance.screen)) {
+        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(instance.gui.screen())) {
             InteractionResult result = decider.isInZone(x, y);
             if (result != InteractionResult.PASS)
                 return result == InteractionResult.SUCCESS;
@@ -198,7 +198,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
         
         debugger.render(graphics, bounds.x, bounds.y, delta);
         
-        if (containsChecked(mouseX, mouseY, false) && ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && !minecraft.player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
+        if (containsChecked(mouseX, mouseY, false) && ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().gui.screen() instanceof DisplayScreen) && !minecraft.player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
             EntryStack<?> stack = EntryStacks.of(minecraft.player.containerMenu.getCarried().copy());
             if (stack.getType() != VanillaEntryTypes.ITEM) {
                 EntryStack<ItemStack> cheatsAs = stack.cheatsAs();
@@ -304,7 +304,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     public boolean mouseReleased(MouseButtonEvent event) {
         if (containsChecked(event.x(), event.y(), false)) {
             LocalPlayer player = minecraft.player;
-            if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && player != null && player.containerMenu != null && !player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
+            if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().gui.screen() instanceof DisplayScreen) && player != null && player.containerMenu != null && !player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
                 EntryStack<?> stack = EntryStacks.of(minecraft.player.containerMenu.getCarried().copy());
                 if (stack.getType() != VanillaEntryTypes.ITEM) {
                     EntryStack<ItemStack> cheatsAs = stack.cheatsAs();

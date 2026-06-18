@@ -53,7 +53,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
+import me.shedaniel.rei.api.common.util.Pair;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 
@@ -439,7 +439,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
             int width = innerBounds.width / entrySize;
             int currentX = 0;
             int currentY = 0;
-            List<Tuple<RealRegionEntry<T>, Point>> entriesPoints = Lists.newArrayList();
+            List<Pair<RealRegionEntry<T>, Point>> entriesPoints = Lists.newArrayList();
             for (RealRegionEntry<T> entry : this.entries.values()) {
                 while (true) {
                     int xPos = currentX * entrySize + innerBounds.x;
@@ -452,7 +452,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                     }
                     
                     if (listener.notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize)) {
-                        entriesPoints.add(new Tuple<>(entry, new Point(xPos, yPos)));
+                        entriesPoints.add(new Pair<>(entry, new Point(xPos, yPos)));
                         break;
                     } else {
                         blockedCount++;
@@ -466,7 +466,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                 int yPos = currentY * entrySize + innerBounds.y;
                 
                 if (listener.notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize)) {
-                    entriesPoints.add(new Tuple<>(null, new Point(xPos, yPos)));
+                    entriesPoints.add(new Pair<>(null, new Point(xPos, yPos)));
                 }
             }
             

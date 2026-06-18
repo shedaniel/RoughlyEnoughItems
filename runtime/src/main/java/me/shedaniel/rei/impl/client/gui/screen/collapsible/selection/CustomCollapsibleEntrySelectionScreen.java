@@ -156,7 +156,7 @@ public class CustomCollapsibleEntrySelectionScreen extends me.shedaniel.rei.impl
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             this.backButton = new Button.Plain(0, 0, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
-                minecraft.setScreen(parent);
+                minecraft.setScreenAndShow(parent);
                 this.parent = null;
             }, Supplier::get) {};
         }
@@ -165,7 +165,7 @@ public class CustomCollapsibleEntrySelectionScreen extends me.shedaniel.rei.impl
     
     @Override
     public void onClose() {
-        this.minecraft.setScreen(parent);
+        this.minecraft.setScreenAndShow(parent);
         this.parent = null;
     }
     

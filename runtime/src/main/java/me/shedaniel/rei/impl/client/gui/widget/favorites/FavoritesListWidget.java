@@ -278,7 +278,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
     
     public void updateFavoritesBounds(@Nullable String searchTerm) {
         this.fullBounds = REIRuntime.getInstance().calculateFavoritesListArea();
-        this.excludedBounds = RectangleUtils.excludeZones(this.fullBounds, ScreenRegistry.getInstance().exclusionZones().getExclusionZones(minecraft.screen).stream());
+        this.excludedBounds = RectangleUtils.excludeZones(this.fullBounds, ScreenRegistry.getInstance().exclusionZones().getExclusionZones(minecraft.gui.screen()).stream());
         this.favoritesBounds = RectangleUtils.excludeZones(this.fullBounds, Stream.of(displayHistory.createBounds(this.fullBounds, null)));
     }
     

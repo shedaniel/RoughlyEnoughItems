@@ -56,7 +56,7 @@ public class ErrorsScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScr
     @Override
     public boolean keyPressed(KeyEvent event) {
         if (event.key() == 256) {
-            Minecraft.getInstance().setScreen(parent);
+            Minecraft.getInstance().setScreenAndShow(parent);
             return true;
         }
         
@@ -81,7 +81,7 @@ public class ErrorsScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScr
         }
         listWidget._addEntry(new TextEntry(Component.empty(), listWidget.getItemWidth()));
         if (quitable) {
-            addRenderableWidget(doneButton = new Button.Plain(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> Minecraft.getInstance().setScreen(parent), Supplier::get) {});
+            addRenderableWidget(doneButton = new Button.Plain(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> Minecraft.getInstance().setScreenAndShow(parent), Supplier::get) {});
         } else {
             addRenderableWidget(doneButton = new Button.Plain(width / 2 - 100, height - 26, 200, 20, Component.translatable("menu.quit"), button -> exit(), Supplier::get) {});
         }

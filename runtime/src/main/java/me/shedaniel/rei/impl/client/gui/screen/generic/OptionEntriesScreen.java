@@ -71,7 +71,7 @@ public abstract class OptionEntriesScreen extends me.shedaniel.rei.impl.client.g
             int width = Minecraft.getInstance().font.width(doneText);
             addRenderableWidget(new Button.Plain(this.width - 4 - width - 10, 4, width + 10, 20, doneText, button -> {
                 save();
-                minecraft.setScreen(parent);
+                minecraft.setScreenAndShow(parent);
             }, Supplier::get) {});
         }
         listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height));
@@ -80,7 +80,7 @@ public abstract class OptionEntriesScreen extends me.shedaniel.rei.impl.client.g
     
     @Override
     public void onClose() {
-        this.minecraft.setScreen(parent);
+        this.minecraft.setScreenAndShow(parent);
     }
     
     public abstract void addEntries(Consumer<ListEntry> entryConsumer);

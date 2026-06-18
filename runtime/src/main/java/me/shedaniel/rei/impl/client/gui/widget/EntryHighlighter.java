@@ -39,7 +39,7 @@ public class EntryHighlighter {
         int dimColor = Color.ofRGBA(20 / 255F, 20 / 255F, 20 / 255F, dimOpacity).getColor();
         int borderColor = Color.ofRGBA(0x5f / 255F, 0xff / 255F, 0x3b / 255F, opacity).getColor();
         int color = Color.ofRGBA(0x5f / 255F, 0xff / 255F, 0x3b / 255F, opacity * 0x34 / 255F).getColor();
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> containerScreen) {
+        if (Minecraft.getInstance().gui.screen() instanceof AbstractContainerScreen<?> containerScreen) {
             int x = containerScreen.leftPos, y = containerScreen.topPos;
             for (Slot slot : containerScreen.getMenu().slots) {
                 if (!slot.hasItem() || !EntryListSearchManager.INSTANCE.matches(EntryStacks.of(slot.getItem()))) {

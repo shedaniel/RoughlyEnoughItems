@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
 import net.fabricmc.api.EnvType;
@@ -449,7 +448,6 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     protected void renderList(GuiGraphics graphics, int startX, int startY, int int_3, int int_4, float float_1) {
         this.hoveredItem = this.isMouseOver(int_3, int_4) ? this.getItemAtPosition(int_3, int_4) : null;
         int itemCount = this.getItemCount();
-        Tesselator tessellator = Tesselator.getInstance();
         
         for (int renderIndex = 0; renderIndex < itemCount; ++renderIndex) {
             E item = this.getItem(renderIndex);

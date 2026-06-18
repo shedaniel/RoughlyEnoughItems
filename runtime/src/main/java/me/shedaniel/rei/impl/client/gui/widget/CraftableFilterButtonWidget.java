@@ -142,19 +142,19 @@ public class CraftableFilterButtonWidget {
                                             ConfigManagerImpl.getInstance().getConfig().setInputMethodId(pair.getKey());
                                         }
                                     });
-                                    Screen screen = Minecraft.getInstance().screen;
+                                    Screen screen = Minecraft.getInstance().gui.screen();
                                     ConfigReloadingScreen reloadingScreen = new ConfigReloadingScreen(Component.translatable("text.rei.input.methods.initializing"),
                                             () -> !future.isDone(), () -> {
-                                        Minecraft.getInstance().setScreen(screen);
+                                        Minecraft.getInstance().setScreenAndShow(screen);
                                     }, () -> {
-                                        Minecraft.getInstance().setScreen(screen);
+                                        Minecraft.getInstance().setScreenAndShow(screen);
                                         InternalLogger.getInstance().error("Failed to prepare input method: cancelled");
                                         ConfigManagerImpl.getInstance().getConfig().setInputMethodId(Identifier.parse("rei:default"));
                                         future.cancel(Platform.isFabric());
                                         service.shutdown();
                                     });
                                     reloadingScreen.setSubtitle(() -> Component.translatable("text.rei.input.methods.reload.progress", String.format("%.2f", progress[0] * 100)));
-                                    Minecraft.getInstance().setScreen(reloadingScreen);
+                                    Minecraft.getInstance().setScreenAndShow(reloadingScreen);
                                     access.close();
                                     future.whenComplete((unused, throwable) -> {
                                         service.shutdown();

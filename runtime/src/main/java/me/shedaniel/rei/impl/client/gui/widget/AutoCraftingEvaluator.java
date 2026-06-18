@@ -109,7 +109,7 @@ public class AutoCraftingEvaluator {
                 
                 if (transferResult.isBlocking() && actuallyCrafting) {
                     if (transferResult.isReturningToScreen()) {
-                        Minecraft.getInstance().setScreen(containerScreen);
+                        Minecraft.getInstance().setScreenAndShow(containerScreen);
                         REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                     }
                     

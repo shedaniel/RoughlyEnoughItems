@@ -156,11 +156,11 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
         graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0xFF777777, 0xFF777777);
         graphics.fillGradient(bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, 0xFF151515, 0xFF151515);
         int y = bounds.y + 4;
-        if (y + 9 >= 30 && y < minecraft.screen.height) {
+        if (y + 9 >= 30 && y < minecraft.gui.screen().height) {
             renderTextScrolling(graphics, this.component, bounds.x + 4, y, bounds.width - 8, 0xFFDDDDDD);
         }
         y += 13;
-        if (y + 9 >= 30 && y < minecraft.screen.height) {
+        if (y + 9 >= 30 && y < minecraft.gui.screen().height) {
             Rectangle lineBounds = new Rectangle(bounds.x + 4, y, bounds.width - 8, 9);
             idDrawer.setTo(lineBounds.contains(mouseX, mouseY), ConfigObject.getInstance().isReducedMotion() ? 0 : 400);
             try (CloseableScissors scissors = scissor(graphics, lineBounds)) {
@@ -175,7 +175,7 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
             }
         }
         y += 10;
-        if (y + 9 >= 30 && y < minecraft.screen.height) {
+        if (y + 9 >= 30 && y < minecraft.gui.screen().height) {
             Rectangle lineBounds = new Rectangle(bounds.x + 4, y, bounds.width - 8, 9);
             modIdDrawer.setTo(lineBounds.contains(mouseX, mouseY), ConfigObject.getInstance().isReducedMotion() ? 0 : 400);
             graphics.drawString(font, Component.translatable("text.rei.collapsible.entries.source").append(" "), bounds.x + 4, y, 0xFFAAAAAA);
@@ -232,7 +232,7 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
                 if (xIndex >= this.rowSize) {
                     y += 16;
                     xIndex = 0;
-                    if (y >= bounds.getMaxY() || y >= minecraft.screen.height) {
+                    if (y >= bounds.getMaxY() || y >= minecraft.gui.screen().height) {
                         break;
                     }
                 }

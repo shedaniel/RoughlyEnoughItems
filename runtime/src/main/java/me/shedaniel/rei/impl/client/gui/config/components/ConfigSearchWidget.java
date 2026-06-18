@@ -76,7 +76,7 @@ public class ConfigSearchWidget {
                     @Override
                     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
                         Widgets.produceClickSound();
-                        ((REIConfigScreen) Minecraft.getInstance().screen).setSearching(true);
+                        ((REIConfigScreen) Minecraft.getInstance().gui.screen()).setSearching(true);
                         return true;
                     }
                     
@@ -118,7 +118,7 @@ public class ConfigSearchWidget {
                     @Override
                     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
                         Widgets.produceClickSound();
-                        ((REIConfigScreen) Minecraft.getInstance().screen).setSearching(true);
+                        ((REIConfigScreen) Minecraft.getInstance().gui.screen()).setSearching(true);
                         return true;
                     }
                     

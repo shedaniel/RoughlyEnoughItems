@@ -68,7 +68,7 @@ public class ConfigButtonWidget {
                     ConfigManager.getInstance().openConfigScreen(REIRuntime.getInstance().getPreviousScreen());
                 })
                 .onRender((matrices, button) -> {
-                    if (!ClientHelper.getInstance().isCheating() || Minecraft.getInstance().screen instanceof DisplayScreen) {
+                    if (!ClientHelper.getInstance().isCheating() || Minecraft.getInstance().gui.screen() instanceof DisplayScreen) {
                         button.removeTint();
                     } else if (!ClientHelperImpl.getInstance().hasOperatorPermission()) {
                         if (Minecraft.getInstance().player.hasInfiniteMaterials()) {
@@ -133,7 +133,7 @@ public class ConfigButtonWidget {
                                 config::doesDisableRecipeBook,
                                 disableRecipeBook -> {
                                     config.setDisableRecipeBook(disableRecipeBook);
-                                    Screen screen = Minecraft.getInstance().screen;
+                                    Screen screen = Minecraft.getInstance().gui.screen();
                                     
                                     if (screen != null) {
                                         screen.init(screen.width, screen.height);
@@ -144,7 +144,7 @@ public class ConfigButtonWidget {
                                 config::isLeftSideMobEffects,
                                 disableRecipeBook -> {
                                     config.setLeftSideMobEffects(disableRecipeBook);
-                                    Screen screen = Minecraft.getInstance().screen;
+                                    Screen screen = Minecraft.getInstance().gui.screen();
                                     
                                     if (screen != null) {
                                         screen.init(screen.width, screen.height);

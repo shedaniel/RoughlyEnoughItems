@@ -63,7 +63,7 @@ public interface ConfigManager extends Reloadable<REIClientPlugin> {
      * @param parent the screen shown before
      */
     default void openConfigScreen(Screen parent) {
-        Minecraft.getInstance().setScreen(getConfigScreen(parent));
+        Minecraft.getInstance().setScreenAndShow(getConfigScreen(parent));
     }
     
     /**

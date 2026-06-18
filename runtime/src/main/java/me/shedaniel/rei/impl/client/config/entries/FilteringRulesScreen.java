@@ -78,7 +78,7 @@ public class FilteringRulesScreen extends me.shedaniel.rei.impl.client.gui.scree
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             addRenderableWidget(new Button.Plain(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
-                minecraft.setScreen(parent);
+                minecraft.setScreenAndShow(parent);
                 this.parent = null;
             }, Supplier::get) {});
         }
@@ -87,7 +87,7 @@ public class FilteringRulesScreen extends me.shedaniel.rei.impl.client.gui.scree
             addRenderableWidget(new Button.Plain(width - 4 - 20, 4, 20, 20, addText, button -> {
                 FilteringAddRuleScreen screen = new FilteringAddRuleScreen(rules);
                 screen.parent = this;
-                minecraft.setScreen(screen);
+                minecraft.setScreenAndShow(screen);
             }, Supplier::get) {});
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height));
@@ -112,7 +112,7 @@ public class FilteringRulesScreen extends me.shedaniel.rei.impl.client.gui.scree
     
     @Override
     public void onClose() {
-        this.minecraft.setScreen(parent);
+        this.minecraft.setScreenAndShow(parent);
     }
     
     public static class RulesList extends UpdatedListWidget<RuleEntry> {
@@ -184,7 +184,7 @@ public class FilteringRulesScreen extends me.shedaniel.rei.impl.client.gui.scree
             super(rule);
             this.screenFunction = Objects.requireNonNullElseGet(screenFunction == null ? ((FilteringRuleType<FilteringRule<?>>) rule.getType()).createEntryScreen(rule) : screenFunction, () -> placeholderScreen(rule));
             configureButton = new Button.Plain(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
-                Minecraft.getInstance().setScreen(this.screenFunction.apply(Minecraft.getInstance().screen));
+                Minecraft.getInstance().setScreenAndShow(this.screenFunction.apply(Minecraft.getInstance().gui.screen()));
             }, Supplier::get) {
                 @Override
                 public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
@@ -194,7 +194,7 @@ public class FilteringRulesScreen extends me.shedaniel.rei.impl.client.gui.scree
             {
                 Component deleteText = Component.translatable("config.roughlyenoughitems.filteringRulesScreen.delete");
                 deleteButton = new Button.Plain(0, 0, Minecraft.getInstance().font.width(deleteText) + 10, 20, deleteText, button -> {
-                    final Screen screen = Minecraft.getInstance().screen;
+                    final Screen screen = Minecraft.getInstance().gui.screen();
                     rules.remove(rule);
                     screen.init(screen.width, screen.height);
                 }, Supplier::get) {};

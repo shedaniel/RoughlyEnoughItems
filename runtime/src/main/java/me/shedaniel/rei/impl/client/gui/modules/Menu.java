@@ -76,8 +76,8 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     
     public Menu(Rectangle menuStart, Collection<FavoriteMenuEntry> entries, boolean sort) {
         buildEntries(entries, sort);
-        int fullWidth = Minecraft.getInstance().screen.width;
-        int fullHeight = Minecraft.getInstance().screen.height;
+        int fullWidth = Minecraft.getInstance().gui.screen().width;
+        int fullHeight = Minecraft.getInstance().gui.screen().height;
         boolean facingRight = true;
         this.facingDownwards = fullHeight - menuStart.getMaxY() > menuStart.y;
         int y = facingDownwards ? menuStart.getMaxY() : menuStart.y - (scrolling.getMaxScrollHeight() + 2);
@@ -129,7 +129,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     }
     
     public int getInnerHeight(int y) {
-        return Math.min(scrolling.getMaxScrollHeight(), minecraft.screen.height - 20 - y);
+        return Math.min(scrolling.getMaxScrollHeight(), minecraft.gui.screen().height - 20 - y);
     }
     
     public int getMaxEntryWidth() {

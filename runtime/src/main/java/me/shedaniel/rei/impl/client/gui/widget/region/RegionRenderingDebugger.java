@@ -58,8 +58,8 @@ public class RegionRenderingDebugger {
             }
             Component debugText = Component.literal(String.format("%d entries, avg. %.0fns, ttl. %.2fms, %s fps", size.getValue(), lastAverageDebugTime, lastTotalDebugTime, minecraft.getFps()));
             int stringWidth = font.width(debugText);
-            graphics.fillGradient(Math.min(x, minecraft.screen.width - stringWidth - 2), y, x + stringWidth + 2, y + font.lineHeight + 2, -16777216, -16777216);
-            graphics.drawString(font, debugText, Math.min(x + 2, minecraft.screen.width - stringWidth), y + 2, -1, false);
+            graphics.fillGradient(Math.min(x, minecraft.gui.screen().width - stringWidth - 2), y, x + stringWidth + 2, y + font.lineHeight + 2, -16777216, -16777216);
+            graphics.drawString(font, debugText, Math.min(x + 2, minecraft.gui.screen().width - stringWidth), y + 2, -1, false);
         }
         
         this.size.setValue(0);

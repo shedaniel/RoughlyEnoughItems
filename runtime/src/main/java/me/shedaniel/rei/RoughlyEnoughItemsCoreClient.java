@@ -93,9 +93,9 @@ import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.types.EmptyEntryDefinition;
 import me.shedaniel.rei.impl.common.networking.DisplaySyncPacket;
+import me.shedaniel.rei.impl.common.networking.REIPackets;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.plugins.ReloadManagerImpl;
-import me.shedaniel.rei.impl.common.registry.displays.ServerDisplayRegistryImpl;
 import me.shedaniel.rei.impl.common.util.InstanceHelper;
 import me.shedaniel.rei.impl.common.util.IssuesDetector;
 import me.shedaniel.rei.plugin.test.REITestCommonPlugin;
@@ -255,15 +255,15 @@ public class RoughlyEnoughItemsCoreClient {
         loadTestPlugins();
         
         Minecraft client = Minecraft.getInstance();
-        NetworkManager.registerReceiver(NetworkManager.s2c(), RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (buf, context) -> {
-            ItemStack stack = buf.readLenientJsonWithCodec(ItemStack.OPTIONAL_CODEC);
-            String player = buf.readUtf(32767);
+        NetworkManager.registerReceiver(NetworkManager.s2c(), REIPackets.CreateItemsMessage.TYPE, REIPackets.CreateItemsMessage.STREAM_CODEC, (payload, context) -> {
+            ItemStack stack = payload.stack();
+            String player = payload.playerName();
             if (client.player != null) {
                 client.player.sendSystemMessage(Component.literal(I18n.get("text.rei.cheat_items").replaceAll("\\{item_name}", EntryStacks.of(stack.copy()).asFormattedText().getString()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)));
             }
         });
-        NetworkManager.registerReceiver(NetworkManager.s2c(), RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (buf, context) -> {
-            Screen currentScreen = Minecraft.getInstance().screen;
+        NetworkManager.registerReceiver(NetworkManager.s2c(), REIPackets.NotEnoughItems.TYPE, REIPackets.NotEnoughItems.STREAM_CODEC, (payload, context) -> {
+            Screen currentScreen = Minecraft.getInstance().gui.screen();
             if (currentScreen instanceof CraftingScreen craftingScreen) {
                 // TODO: Recipe Ghost
                 /*RecipeBookComponent recipeBookGui = craftingScreen.getRecipeBookComponent();
@@ -313,7 +313,7 @@ public class RoughlyEnoughItemsCoreClient {
     public static boolean shouldReturn(Screen screen) {
         if (REIRuntime.getInstance().getOverlay().isEmpty()) return true;
         if (screen == null) return true;
-        if (screen != Minecraft.getInstance().screen) return true;
+        if (screen != Minecraft.getInstance().gui.screen()) return true;
         return _shouldReturn(screen);
     }
     
@@ -390,7 +390,7 @@ public class RoughlyEnoughItemsCoreClient {
         });
         ClientGuiEvent.INIT_POST.register((screen, access) -> {
             REIRuntime.getInstance().getOverlay(false, true);
-            if (Minecraft.getInstance().screen == screen) {
+            if (Minecraft.getInstance().gui.screen() == screen) {
                 if (REIRuntime.getInstance().getPreviousScreen() != screen) {
                     OverlaySearchField searchField = REIRuntimeImpl.getSearchField();
                     

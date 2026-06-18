@@ -180,7 +180,7 @@ public class UncertainDisplayViewingScreen extends REIScreen {
     @Override
     public boolean keyPressed(KeyEvent event) {
         if (event.key() == 256 || this.minecraft.options.keyInventory.matches(event)) {
-            Minecraft.getInstance().setScreen(parent);
+            Minecraft.getInstance().setScreenAndShow(parent);
             if (parent instanceof AbstractContainerScreen) {
                 REIRuntime.getInstance().getOverlay().get().queueReloadOverlay();
             }

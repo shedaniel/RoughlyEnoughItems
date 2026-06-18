@@ -500,14 +500,14 @@ public abstract class AbstractDisplayViewingScreen extends REIScreen implements 
             return true;
         if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(event.key(), event.scancode())) {
             if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+                minecraft.setScreenAndShow(REIRuntimeImpl.getInstance().getLastDisplayScreen());
             } else {
-                minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
+                minecraft.setScreenAndShow(REIRuntime.getInstance().getPreviousScreen());
             }
             return true;
         }
         if (this.minecraft.options.keyInventory.matches(event)) {
-            Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
+            Minecraft.getInstance().setScreenAndShow(REIRuntime.getInstance().getPreviousScreen());
             return true;
         }
         return false;

@@ -74,7 +74,7 @@ public class ImportantWarningsWidget extends WidgetWithBounds {
                 Component.translatable("text.rei.recipes.not.full.title").withStyle(ChatFormatting.RED),
                 Component.translatable("text.rei.recipes.not.full.desc", Component.translatable("text.rei.recipes.not.full.desc.command").withStyle(ChatFormatting.AQUA, ChatFormatting.UNDERLINE)).withStyle(ChatFormatting.GRAY)
         );
-        this.bounds = ScreenRegistry.getInstance().getOverlayBounds(DisplayPanelLocation.LEFT, Minecraft.getInstance().screen);
+        this.bounds = ScreenRegistry.getInstance().getOverlayBounds(DisplayPanelLocation.LEFT, Minecraft.getInstance().gui.screen());
         this.bounds.setBounds(this.bounds.x + 10, this.bounds.y + 10, this.bounds.width - 20, this.bounds.height - 20);
         int heightRequired = -5;
         for (Component text : texts) {

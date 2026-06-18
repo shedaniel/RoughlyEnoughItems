@@ -61,7 +61,7 @@ public class ConfigAddonsScreen extends me.shedaniel.rei.impl.client.gui.screen.
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             addRenderableWidget(Button.builder(backText, button -> {
-                minecraft.setScreen(parent);
+                minecraft.setScreenAndShow(parent);
             }).bounds(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20).build());
         }
         rulesList = addWidget(new AddonsList(minecraft, width, height, 30, height));
@@ -126,7 +126,7 @@ public class ConfigAddonsScreen extends me.shedaniel.rei.impl.client.gui.screen.
         public DefaultAddonEntry(Screen parent, ConfigAddon addon) {
             this.addon = addon;
             this.configureButton = new Button.Plain(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
-                Minecraft.getInstance().setScreen(this.addon.createScreen(Minecraft.getInstance().screen));
+                Minecraft.getInstance().setScreenAndShow(this.addon.createScreen(Minecraft.getInstance().gui.screen()));
             }, Supplier::get) {
                 @Override
                 public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {

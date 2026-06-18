@@ -103,7 +103,7 @@ public class ConfigOptionValueWidget {
         } else if (option.getEntry() instanceof OptionValueEntry.Configure<T>) {
             label.clickable().onClick($ -> {
                 ((OptionValueEntry.Configure<T>) option.getEntry()).configure(access, option, () -> {
-                    Minecraft.getInstance().setScreen((Screen) access);
+                    Minecraft.getInstance().setScreenAndShow((Screen) access);
                     setText.accept(option.getEntry().getOption(access.get(option)));
                 });
             });
@@ -138,7 +138,7 @@ public class ConfigOptionValueWidget {
                     }
                     
                     return ToggleMenuEntry.of(selectionOption, () -> false, o -> {
-                        ((REIConfigScreen) Minecraft.getInstance().screen).closeMenu();
+                        ((REIConfigScreen) Minecraft.getInstance().gui.screen()).closeMenu();
                         access.set(option, opt);
                         setText.accept(selection.getOption(opt));
                     });

@@ -42,7 +42,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.Tuple;
+import me.shedaniel.rei.api.common.util.Pair;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.net.URI;
@@ -58,11 +58,11 @@ public class WarningAndErrorScreen extends REIScreen {
     private StringEntryListWidget listWidget;
     private String action;
     private Screen parent;
-    private List<Tuple<String, String>> warnings;
-    private List<Tuple<String, String>> errors;
+    private List<Pair<String, String>> warnings;
+    private List<Pair<String, String>> errors;
     private Consumer<Screen> onContinue;
     
-    public WarningAndErrorScreen(String action, List<Tuple<String, String>> warnings, List<Tuple<String, String>> errors, Consumer<Screen> onContinue) {
+    public WarningAndErrorScreen(String action, List<Pair<String, String>> warnings, List<Pair<String, String>> errors, Consumer<Screen> onContinue) {
         super(Component.empty());
         this.action = action;
         this.warnings = warnings;
@@ -99,7 +99,7 @@ public class WarningAndErrorScreen extends REIScreen {
         listWidget.creditsAddEntry(new EmptyItem());
         if (!warnings.isEmpty())
             listWidget.creditsAddEntry(new TextItem(Component.literal("Warnings:").withStyle(ChatFormatting.GOLD).getVisualOrderText()));
-        for (Tuple<String, String> pair : warnings) {
+        for (Pair<String, String> pair : warnings) {
             addText(Component.literal(pair.getA()));
             if (pair.getB() != null)
                 addLink(Component.literal(pair.getB()), pair.getB());
@@ -112,7 +112,7 @@ public class WarningAndErrorScreen extends REIScreen {
         }
         if (!errors.isEmpty())
             listWidget.creditsAddEntry(new TextItem(Component.literal("Errors:").withStyle(ChatFormatting.RED).getVisualOrderText()));
-        for (Tuple<String, String> pair : errors) {
+        for (Pair<String, String> pair : errors) {
             addText(Component.literal(pair.getA()));
             if (pair.getB() != null)
                 addLink(Component.literal(pair.getB()), pair.getB());

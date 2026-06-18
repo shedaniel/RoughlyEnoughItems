@@ -327,7 +327,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
             }
             
             Style style = this.getTextAt(mouseX, mouseY);
-            Screen screen = Minecraft.getInstance().screen;
+            Screen screen = Minecraft.getInstance().gui.screen();
             if (style != null && screen != null) {
                 if (style.getHoverEvent() != null) {
                     HoverEvent hoverEvent = style.getHoverEvent();
@@ -350,7 +350,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
                 if (style != null && style.getClickEvent() != null) {
 
 
-                    Screen.defaultHandleGameClickEvent(style.getClickEvent(), Minecraft.getInstance(), Minecraft.getInstance().screen);
+                    Screen.defaultHandleGameClickEvent(style.getClickEvent(), Minecraft.getInstance(), Minecraft.getInstance().gui.screen());
                     return true;
                 }
             }

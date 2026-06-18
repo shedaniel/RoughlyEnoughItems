@@ -3,6 +3,7 @@ package me.shedaniel.rei.api.client.gui.compat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -99,7 +100,7 @@ public class GuiGraphics extends GuiGraphicsExtractor {
     public void withFreshScissorStack(Runnable runnable) {
         GuiGraphicsExtractor.ScissorStack previous = this.scissorStack;
         try {
-            this.scissorStack = new GuiGraphicsExtractor.ScissorStack();
+            this.scissorStack = new GuiGraphicsExtractor.ScissorStack(ScreenRectangle.empty());
             runnable.run();
         } finally {
             this.scissorStack = previous;

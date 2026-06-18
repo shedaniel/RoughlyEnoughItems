@@ -49,7 +49,7 @@ public class ExportRecipeIdentifierToast implements Toast {
     }
     
     public static void addToast(String title, @Nullable String subtitleNullable) {
-        Minecraft.getInstance().getToastManager().addToast(new ExportRecipeIdentifierToast(title, subtitleNullable));
+        Minecraft.getInstance().gui.toastManager().addToast(new ExportRecipeIdentifierToast(title, subtitleNullable));
     }
     
     @Override

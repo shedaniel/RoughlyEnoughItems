@@ -4,7 +4,7 @@
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
+ * in the Software without restriction, including limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
@@ -21,32 +21,25 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.config.options;
+package me.shedaniel.rei.api.common.util;
 
-import me.shedaniel.rei.api.client.config.ConfigObject;
-import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-
-public interface ConfigUtils {
-    static boolean isReducedMotion() {
-        if (Minecraft.getInstance().gui.screen() instanceof REIConfigScreen screen) {
-            return screen.get(AllREIConfigOptions.REDUCED_MOTION);
-        } else {
-            return ConfigObject.getInstance().isReducedMotion();
-        }
+/**
+ * An immutable pair of values.
+ */
+public record Pair<A, B>(A first, B second) {
+    public A getA() {
+        return first;
     }
     
-    static MutableComponent literal(String text) {
-        return Component.literal(text);
+    public B getB() {
+        return second;
     }
     
-    static MutableComponent translatable(String key) {
-        return Component.translatable(key);
+    public A getFirst() {
+        return first;
     }
     
-    static MutableComponent translatable(String key, Object... args) {
-        return Component.translatable(key, args);
+    public B getSecond() {
+        return second;
     }
 }

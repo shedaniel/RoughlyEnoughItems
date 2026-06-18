@@ -450,7 +450,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public Tooltip getCurrentTooltip(TooltipContext context) {
         Tooltip tooltip = getCurrentEntry().getTooltip(context);
         
-        if (tooltip != null && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+        if (tooltip != null && !(Minecraft.getInstance().gui.screen() instanceof DisplayScreen)) {
             boolean exists = getTransferHandler(false) != null;
             
             if (!exists) {
@@ -572,13 +572,13 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
         if (REIRuntimeImpl.isWithinRecipeViewingScreen && this.getCyclingEntries().get().size() > 1 && containsMouse(mouseX, mouseY)) {
             if (amountY < 0) {
-                for (EntryWidget slot : Widgets.<EntryWidget>walk(minecraft.screen.children(), EntryWidget.class::isInstance)) {
+                for (EntryWidget slot : Widgets.<EntryWidget>walk(minecraft.gui.screen().children(), EntryWidget.class::isInstance)) {
                     slot.getCyclingEntries().previous();
                     slot.lastCycleTime = System.currentTimeMillis();
                 }
                 return true;
             } else if (amountY > 0) {
-                for (EntryWidget slot : Widgets.<EntryWidget>walk(minecraft.screen.children(), EntryWidget.class::isInstance)) {
+                for (EntryWidget slot : Widgets.<EntryWidget>walk(minecraft.gui.screen().children(), EntryWidget.class::isInstance)) {
                     slot.getCyclingEntries().next();
                     slot.lastCycleTime = System.currentTimeMillis();
                 }
@@ -617,7 +617,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             }
         }
         
-        if (!(Minecraft.getInstance().screen instanceof DisplayScreen) && Minecraft.getInstance().hasControlDown()) {
+        if (!(Minecraft.getInstance().gui.screen() instanceof DisplayScreen) && Minecraft.getInstance().hasControlDown()) {
             try {
                 TransferHandler handler = getTransferHandler(true);
                 
@@ -636,8 +636,8 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     
                     if (transferResult.isBlocking()) {
                         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                        if (transferResult.isReturningToScreen() && Minecraft.getInstance().screen != containerScreen) {
-                            Minecraft.getInstance().setScreen(containerScreen);
+                        if (transferResult.isReturningToScreen() && Minecraft.getInstance().gui.screen() != containerScreen) {
+                            Minecraft.getInstance().setScreenAndShow(containerScreen);
                             REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                         }
                         return true;

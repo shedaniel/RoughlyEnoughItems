@@ -192,7 +192,7 @@ public class REIConfigScreen extends me.shedaniel.rei.impl.client.gui.screen.REI
         }
         
         this.widgets.add(Widgets.createButton(new Rectangle(width / 2 - 150 - 10, height - 26, 150, 20), translatable("gui.cancel")).onClick(button -> {
-            Minecraft.getInstance().setScreen(this.parent);
+            Minecraft.getInstance().setScreenAndShow(this.parent);
         }));
         this.widgets.add(Widgets.createButton(new Rectangle(width / 2 + 10, height - 26, 150, 20), translatable("gui.done")).onClick(button -> {
             for (OptionCategory optionCategory : this.categories) {
@@ -209,7 +209,7 @@ public class REIConfigScreen extends me.shedaniel.rei.impl.client.gui.screen.REI
             if (REIRuntimeImpl.getSearchField() != null) {
                 ScreenOverlayImpl.getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
             }
-            Minecraft.getInstance().setScreen(this.parent);
+            Minecraft.getInstance().setScreenAndShow(this.parent);
         }));
     }
     
@@ -239,7 +239,7 @@ public class REIConfigScreen extends me.shedaniel.rei.impl.client.gui.screen.REI
         if (searching) {
             setSearching(false);
         } else {
-            this.minecraft.setScreen(this.parent);
+            this.minecraft.setScreenAndShow(this.parent);
         }
     }
     

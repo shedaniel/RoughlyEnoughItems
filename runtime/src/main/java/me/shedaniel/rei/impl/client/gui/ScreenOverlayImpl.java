@@ -215,7 +215,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     private Rectangle getCenterSearchFieldArea(int widthRemoved) {
-        Rectangle screenBounds = ScreenRegistry.getInstance().getScreenBounds(minecraft.screen);
+        Rectangle screenBounds = ScreenRegistry.getInstance().getScreenBounds(minecraft.gui.screen());
         return new Rectangle(screenBounds.x, window.getGuiScaledHeight() - 22, screenBounds.width - widthRemoved, 18);
     }
     
@@ -230,7 +230,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             init();
             getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
         } else {
-            for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(minecraft.screen)) {
+            for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(minecraft.gui.screen())) {
                 if (decider != null && decider.shouldRecalculateArea(ConfigObject.getInstance().getDisplayPanelLocation(), bounds)) {
                     init();
                     break;
@@ -247,7 +247,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (!hasSpace()) return;
         this.renderWidgets(graphics, mouseX, mouseY, delta);
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
-            Screen screen = Minecraft.getInstance().screen;
+            Screen screen = Minecraft.getInstance().gui.screen();
             ClickArea.ClickAreaContext<Screen> context = createClickAreaContext(mouseX, mouseY, screen);
             List<Component> clickAreaTooltips = ScreenRegistry.getInstance().getClickAreaTooltips((Class<Screen>) screen.getClass(), context);
             if (clickAreaTooltips != null && !clickAreaTooltips.isEmpty()) {
@@ -271,7 +271,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     private static Rectangle calculateOverlayBounds() {
-        Rectangle bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation(), Minecraft.getInstance().screen);
+        Rectangle bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation(), Minecraft.getInstance().gui.screen());
         
         double hAlign = ConfigObject.getInstance().getDisplayPanelLocation() == DisplayPanelLocation.LEFT ? 1 - ConfigObject.getInstance().getHorizontalEntriesBoundariesAlignments() : ConfigObject.getInstance().getHorizontalEntriesBoundariesAlignments();
         int widthReduction = (int) Math.round(bounds.width * (1 - ConfigObject.getInstance().getHorizontalEntriesBoundariesPercentage()));
@@ -293,7 +293,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) buttonsHeight += 22;
         Rectangle area = REIRuntime.getInstance().calculateEntryListArea(bounds).clone();
         area.height = buttonsHeight;
-        return RectangleUtils.excludeZones(bounds, ScreenRegistry.getInstance().exclusionZones().getExclusionZones(Minecraft.getInstance().screen).stream()
+        return RectangleUtils.excludeZones(bounds, ScreenRegistry.getInstance().exclusionZones().getExclusionZones(Minecraft.getInstance().gui.screen()).stream()
                 .filter(zone -> zone.intersects(area)));
     }
     
@@ -324,7 +324,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public void renderTooltip(GuiGraphics graphics, Tooltip tooltip) {
-        renderTooltipInner(minecraft.screen, graphics, tooltip, tooltip.getX(), tooltip.getY());
+        renderTooltipInner(minecraft.gui.screen(), graphics, tooltip, tooltip.getX(), tooltip.getY());
     }
     
     protected abstract void renderTooltipInner(Screen screen, GuiGraphics graphics, Tooltip tooltip, int mouseX, int mouseY);
@@ -391,7 +391,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             REIRuntime.getInstance().toggleOverlayVisible();
             return true;
         }
-        EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen, PointHelper.ofMouse());
+        EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().gui.screen(), PointHelper.ofMouse());
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
             if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(event.key(), event.scancode())) {
@@ -475,7 +475,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             REIRuntime.getInstance().toggleOverlayVisible();
             return REIRuntime.getInstance().isOverlayVisible();
         }
-        EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen, PointHelper.ofMouse());
+        EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().gui.screen(), PointHelper.ofMouse());
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
             if (ConfigObject.getInstance().getRecipeKeybind().matchesMouse(event.button())) {
@@ -506,7 +506,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             }
         }
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
-            Screen screen = Minecraft.getInstance().screen;
+            Screen screen = Minecraft.getInstance().gui.screen();
             ClickArea.ClickAreaContext<Screen> context = createClickAreaContext(event.x(), event.y(), screen);
             if (ScreenRegistry.getInstance().executeClickArea((Class<Screen>) screen.getClass(), context)) {
                 return true;
@@ -571,7 +571,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     
     @Override
     public boolean isNotInExclusionZones(double mouseX, double mouseY) {
-        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().screen)) {
+        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().gui.screen())) {
             InteractionResult in = decider.isInZone(mouseX, mouseY);
             if (in != InteractionResult.PASS)
                 return in == InteractionResult.SUCCESS;

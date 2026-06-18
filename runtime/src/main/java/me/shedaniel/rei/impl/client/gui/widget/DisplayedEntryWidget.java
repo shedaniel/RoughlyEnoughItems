@@ -55,7 +55,7 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
     
     @Override
     public void queueTooltip(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && !minecraft.player.containerMenu.getCarried().isEmpty()) {
+        if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().gui.screen() instanceof DisplayScreen) && !minecraft.player.containerMenu.getCarried().isEmpty()) {
             return;
         }
         super.queueTooltip(graphics, mouseX, mouseY, delta);
@@ -63,7 +63,7 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
     
     @Override
     protected boolean doAction(MouseButtonEvent event) {
-        if (ClientHelper.getInstance().isCheating() && !event.hasControlDown() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+        if (ClientHelper.getInstance().isCheating() && !event.hasControlDown() && !(Minecraft.getInstance().gui.screen() instanceof DisplayScreen)) {
             EntryStack<?> entry = getCurrentEntry().copy();
             if (!entry.isEmpty()) {
                 if (entry.getType() != VanillaEntryTypes.ITEM) {
@@ -90,7 +90,7 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
     public boolean cancelDeleteItems(EntryStack<?> stack) {
         if (!interactable || !ConfigObject.getInstance().isGrabbingItems())
             return super.cancelDeleteItems(stack);
-        if (ClientHelper.getInstance().isCheating() && !Minecraft.getInstance().hasControlDown() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+        if (ClientHelper.getInstance().isCheating() && !Minecraft.getInstance().hasControlDown() && !(Minecraft.getInstance().gui.screen() instanceof DisplayScreen)) {
             EntryStack<?> entry = getCurrentEntry().copy();
             if (!entry.isEmpty()) {
                 if (entry.getType() != VanillaEntryTypes.ITEM) {
@@ -105,7 +105,7 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
     
     @Override
     public boolean keyPressedIgnoreContains(KeyEvent event) {
-        if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+        if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().gui.screen() instanceof DisplayScreen)) {
             EntryStack<?> entry = getCurrentEntry().copy();
             if (!entry.isEmpty()) {
                 if (entry.getType() != VanillaEntryTypes.ITEM) {

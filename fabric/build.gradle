@@ -123,7 +123,7 @@ unifiedPublishing {
     project {
         displayName = "[Fabric $rootProject.supported_version] v$project.version"
         releaseType = rootProject.unstable == "false" ? "release" : "alpha"
-        gameVersions = ["26.1", "26.1.1", "26.1.2"]
+        gameVersions = ["26.2"]
         gameLoaders = ["fabric"]
         changelog = rootProject.releaseChangelog
 
