@@ -167,6 +167,7 @@
   "text.rei.release_export": "Lasse %s los, um zu exportieren",
   "text.rei.ask_to_export": "Möchtest du \"%s\" exportieren?",
   "text.rei.ask_to_export.subtitle": "Dies wird %d Anzeigen als Bilder exportieren.",
+  "text.rei.recipes.not.full.button.okay": "Okay, nicht erneut anzeigen",
   "text.rei.recipe_id": "\n%sRezept-Id: %s",
   "text.rei.recipe_screen_type.selection": "Darstellung Rezept-Bildschirm",
   "text.rei.recipe_screen_type.selection.sub": "Du kannst diese Einstellung jederzeit über den Konfigurationsbildschirm wieder bearbeiten.",
