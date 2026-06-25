@@ -1,101 +1,50 @@
-# Roughly Enough Items
-https://minecraft.curseforge.com/projects/roughly-enough-items <br>
-Roughly Enough Items is a mod to view Items and Recipes for Minecraft 1.13 - 1.18, supporting mod loaders from Forge, Rift to Fabric.
------
+# Roughly Enough Items (REI) Fork - Disable Partial Recipe Warning
+
+> ⚠️ **Status: DEPRECATED**  
+> As of Minecraft version 1.26.1, this fix is no longer necessary as the base mod/game handles this behavior natively. This repository is archived and kept for historical purposes. For the original mod, visit the [Official Roughly Enough Items CurseForge Page](https://minecraft.curseforge.com/projects/roughly-enough-items).
+
+---
+
+## What This Fork Did
+
+In the original REI, if a large server failed to load 100% of the recipes, a **"Partial Recipe Warning"** notification would pop up. While you could click it away, the vanilla REI behavior forgot this preference immediately. 
+
+This meant the warning would aggressively reappear every time you:
+* Changed lobbies on a large network.
+* Left and rejoined a server.
+* Changed dimensions or reloaded chunks in a way that refreshed the recipe cache.
+
+### The Solution
+This fork modified the dismissal button to act as a **"Don't show this again"** toggle. Clicking it saved your preference directly to a configuration file, permanently silencing the warning across server switches and sessions.
+
+---
+
+## Installation & Usage (Legacy)
+
+If you are still running an older Minecraft version where this is an issue:
+1. Replace your existing REI `.jar` with the build from this fork.
+2. When the warning appears, click the **"Don't show it again"** button.
+3. To reset this setting, you can manually toggle it in the config file.
+
+## License
+This project inherits the original license of Roughly Enough Items. All credits go to the original REI developers.
+
+---
+---
+
+# Official Roughly Enough Items Documentation
 
 [Help translate REI on Crowdin!](https://crowdin.com/project/roughly-enough-items)
 
-![](https://i.imgur.com/eQsWDrM.png)
+Roughly Enough Items is a clean and modular mod to view Items and Recipes for Minecraft, supporting mod loaders from Forge, Rift to Fabric.
 
-![](https://i.imgur.com/OcOQLip.png)
+*This mod is required on both the client side and the server side for full functionality.*
 
-This mod is both client sided and server sided.
+## Maven
 
-# Maven
-Firstly, add my Maven repository (If you already have the architectury maven, you don't need to do this, they are the same repo)
+Firstly, add the Maven repository (If you already have the architectury maven, you don't need to do this, they are the same repo):
+
 ```gradle
 repositories {
-    maven { url "https://maven.shedaniel.me" }
+    maven { url "[https://maven.shedaniel.me](https://maven.shedaniel.me)" }
 }
-```
-
-## Choosing the correct artifact to depend on
-### Fabric
-REI recommends you to declare a compile dependency on REI's API, and a runtime dependency on REI's full package.
-```gradle
-dependencies {
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:VERSION"
-    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:VERSION"
-}
-```
-
-Additionally, if you want to interact with the builtin plugins, you may declare a compile dependency on it as well.
-```gradle
-dependencies {
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:VERSION"
-}
-```
-
-### Forge (ForgeGradle)
-REI recommends you to just depend on REI's full package.
-```gradle
-dependencies {
-    implementation fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:VERSION")
-}
-```
-
-### Forge (Architectury Loom)
-REI recommends you to declare a compile dependency on REI's API, and a runtime dependency on REI's full package.
-```gradle
-dependencies {
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-forge:VERSION"
-    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-forge:VERSION"
-}
-```
-
-Additionally, if you want to interact with the builtin plugins, you may declare a compile dependency on it as well.
-```gradle
-dependencies {
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-forge:VERSION"
-}
-```
-
-### Architectury
-REI recommends you to declare a compile dependency on REI's common API, and declare the full package on the individual platform's subprojects.
-```gradle
-// Common
-dependencies {
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:VERSION"
-}
-
-// Fabric
-dependencies {
-    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:VERSION"
-}
-
-// Forge
-dependencies {
-    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-forge:VERSION"
-}
-```
-
-Additionally, if you want to interact with the builtin plugins, you may declare a compile dependency on it as well.
-```gradle
-// Common
-dependencies {
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin:VERSION"
-}
-```
-
-### List of artifacts
-- **me.shedaniel:RoughlyEnoughItems-api**: REI API for Architectury Common
-- **me.shedaniel:RoughlyEnoughItems-default-plugin**: REI Default Plugin for Architectury Common
-- **me.shedaniel:RoughlyEnoughItems-runtime**: REI Runtime for Architectury Common
-- **me.shedaniel:RoughlyEnoughItems-api-fabric**: REI API for Fabric
-- **me.shedaniel:RoughlyEnoughItems-default-plugin-fabric**: REI Default Plugin for Fabric
-- **me.shedaniel:RoughlyEnoughItems-runtime-fabric**: REI Runtime for Fabric
-- **me.shedaniel:RoughlyEnoughItems-api-forge**: REI API for Forge
-- **me.shedaniel:RoughlyEnoughItems-default-plugin-forge**: REI Default Plugin for Forge
-- **me.shedaniel:RoughlyEnoughItems-runtime-forge**: REI Runtime for Forge
-- **me.shedaniel:RoughlyEnoughItems-fabric**: Full REI for Fabric
-- **me.shedaniel:RoughlyEnoughItems-forge**: Full REI for Forge
