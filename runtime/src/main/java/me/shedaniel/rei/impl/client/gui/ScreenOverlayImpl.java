@@ -515,7 +515,12 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (!visible) {
             return false;
         }
+        boolean updatedDraggingStack = false;
         for (GuiEventListener element : widgets) {
+            if (!updatedDraggingStack && isHoveredOverlayList(element, event) && draggingStack != null) {
+                draggingStack.mouseClicked(event, doubleClick);
+                updatedDraggingStack = true;
+            }
             if (element != configButton && element != menuHolder.widget() && element != hintsWidget && element != draggingStack && element.mouseClicked(event, doubleClick)) {
                 this.setFocused(element);
                 if (event.button() == 0)
@@ -525,7 +530,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
                 return true;
             }
         }
-        if (draggingStack != null) {
+        if (!updatedDraggingStack && draggingStack != null) {
             draggingStack.mouseClicked(event, doubleClick);
         }
         if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesMouse(event.button())) {
@@ -536,6 +541,10 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             return true;
         }
         return false;
+    }
+
+    private static boolean isHoveredOverlayList(GuiEventListener element, MouseButtonEvent event) {
+        return element instanceof OverlayListWidget list && list.containsMouse(new Point(event.x(), event.y()));
     }
     
     @Override
