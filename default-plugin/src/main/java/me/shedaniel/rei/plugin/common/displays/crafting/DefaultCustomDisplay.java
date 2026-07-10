@@ -29,7 +29,7 @@ import me.shedaniel.rei.api.common.display.DisplaySerializer;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.BitSet;
 import java.util.List;
@@ -40,14 +40,14 @@ public class DefaultCustomDisplay extends DefaultCraftingDisplay {
             RecordCodecBuilder.mapCodec(instance -> instance.group(
                     EntryIngredient.codec().listOf().fieldOf("inputs").forGetter(DefaultCustomDisplay::getInputEntries),
                     EntryIngredient.codec().listOf().fieldOf("outputs").forGetter(DefaultCustomDisplay::getOutputEntries),
-                    ResourceLocation.CODEC.optionalFieldOf("location").forGetter(DefaultCustomDisplay::getDisplayLocation)
+                    Identifier.CODEC.optionalFieldOf("location").forGetter(DefaultCustomDisplay::getDisplayLocation)
             ).apply(instance, DefaultCustomDisplay::new)),
             StreamCodec.composite(
                     EntryIngredient.streamCodec().apply(ByteBufCodecs.list()),
                     DefaultCustomDisplay::getInputEntries,
                     EntryIngredient.streamCodec().apply(ByteBufCodecs.list()),
                     DefaultCustomDisplay::getOutputEntries,
-                    ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC),
+                    ByteBufCodecs.optional(Identifier.STREAM_CODEC),
                     DefaultCustomDisplay::getDisplayLocation,
                     DefaultCustomDisplay::new
             ));
@@ -55,7 +55,7 @@ public class DefaultCustomDisplay extends DefaultCraftingDisplay {
     private final int width;
     private final int height;
     
-    public DefaultCustomDisplay(List<EntryIngredient> input, List<EntryIngredient> output, Optional<ResourceLocation> location) {
+    public DefaultCustomDisplay(List<EntryIngredient> input, List<EntryIngredient> output, Optional<Identifier> location) {
         super(input, output, location);
         BitSet row = new BitSet(3);
         BitSet column = new BitSet(3);

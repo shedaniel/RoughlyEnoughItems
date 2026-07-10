@@ -40,7 +40,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.ApiStatus;
@@ -106,11 +106,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public boolean isGrabbingItems() {
         return basics.cheatingStyle == ItemCheatingStyle.GRAB;
-    }
-    
-    @Override
-    public boolean isFavoritesAnimated() {
-        return !basics.reduceMotion;
     }
     
     @Override
@@ -219,11 +214,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     @Nullable
-    public ResourceLocation getInputMethodId() {
+    public Identifier getInputMethodId() {
         return functionality.inputMethod;
     }
     
-    public void setInputMethodId(@Nullable ResourceLocation id) {
+    public void setInputMethodId(@Nullable Identifier id) {
         functionality.inputMethod = id;
     }
     
@@ -295,11 +290,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    public boolean doesFastEntryRendering() {
-        return advanced.miscellaneous.newFastEntryRendering;
-    }
-    
-    @Override
     public boolean doesCacheEntryRendering() {
         return advanced.miscellaneous.cachingFastEntryRendering;
     }
@@ -311,6 +301,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public boolean doesCacheDisplayLookup() {
         return advanced.miscellaneous.cachingDisplayLookup;
+    }
+    
+    @Override
+    public ForceLocalRecipesMode getForceLocalRecipes() {
+        return advanced.miscellaneous.forceLocalRecipes;
     }
     
     @Override
@@ -651,7 +646,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Functionality {
         @Nullable
-        public ResourceLocation inputMethod = null;
+        public Identifier inputMethod = null;
         @Comment("Declares whether REI should remove the recipe book.")
         public boolean disableRecipeBook = false;
         @Comment("Declares whether mob effects should be on the left side instead of the right side.")
@@ -737,9 +732,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares whether arrows in containers should be clickable.")
             public boolean clickableRecipeArrows = true;
             public boolean registerRecipesInAnotherThread = true;
-            public boolean newFastEntryRendering = true;
             public boolean cachingFastEntryRendering = false;
             public boolean cachingDisplayLookup = true;
+            @Comment("Controls whether REI synthesizes recipe displays from the client's own data packs, for servers that do not sync recipe data. NEVER: off; AUTO: load locally as a fallback until the server syncs displays; ALWAYS: load locally even when the server provides displays.")
+            public ForceLocalRecipesMode forceLocalRecipes = ForceLocalRecipesMode.AUTO;
             public CategorySettings categorySettings = new CategorySettings();
             
             public static class CategorySettings {

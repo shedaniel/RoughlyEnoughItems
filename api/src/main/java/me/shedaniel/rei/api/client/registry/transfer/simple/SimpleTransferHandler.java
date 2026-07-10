@@ -37,7 +37,7 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.ClientInternals;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
@@ -174,11 +174,8 @@ public interface SimpleTransferHandler extends TransferHandler, TransferHandlerM
         for (Widget widget : widgets) {
             if (widget instanceof Slot && ((Slot) widget).getNoticeMark() == Slot.INPUT) {
                 if (missingIndices.contains(i++)) {
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(0, 0, 50);
                     Rectangle innerBounds = ((Slot) widget).getInnerBounds();
                     graphics.fill(innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), 0x40ff0000);
-                    graphics.pose().popPose();
                 }
             }
         }

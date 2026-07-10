@@ -31,10 +31,10 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.utils.PanelTextures;
 import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -47,8 +47,8 @@ public final class PanelWidget extends Panel {
     private static final PanelWidget TEMP = new PanelWidget(new Rectangle());
     private Rectangle bounds;
     private int color = -1;
-    private ResourceLocation texture;
-    private ResourceLocation darkTexture;
+    private Identifier texture;
+    private Identifier darkTexture;
     private Predicate<Panel> rendering = Predicates.alwaysTrue();
     private NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
             .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
@@ -60,7 +60,7 @@ public final class PanelWidget extends Panel {
     }
     
     @Override
-    public void setTexture(ResourceLocation texture, ResourceLocation darkTexture) {
+    public void setTexture(Identifier texture, Identifier darkTexture) {
         this.texture = texture;
         this.darkTexture = darkTexture;
     }
@@ -113,8 +113,8 @@ public final class PanelWidget extends Panel {
     }
     
     public void renderBackground(GuiGraphics graphics, int x, int y, int width, int height, boolean dark, float alpha, float red, float green, float blue) {
-        ResourceLocation texture = dark ? this.darkTexture : this.texture;
-        graphics.blitSprite(RenderType::guiTextured, texture, x, y, width, height, ARGB.colorFromFloat(alpha, red, green, blue));
+        Identifier texture = dark ? this.darkTexture : this.texture;
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, texture, x, y, width, height, ARGB.colorFromFloat(alpha, red, green, blue));
     }
     
     @Override

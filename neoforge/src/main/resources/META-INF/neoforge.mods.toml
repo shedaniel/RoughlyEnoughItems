@@ -16,21 +16,29 @@ To allow players to view items and recipes.
 [[dependencies.roughlyenoughitems]]
 modId = "architectury"
 type = "required"
-versionRange = "[16.1.0,)"
+versionRange = "[21.0,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.roughlyenoughitems]]
 modId = "cloth_config"
 type = "required"
-versionRange = "[18.0,)"
+versionRange = "[26.2,)"
+ordering = "NONE"
+side = "BOTH"
+
+# Architectury 21.x is built for Minecraft 26.2, so NeoForge hard-requires it.
+[[dependencies.roughlyenoughitems]]
+modId = "minecraft"
+type = "required"
+versionRange = "[26.2,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.roughlyenoughitems]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.5-beta,)"
+versionRange = "[26.2,)"
 ordering = "NONE"
 side = "BOTH"
 

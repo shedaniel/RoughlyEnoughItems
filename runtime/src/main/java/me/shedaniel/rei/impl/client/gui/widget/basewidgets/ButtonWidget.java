@@ -32,14 +32,16 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,8 +55,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ButtonWidget extends Button {
-    private static final WidgetSprites SPRITES = new WidgetSprites(ResourceLocation.withDefaultNamespace("widget/button"), ResourceLocation.withDefaultNamespace("widget/button_disabled"), ResourceLocation.withDefaultNamespace("widget/button_highlighted"));
-    private static final WidgetSprites DARK_SPRITES = new WidgetSprites(ResourceLocation.parse("roughlyenoughitems:widget/button_dark"), ResourceLocation.parse("roughlyenoughitems:widget/button_disabled_dark"), ResourceLocation.parse("roughlyenoughitems:widget/button_highlighted_dark"));
+    private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDefaultNamespace("widget/button"), Identifier.withDefaultNamespace("widget/button_disabled"), Identifier.withDefaultNamespace("widget/button_highlighted"));
+    private static final WidgetSprites DARK_SPRITES = new WidgetSprites(Identifier.parse("roughlyenoughitems:widget/button_dark"), Identifier.parse("roughlyenoughitems:widget/button_disabled_dark"), Identifier.parse("roughlyenoughitems:widget/button_highlighted_dark"));
     private Rectangle bounds;
     private boolean enabled = true;
     private Component text;
@@ -251,8 +253,8 @@ public class ButtonWidget extends Button {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (containsMouse(mouseX, mouseY) && isEnabled() && button == 0) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (containsMouse(event.x(), event.y()) && isEnabled() && event.button() == 0) {
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             onClick();
             return true;
@@ -261,9 +263,9 @@ public class ButtonWidget extends Button {
     }
     
     @Override
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
+    public boolean keyPressed(KeyEvent event) {
         if (this.isEnabled() && focused) {
-            if (int_1 != 257 && int_1 != 32 && int_1 != 335) {
+            if (event.key() != 257 && event.key() != 32 && event.key() != 335) {
                 return false;
             } else {
                 minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
@@ -285,7 +287,7 @@ public class ButtonWidget extends Button {
     
     protected void renderBackground(GuiGraphics graphics, int x, int y, int width, int height, boolean focused, boolean dark, Color color) {
         WidgetSprites sprites = dark ? DARK_SPRITES : SPRITES;
-        ResourceLocation texture = sprites.get(this.isEnabled(), focused);
-        graphics.blitSprite(RenderType::guiTextured, texture, x, y, width, height, color.getColor());
+        Identifier texture = sprites.get(this.isEnabled(), focused);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, texture, x, y, width, height, color.getColor());
     }
 }

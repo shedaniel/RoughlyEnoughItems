@@ -25,13 +25,13 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 public class PaddedWidget extends DelegateWidgetWithTranslate {
     private final int padLeft, padRight, padTop, padBottom;
     
     public PaddedWidget(int padLeft, int padRight, int padTop, int padBottom, WidgetWithBounds widget) {
-        super(widget, Matrix4f::new);
+        super(widget, Matrix3x2f::new);
         this.padLeft = padLeft;
         this.padRight = padRight;
         this.padTop = padTop;
@@ -39,8 +39,8 @@ public class PaddedWidget extends DelegateWidgetWithTranslate {
     }
     
     @Override
-    protected Matrix4f translate() {
-        return new Matrix4f().translate(padLeft, padRight, 0);
+    protected Matrix3x2f translate() {
+        return new Matrix3x2f().translate(padLeft, padRight);
     }
     
     @Override

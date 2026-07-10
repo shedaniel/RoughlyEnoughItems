@@ -24,10 +24,9 @@
 package me.shedaniel.rei.impl.client.transfer;
 
 import dev.architectury.networking.NetworkManager;
-import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
+import me.shedaniel.rei.impl.common.networking.REIPackets;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.client.registry.transfer.simple.SimpleTransferHandler;
@@ -46,7 +45,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -81,17 +79,15 @@ public enum SimpleTransferHandlerImpl implements ClientInternals.SimpleTransferH
             return TransferHandler.Result.createSuccessful();
         }
         
-        context.getMinecraft().setScreen(containerScreen);
+        context.getMinecraft().setScreenAndShow(containerScreen);
         if (containerScreen instanceof AbstractRecipeBookScreen<?> screen) {
             screen.recipeBookComponent.ghostSlots.clear();
         }
         
-        RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), context.getMinecraft().getConnection().registryAccess());
-        buf.writeResourceLocation(context.getDisplay().getCategoryIdentifier().getIdentifier());
-        buf.writeBoolean(context.isStackedCrafting());
-        
-        buf.writeNbt(save(context, buf.registryAccess(), inputs, inputSlots, inventorySlots));
-        NetworkManager.sendToServer(RoughlyEnoughItemsNetwork.MOVE_ITEMS_NEW_PACKET, buf);
+        NetworkManager.sendToServer(new REIPackets.MoveItemsNew(
+                context.getDisplay().getCategoryIdentifier().getIdentifier(),
+                context.isStackedCrafting(),
+                save(context, context.getMinecraft().getConnection().registryAccess(), inputs, inputSlots, inventorySlots)));
         return TransferHandler.Result.createSuccessful();
     }
     

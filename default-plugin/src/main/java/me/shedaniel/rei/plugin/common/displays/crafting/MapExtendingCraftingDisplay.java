@@ -39,7 +39,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,19 +50,19 @@ public class MapExtendingCraftingDisplay extends DefaultCraftingDisplay {
     public static final DisplaySerializer<MapExtendingCraftingDisplay> SERIALIZER = DisplaySerializer.of(
             RecordCodecBuilder.mapCodec(instance -> instance.group(
                     Codec.INT.fieldOf("i").forGetter(d -> d.i),
-                    ResourceLocation.CODEC.optionalFieldOf("location").forGetter(MapExtendingCraftingDisplay::getDisplayLocation)
+                    Identifier.CODEC.optionalFieldOf("location").forGetter(MapExtendingCraftingDisplay::getDisplayLocation)
             ).apply(instance, MapExtendingCraftingDisplay::new)),
             StreamCodec.composite(
                     ByteBufCodecs.INT,
                     d -> d.i,
-                    ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC),
+                    ByteBufCodecs.optional(Identifier.STREAM_CODEC),
                     MapExtendingCraftingDisplay::getDisplayLocation,
                     MapExtendingCraftingDisplay::new
             ));
     
     private final int i;
     
-    public MapExtendingCraftingDisplay(int i, Optional<ResourceLocation> id) {
+    public MapExtendingCraftingDisplay(int i, Optional<Identifier> id) {
         super(getInputs(i), List.of(mapWith("X", i + 1, 1)), id);
         this.i = i;
     }

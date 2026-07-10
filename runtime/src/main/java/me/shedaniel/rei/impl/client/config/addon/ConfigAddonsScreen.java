@@ -29,13 +29,14 @@ import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -45,7 +46,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class ConfigAddonsScreen extends Screen {
+public class ConfigAddonsScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private AddonsList rulesList;
     private final Screen parent;
     
@@ -60,7 +61,7 @@ public class ConfigAddonsScreen extends Screen {
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             addRenderableWidget(Button.builder(backText, button -> {
-                minecraft.setScreen(parent);
+                minecraft.setScreenAndShow(parent);
             }).bounds(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20).build());
         }
         rulesList = addWidget(new AddonsList(minecraft, width, height, 30, height));
@@ -124,13 +125,12 @@ public class ConfigAddonsScreen extends Screen {
         
         public DefaultAddonEntry(Screen parent, ConfigAddon addon) {
             this.addon = addon;
-            this.configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
-                Minecraft.getInstance().setScreen(this.addon.createScreen(Minecraft.getInstance().screen));
+            this.configureButton = new Button.Plain(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
+                Minecraft.getInstance().setScreenAndShow(this.addon.createScreen(Minecraft.getInstance().gui.screen()));
             }, Supplier::get) {
                 @Override
-                public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-                    super.renderWidget(graphics, mouseX, mouseY, delta);
-                    graphics.blit(RenderType::guiTextured, InternalTextures.CHEST_GUI_TEXTURE, getX() + 3, getY() + 3, 0, 0, 14, 14, 256, 256);
+                public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+                    graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, getX() + 3, getY() + 3, 0, 0, 14, 14, 256, 256);
                 }
             };
         }
@@ -143,9 +143,9 @@ public class ConfigAddonsScreen extends Screen {
                 int i = client.font.width(title);
                 if (i > entryWidth - 28) {
                     FormattedText titleTrimmed = FormattedText.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 0xFFFFFFFF);
                 } else {
-                    graphics.drawString(client.font, title.getVisualOrderText(), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, title.getVisualOrderText(), x + 2, y + 1, 0xFFFFFFFF);
                 }
             }
             {
@@ -153,14 +153,14 @@ public class ConfigAddonsScreen extends Screen {
                 int i = client.font.width(subtitle);
                 if (i > entryWidth - 28) {
                     FormattedText subtitleTrimmed = FormattedText.composite(client.font.substrByWidth(subtitle, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 0xFF808080);
                 } else {
-                    graphics.drawString(client.font, subtitle.getVisualOrderText(), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, subtitle.getVisualOrderText(), x + 2, y + 12, 0xFF808080);
                 }
             }
             configureButton.setX(x + entryWidth - 25);
             configureButton.setY(y + 1);
-            configureButton.render(graphics, mouseX, mouseY, delta);
+            configureButton.extractRenderState(graphics, mouseX, mouseY, delta);
         }
         
         @Override

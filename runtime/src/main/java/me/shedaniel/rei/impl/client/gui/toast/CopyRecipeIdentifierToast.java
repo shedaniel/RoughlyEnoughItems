@@ -23,20 +23,20 @@
 
 package me.shedaniel.rei.impl.client.gui.toast;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
 public class CopyRecipeIdentifierToast implements Toast {
-    protected static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/toasts.png");
+    protected static final Identifier TEXTURE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/toasts.png");
     private String title;
     private String subtitle;
     private long startTime;
@@ -49,7 +49,7 @@ public class CopyRecipeIdentifierToast implements Toast {
     }
     
     public static void addToast(String title, @Nullable String subtitleNullable) {
-        Minecraft.getInstance().getToastManager().addToast(new CopyRecipeIdentifierToast(title, subtitleNullable));
+        Minecraft.getInstance().gui.toastManager().addToast(new CopyRecipeIdentifierToast(title, subtitleNullable));
     }
     
     @Override
@@ -69,16 +69,19 @@ public class CopyRecipeIdentifierToast implements Toast {
         this.wantedVisibility = (double) m < d ? Visibility.SHOW : Visibility.HIDE;
     }
     
-    @Override
     public void render(GuiGraphics graphics, Font font, long var2) {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        graphics.blit(RenderType::guiTextured, TEXTURE, 0, 0, 0, 0, 160, 32, 256, 256);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, 0, 0, 160, 32, 256, 256);
         if (this.subtitle == null) {
             graphics.drawString(font, this.title, 18, 12, 11141120, false);
         } else {
             graphics.drawString(font, this.title, 18, 7, 11141120, false);
             graphics.drawString(font, this.subtitle, 18, 18, -16777216, false);
         }
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor graphics, Font font, long time) {
+        render(GuiGraphics.of(graphics), font, time);
     }
     
     @Override

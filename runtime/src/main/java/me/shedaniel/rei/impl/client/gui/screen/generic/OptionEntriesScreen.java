@@ -23,23 +23,23 @@
 
 package me.shedaniel.rei.impl.client.gui.screen.generic;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
@@ -53,7 +53,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public abstract class OptionEntriesScreen extends Screen {
+public abstract class OptionEntriesScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private ListWidget listWidget;
     public Screen parent;
     
@@ -69,11 +69,10 @@ public abstract class OptionEntriesScreen extends Screen {
         {
             Component doneText = Component.translatable("gui.done");
             int width = Minecraft.getInstance().font.width(doneText);
-            addRenderableWidget(new Button(this.width - 4 - width - 10, 4, width + 10, 20, doneText, button -> {
+            addRenderableWidget(new Button.Plain(this.width - 4 - width - 10, 4, width + 10, 20, doneText, button -> {
                 save();
-                minecraft.setScreen(parent);
-            }, Supplier::get) {
-            });
+                minecraft.setScreenAndShow(parent);
+            }, Supplier::get) {});
         }
         listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height));
         addEntries(ruleEntry -> listWidget.addItem(ruleEntry));
@@ -81,7 +80,7 @@ public abstract class OptionEntriesScreen extends Screen {
     
     @Override
     public void onClose() {
-        this.minecraft.setScreen(parent);
+        this.minecraft.setScreenAndShow(parent);
     }
     
     public abstract void addEntries(Consumer<ListEntry> entryConsumer);
@@ -196,7 +195,7 @@ public abstract class OptionEntriesScreen extends Screen {
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             widget.setX(x + 2);
             widget.setY(y + 2);
-            widget.render(graphics, mouseX, mouseY, delta);
+            widget.extractRenderState(graphics, mouseX, mouseY, delta);
         }
         
         @Override
@@ -223,18 +222,17 @@ public abstract class OptionEntriesScreen extends Screen {
         private final Button widget;
         
         public ButtonListEntry(int width, Function<ButtonListEntry, Component> textFunction, BiConsumer<ButtonListEntry, Button> buttonConsumer) {
-            this.widget = new Button(0, 0, 100, 20, textFunction.apply(this), button -> {
+            this.widget = new Button.Plain(0, 0, 100, 20, textFunction.apply(this), button -> {
                 buttonConsumer.accept(this, button);
                 button.setMessage(textFunction.apply(this));
-            }, Supplier::get) {
-            };
+            }, Supplier::get) {};
         }
         
         @Override
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             widget.setX(x + 2);
             widget.setY(y);
-            widget.render(graphics, mouseX, mouseY, delta);
+            widget.extractRenderState(graphics, mouseX, mouseY, delta);
         }
         
         @Override
@@ -271,7 +269,7 @@ public abstract class OptionEntriesScreen extends Screen {
     }
     
     public static class SubListEntry extends ListEntry {
-        private static final ResourceLocation CONFIG_TEX = ResourceLocation.fromNamespaceAndPath("cloth-config2", "textures/gui/cloth_config.png");
+        private static final Identifier CONFIG_TEX = Identifier.fromNamespaceAndPath("cloth-config2", "textures/gui/cloth_config.png");
         private final CategoryLabelWidget widget;
         private final List<ListEntry> rules;
         private final List<GuiEventListener> children;
@@ -293,12 +291,11 @@ public abstract class OptionEntriesScreen extends Screen {
         
         @Override
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             this.widget.rectangle.x = x + 3;
             this.widget.rectangle.y = y;
             this.widget.rectangle.width = entryWidth - 6;
             this.widget.rectangle.height = 24;
-            graphics.blit(RenderType::guiTextured, CONFIG_TEX, x + 3, y + 5, 24, (this.widget.rectangle.contains(mouseX, mouseY) ? 18 : 0) + (this.expanded ? 9 : 0), 9, 9, 256, 256);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, CONFIG_TEX, x + 3, y + 5, 24, (this.widget.rectangle.contains(mouseX, mouseY) ? 18 : 0) + (this.expanded ? 9 : 0), 9, 9, 256, 256);
             graphics.drawString(Minecraft.getInstance().font, this.name.get().getVisualOrderText(), x + 3 + 15, y + 6, this.widget.rectangle.contains(mouseX, mouseY) ? -1638890 : -1);
             
             for (ListEntry performanceEntry : this.rules) {
@@ -369,8 +366,8 @@ public abstract class OptionEntriesScreen extends Screen {
             }
             
             @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                if (this.rectangle.contains(mouseX, mouseY)) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+                if (this.rectangle.contains(event.x(), event.y())) {
                     SubListEntry.this.expanded = !SubListEntry.this.expanded;
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     return true;

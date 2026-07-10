@@ -23,13 +23,12 @@
 
 package me.shedaniel.rei.impl.client.registry.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientGuiEvent;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.registry.screen.OverlayRendererProvider;
 import me.shedaniel.rei.impl.common.InternalLogger;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import org.jetbrains.annotations.Nullable;
 
@@ -88,7 +87,7 @@ public enum DefaultScreenOverlayRenderer implements OverlayRendererProvider {
             rendered[0] = 1;
             resetFocused(screen);
             if (!(screen instanceof DisplayScreen)) {
-                sink.render(graphics, mouseX, mouseY, delta);
+                sink.render(GuiGraphics.of(graphics), mouseX, mouseY, delta);
             }
             resetFocused(screen);
         };
@@ -97,25 +96,20 @@ public enum DefaultScreenOverlayRenderer implements OverlayRendererProvider {
                 return;
             rendered[0] = 2;
             resetFocused(screen);
-            graphics.pose().pushPose();
-            graphics.pose().translate(-screen.leftPos, -screen.topPos, 0.0);
-            sink.lateRender(graphics, mouseX, mouseY, delta);
-            graphics.pose().popPose();
-            resetFocused(screen);
         };
         this.renderPost = (screen, graphics, mouseX, mouseY, delta) -> {
-            if (shouldReturn(screen) || rendered[0] == 2)
+            if (shouldReturn(screen))
                 return;
-            if (screen instanceof AbstractContainerScreen) {
+            if (screen instanceof AbstractContainerScreen && rendered[0] < 2) {
                 InternalLogger.getInstance().warn("Screen " + screen.getClass().getName() + " did not render background and foreground! This might cause rendering issues!");
             }
             resetFocused(screen);
-            if (rendered[0] == 0 && !(screen instanceof DisplayScreen)) {
-                sink.render(graphics, mouseX, mouseY, delta.getRealtimeDeltaTicks());
+            if (rendered[0] == 0 && !(screen instanceof DisplayScreen) && (!(screen instanceof AbstractContainerScreen) || rendered[0] < 2)) {
+                sink.render(GuiGraphics.of(graphics), mouseX, mouseY, delta);
             }
             rendered[0] = 1;
             if (rendered[0] == 1) {
-                sink.lateRender(graphics, mouseX, mouseY, delta.getRealtimeDeltaTicks());
+                sink.lateRender(GuiGraphics.of(graphics), mouseX, mouseY, delta);
             }
             resetFocused(screen);
         };

@@ -40,10 +40,10 @@ import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigOptions;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.ArrowWidget;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.PanelWidget;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public class InterfacePreviewer {
                     base.getBounds().setBounds(2, 2, width - 4, height.getAsInt() - 4);
                     return base;
                 }),
-                Widgets.withTranslate(widget, () -> new Matrix4f().translate(0, (height.getAsInt() - widget.getBounds().height) / 2, 0))
+                Widgets.withTranslate(widget, () -> new Matrix3x2f().translate(0, (height.getAsInt() - widget.getBounds().height) / 2))
         );
     }
     

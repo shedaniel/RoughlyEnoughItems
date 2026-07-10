@@ -37,11 +37,12 @@ import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProvider
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitor;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -83,8 +84,6 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
             }
             
             if (entry.dragging) {
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, 0, 600);
                 entry.point.update(delta);
                 entry.dimension.update(delta);
                 int width = entry.component.getWidth();
@@ -93,7 +92,6 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
                 entry.point.setTo(new FloatingPoint(mouseX - mouseStartOffset.x * width, mouseY - mouseStartOffset.y * height), reducedMotion ? 0 : 30);
                 entry.dimension.setTo(new FloatingDimension(width, height), reducedMotion ? 0 : 700);
                 entry.component.render(graphics, getCurrentBounds(), mouseX, mouseY, delta);
-                graphics.pose().popPose();
                 
                 VoxelShape shape = entry.getBoundsProvider().bounds();
                 ShapeBounds shapeBounds = new ShapeBounds(shape);
@@ -122,10 +120,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
                     iterator.remove();
                 } else {
                     bounds.shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
-                        graphics.pose().pushPose();
-                        graphics.pose().translate(0, 0, 500);
                         graphics.fillGradient((int) x1, (int) y1, (int) x2, (int) y2, 0xfdff6b | (bounds.alpha.intValue() << 24), 0xfdff6b | (bounds.alpha.intValue() << 24));
-                        graphics.pose().popPose();
                     });
                 }
             }
@@ -140,10 +135,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
             if (value.width < 2 || value.height < 2 || (Math.abs(value.x - target.x) <= 1.3 && Math.abs(value.y - target.y) <= 1.3 && Math.abs(value.width - target.width) <= 1 && Math.abs(value.height - target.height) <= 1)) {
                 iterator.remove();
             } else {
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, 0, 600);
                 renderBackEntry.component.render(graphics, value.getBounds(), mouseX, mouseY, delta);
-                graphics.pose().popPose();
             }
         }
     }
@@ -154,21 +146,21 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button != 0) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() != 0) {
             return false;
         }
         drop();
-        DraggableComponent<?> hoveredStack = provider.getHovered(this, mouseX, mouseY);
+        DraggableComponent<?> hoveredStack = provider.getHovered(this, event.x(), event.y());
         if (hoveredStack != null) {
-            entry = new DraggableEntry(hoveredStack, new Point(mouseX, mouseY));
+            entry = new DraggableEntry(hoveredStack, new Point(event.x(), event.y()));
         }
         return false;
     }
     
     @Override
-    public boolean mouseReleased(double d, double e, int i) {
-        if (i != 0) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (event.button() != 0) {
             return false;
         }
         drop();
@@ -176,8 +168,8 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     }
     
     @Override
-    public boolean mouseDragged(double mouseX1, double mouseY1, int button, double mouseX2, double mouseY2) {
-        return button == 0 && entry != null && entry.dragging;
+    public boolean mouseDragged(MouseButtonEvent event, double mouseX2, double mouseY2) {
+        return event.button() == 0 && entry != null && entry.dragging;
     }
     
     public boolean drop() {
@@ -194,7 +186,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     @Override
     public Screen getScreen() {
-        return Minecraft.getInstance().screen;
+        return Minecraft.getInstance().gui.screen();
     }
     
     @Override

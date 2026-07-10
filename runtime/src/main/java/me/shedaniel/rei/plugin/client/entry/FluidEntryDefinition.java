@@ -27,16 +27,15 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import dev.architectury.fluid.FluidStack;
+import dev.architectury.hooks.client.fluid.ClientFluidStackHooks;
 import dev.architectury.hooks.fluid.FluidStackHooks;
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
-import me.shedaniel.rei.api.client.util.SpriteRenderer;
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -51,11 +50,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.language.I18n;
@@ -66,9 +62,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.FlowingFluid;
@@ -81,7 +76,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntrySerializer<FluidStack> {
-    private static final String FLUID_AMOUNT = Platform.isForge() ? "tooltip.rei.fluid_amount.forge" : "tooltip.rei.fluid_amount";
+    private static final String FLUID_AMOUNT = Platform.isNeoForge() ? "tooltip.rei.fluid_amount.forge" : "tooltip.rei.fluid_amount";
     @Environment(EnvType.CLIENT)
     private EntryRenderer<FluidStack> renderer;
     
@@ -114,7 +109,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     
     @Override
     @Nullable
-    public ResourceLocation getIdentifier(EntryStack<FluidStack> entry, FluidStack value) {
+    public Identifier getIdentifier(EntryStack<FluidStack> entry, FluidStack value) {
         return BuiltInRegistries.FLUID.getKey(value.getFluid());
     }
     
@@ -213,77 +208,35 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     }
     
     @Environment(EnvType.CLIENT)
-    public static class FluidEntryRenderer implements BatchedEntryRenderer<FluidStack, TextureAtlasSprite> {
+    public static class FluidEntryRenderer implements EntryRenderer<FluidStack> {
         private static final Supplier<TextureAtlasSprite> MISSING_SPRITE = Suppliers.memoize(() -> {
-            TextureAtlas atlas = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
-            return atlas.getSprite(MissingTextureAtlasSprite.getLocation());
+//            TextureAtlas atlas = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
+//            return atlas.getSprite(MissingTextureAtlasSprite.getLocation());
+            return null;
         });
-        
-        @Override
-        public TextureAtlasSprite getExtraData(EntryStack<FluidStack> entry) {
-            FluidStack stack = entry.getValue();
-            if (stack.isEmpty()) return null;
-            return FluidStackHooks.getStillTexture(stack);
-        }
         
         private TextureAtlasSprite missingTexture() {
             return MISSING_SPRITE.get();
         }
         
         @Override
-        public int getBatchIdentifier(EntryStack<FluidStack> entry, Rectangle bounds, TextureAtlasSprite extraData) {
-            return 0;
-        }
-        
-        @Override
-        public void startBatch(EntryStack<FluidStack> entry, TextureAtlasSprite extraData, GuiGraphics graphics, float delta) {}
-        
-        @Override
-        public void renderBase(EntryStack<FluidStack> entry, TextureAtlasSprite sprite, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
-            TextureAtlasSprite s = sprite == null ? missingTexture() : sprite;
-            SpriteRenderer.beginPass()
-                    .setup(immediate, RenderType.solid())
-                    .sprite(s)
-                    .color(sprite == null ? 0xFFFFFF : FluidStackHooks.getColor(entry.getValue()))
-                    .light(0x00f000f0)
-                    .overlay(OverlayTexture.NO_OVERLAY)
-                    .alpha(0xff)
-                    .normal(graphics.pose().last().normal(), 0, 0, 0)
-                    .position(graphics.pose().last().pose(), bounds.x, bounds.getMaxY() - bounds.height * Mth.clamp(entry.get(EntryStack.Settings.FLUID_RENDER_RATIO), 0, 1), bounds.getMaxX(), bounds.getMaxY(), 0)
-                    .next(s.atlasLocation());
-        }
-        
-        @Override
-        public void afterBase(EntryStack<FluidStack> entry, TextureAtlasSprite extraData, GuiGraphics graphics, float delta) {}
-        
-        @Override
-        public void renderOverlay(EntryStack<FluidStack> entry, TextureAtlasSprite extraData, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {}
-        
-        @Override
-        public void endBatch(EntryStack<FluidStack> entry, TextureAtlasSprite extraData, GuiGraphics graphics, float delta) {}
-        
-        @Override
         public void render(EntryStack<FluidStack> entry, GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
             FluidStack stack = entry.getValue();
             if (stack.isEmpty()) return;
-            TextureAtlasSprite sprite = FluidStackHooks.getStillTexture(stack);
+            TextureAtlasSprite sprite = ClientFluidStackHooks.getStillTexture(stack);
             if (sprite == null) return;
-            int color = FluidStackHooks.getColor(stack);
+            int color = ClientFluidStackHooks.getColor(stack);
             
-            MultiBufferSource.BufferSource immediate = graphics.bufferSource;
-            
-            SpriteRenderer.beginPass()
+            /*SpriteRenderer.beginPass()
                     .setup(immediate, RenderType.solid())
                     .sprite(sprite)
                     .color(color)
                     .light(0x00f000f0)
                     .overlay(OverlayTexture.NO_OVERLAY)
                     .alpha(0xff)
-                    .normal(graphics.pose().last().normal(), 0, 0, 0)
-                    .position(graphics.pose().last().pose(), bounds.x, bounds.getMaxY() - bounds.height * Mth.clamp(entry.get(EntryStack.Settings.FLUID_RENDER_RATIO), 0, 1), bounds.getMaxX(), bounds.getMaxY(), 0)
-                    .next(TextureAtlas.LOCATION_BLOCKS);
-            
-            immediate.endBatch();
+                    .normal(graphics.pose(), 0, 0, 0)
+                    .position(graphics.pose(), bounds.x, bounds.getMaxY() - bounds.height * Mth.clamp(entry.get(EntryStack.Settings.FLUID_RENDER_RATIO), 0, 1), bounds.getMaxX(), bounds.getMaxY(), 0)
+                    .next(TextureAtlas.LOCATION_BLOCKS);*/
         }
         
         @Override
@@ -300,7 +253,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
                 }
             }
             if (Minecraft.getInstance().options.advancedItemTooltips) {
-                ResourceLocation fluidId = BuiltInRegistries.FLUID.getKey(entry.getValue().getFluid());
+                Identifier fluidId = BuiltInRegistries.FLUID.getKey(entry.getValue().getFluid());
                 toolTip.add((Component.literal(fluidId.toString())).withStyle(ChatFormatting.DARK_GRAY));
             }
             return Tooltip.create(toolTip);

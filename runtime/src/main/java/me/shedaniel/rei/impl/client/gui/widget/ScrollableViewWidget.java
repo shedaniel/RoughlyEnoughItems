@@ -29,9 +29,10 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import org.joml.Matrix4f;
+import net.minecraft.client.input.MouseButtonEvent;
+import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,7 +63,7 @@ public class ScrollableViewWidget {
         }
         
         widgets.add(Widgets.scissored(scrollingRef[0].getScissorBounds(), Widgets.withTranslate(inner,
-                () -> new Matrix4f().translate(0, -scrollingRef[0].scrollAmountInt(), 0))));
+                () -> new Matrix3x2f().translate(0, -scrollingRef[0].scrollAmountInt()))));
         widgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             scrollingRef[0].updatePosition(delta);
             scrollingRef[0].renderScrollBar(graphics);
@@ -84,18 +85,18 @@ public class ScrollableViewWidget {
             }
             
             @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                if (bounds.contains(mouseX, mouseY) && scrolling.updateDraggingState(mouseX, mouseY, button)) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+                if (bounds.contains(event.x(), event.y()) && scrolling.updateDraggingState(event.x(), event.y(), event.button())) {
                     return true;
                 }
-                return super.mouseClicked(mouseX, mouseY, button);
+                return super.mouseClicked(event, doubleClick);
             }
             
             @Override
-            public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-                if (scrolling.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+            public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+                if (scrolling.mouseDragged(event.x(), event.y(), event.button(), deltaX, deltaY))
                     return true;
-                return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+                return super.mouseDragged(event, deltaX, deltaY);
             }
             
             @Override

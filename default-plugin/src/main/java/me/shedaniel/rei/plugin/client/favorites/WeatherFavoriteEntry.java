@@ -37,15 +37,16 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
@@ -57,9 +58,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class WeatherFavoriteEntry extends FavoriteEntry {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "weather");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath("roughlyenoughitems", "weather");
     public static final String TRANSLATION_KEY = "favorite.section.weather";
-    private static final ResourceLocation CHEST_GUI_TEXTURE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    private static final Identifier CHEST_GUI_TEXTURE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final String KEY = "weather";
     @Nullable
     private final Weather weather;
@@ -104,7 +105,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
         ClientLevel world = Minecraft.getInstance().level;
         if (world.isThundering())
             return Weather.THUNDER;
-        if (world.getLevelData().isRaining())
+        if (world.isRaining())
             return Weather.RAIN;
         return Weather.CLEAR;
     }
@@ -116,16 +117,16 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
             public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 int color = bounds.contains(mouseX, mouseY) ? 0xFFEEEEEE : 0xFFAAAAAA;
                 if (bounds.width > 4 && bounds.height > 4) {
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY(), 0);
-                    graphics.pose().scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f, 1);
+                    graphics.pose().pushMatrix();
+                    graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY());
+                    graphics.pose().scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f);
                     renderWeatherIcon(graphics, weather, 0, 0, color);
-                    graphics.pose().popPose();
+                    graphics.pose().popMatrix();
                 }
             }
             
             private void renderWeatherIcon(GuiGraphics graphics, Weather type, int centerX, int centerY, int color) {
-                graphics.blit(RenderType::guiTextured, CHEST_GUI_TEXTURE, centerX - 7, centerY - 7, type.getId() * 14, 14, 14, 14, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, CHEST_GUI_TEXTURE, centerX - 7, centerY - 7, type.getId() * 14, 14, 14, 14, 256, 256);
             }
             
             @Override
@@ -149,8 +150,8 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
     }
     
     @Override
-    public boolean doAction(int button) {
-        if (button == 0) {
+    public boolean doAction(MouseButtonEvent event) {
+        if (event.button() == 0) {
             if (weather != null) {
                 Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)), "/"));
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
@@ -182,7 +183,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
     }
     
     @Override
-    public ResourceLocation getType() {
+    public Identifier getType() {
         return ID;
     }
     
@@ -304,11 +305,11 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
             if (selected && containsMouse) {
                 REIRuntime.getInstance().queueTooltip(Tooltip.create(Component.translatable("text.rei.weather_button.tooltip.entry", text)));
             }
-            graphics.drawString(font, text, x + 2, y + 2, selected ? 16777215 : 8947848, false);
+            graphics.drawString(font, text, x + 2, y + 2, selected ? 0xFFFFFFFF : 0xFF888888, false);
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
             Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)), "/"));
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             closeMenu();

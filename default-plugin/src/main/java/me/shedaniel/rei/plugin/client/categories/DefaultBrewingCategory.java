@@ -37,9 +37,9 @@ import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.brewing.DefaultBrewingDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -69,10 +69,10 @@ public class DefaultBrewingCategory implements DisplayCategory<DefaultBrewingDis
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));
         widgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
-            ResourceLocation texture = REIRuntime.getInstance().getDefaultDisplayTexture();
-            graphics.blit(RenderType::guiTextured, texture, startPoint.x, startPoint.y, 0, 108, 103, 59, 256, 256);
+            Identifier texture = REIRuntime.getInstance().getDefaultDisplayTexture();
+            graphics.blit(RenderPipelines.GUI_TEXTURED, texture, startPoint.x, startPoint.y, 0, 108, 103, 59, 256, 256);
             int width = Mth.ceil(System.currentTimeMillis() / 250d % 18d);
-            graphics.blit(RenderType::guiTextured, texture, startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4, 256, 256);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, texture, startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4, 256, 256);
         }));
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 1, startPoint.y + 1)).entry(EntryStacks.of(Items.BLAZE_POWDER)).disableBackground().markInput());
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 40, startPoint.y + 1)).entries(display.getInputEntries().get(0)).disableBackground().markInput());

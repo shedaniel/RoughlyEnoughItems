@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.modules.entries;
 
 import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 
@@ -64,7 +64,7 @@ public class TextMenuEntry extends AbstractMenuEntry {
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        graphics.drawString(font, lastText = text.get(), getX() + 2, getY() + 2, 8947848, false);
+        graphics.drawString(font, lastText = text.get(), getX() + 2, getY() + 2, 0xFF888888, false);
         this.lastTextWidth = Math.max(0, font.width(lastText));
     }
 }

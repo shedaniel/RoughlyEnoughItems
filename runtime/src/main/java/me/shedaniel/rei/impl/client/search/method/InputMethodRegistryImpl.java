@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -42,28 +42,28 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class InputMethodRegistryImpl implements InputMethodRegistry {
-    private final Map<ResourceLocation, InputMethod<?>> inputMethods = Maps.newHashMap();
+    private final Map<Identifier, InputMethod<?>> inputMethods = Maps.newHashMap();
     
     @Override
-    public void add(ResourceLocation id, InputMethod<?> inputMethod) {
+    public void add(Identifier id, InputMethod<?> inputMethod) {
         this.inputMethods.put(id, inputMethod);
         InternalLogger.getInstance().debug("Added input method [%s]: %s", id, inputMethod.getName().getString());
     }
     
     @Override
     @Nullable
-    public InputMethod<?> get(@Nullable ResourceLocation id) {
+    public InputMethod<?> get(@Nullable Identifier id) {
         if (id == null) return null;
         return this.inputMethods.get(id);
     }
     
     @Override
-    public InputMethod<?> getOrDefault(@Nullable ResourceLocation id) {
+    public InputMethod<?> getOrDefault(@Nullable Identifier id) {
         return Objects.requireNonNullElse(this.get(id), DefaultInputMethod.INSTANCE);
     }
     
     @Override
-    public Map<ResourceLocation, InputMethod<?>> getAll() {
+    public Map<Identifier, InputMethod<?>> getAll() {
         return Collections.unmodifiableMap(this.inputMethods);
     }
     
@@ -78,14 +78,14 @@ public class InputMethodRegistryImpl implements InputMethodRegistry {
         String languageCode = Minecraft.getInstance().options.languageCode;
         if (!CollectionUtils.anyMatch(active.getMatchingLocales(), locale -> locale.code().equals(languageCode))) {
             InternalLogger.getInstance().error("Reset active input method because the language code {} is not supported by the active input method.", languageCode);
-            ConfigManagerImpl.getInstance().getConfig().setInputMethodId(ResourceLocation.parse("rei:default"));
+            ConfigManagerImpl.getInstance().getConfig().setInputMethodId(Identifier.parse("rei:default"));
             return;
         }
         ExecutorService service = Executors.newSingleThreadExecutor();
         active.prepare(service).whenComplete((unused, throwable) -> {
             if (throwable != null) {
                 InternalLogger.getInstance().error("Failed to prepare input method", throwable);
-                ConfigManagerImpl.getInstance().getConfig().setInputMethodId(ResourceLocation.parse("rei:default"));
+                ConfigManagerImpl.getInstance().getConfig().setInputMethodId(Identifier.parse("rei:default"));
                 
                 ExecutorService service2 = Executors.newSingleThreadExecutor();
                 active.dispose(service2).whenComplete((unused2, throwable2) -> {

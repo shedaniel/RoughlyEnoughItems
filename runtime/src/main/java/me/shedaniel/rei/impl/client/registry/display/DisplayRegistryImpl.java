@@ -55,6 +55,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin, DisplayRegistryImpl.ClientDisplaysHolder> implements DisplayRegistry, DisplayConsumerImpl, DisplayGeneratorsRegistryImpl {
     public static final Object SYNCED = new Object();
+
+    /**
+     * Origin marker for displays added by the client-side recipe fallback. Carries the
+     * originating {@link RecipeDisplayId} so individual fallback displays can be removed when
+     * the server later advertises the same recipe (see {@link #removeFallbackRecipes(Set)}).
+     */
+    public record ClientFallbackOrigin(RecipeDisplayId id) {
+    }
     private final Map<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> displayGenerators = new ConcurrentHashMap<>();
     private final List<DynamicDisplayGenerator<?>> globalDisplayGenerators = new ArrayList<>();
     private final List<DisplayVisibilityPredicate> visibilityPredicates = new ArrayList<>();
@@ -156,6 +164,10 @@ public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin
     
     @Override
     public void endReload() {
+        // Synthesize recipe displays from the client's own data packs for servers that
+        // do not sync recipe data (no-op unless the local-recipes fallback is active).
+        ClientRecipeFallback.injectInto(this);
+
         InternalLogger.getInstance().debug("Found %d displays", size());
         
         for (CategoryIdentifier<?> identifier : getAll().keySet()) {
@@ -195,7 +207,33 @@ public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin
         }
         InternalLogger.getInstance().debug("Filled %d displays from vanilla server in %s", size() - lastSize, stopwatch.stop());
     }
-    
+
+    /**
+     * Fills displays from locally-loaded recipes (the client-side fallback), tagging them with
+     * a {@link ClientFallbackOrigin} so they can be removed if the server later syncs its own
+     * displays. Entries whose id the server already advertised ({@code excludeIds}) are skipped.
+     */
+    public void addFallbackRecipes(List<RecipeDisplayEntry> entries, Set<RecipeDisplayId> excludeIds) {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        int lastSize = size();
+        if (!fillers().isEmpty()) {
+            for (RecipeDisplayEntry entry : entries) {
+                if (excludeIds.contains(entry.id())) {
+                    continue;
+                }
+                try {
+                    ClientFallbackOrigin origin = new ClientFallbackOrigin(entry.id());
+                    for (Display display : tryFillDisplay(entry.display(), DisplayAdditionReason.RECIPE_MANAGER, DisplayAdditionReason.withId(entry.id()))) {
+                        add(display, origin);
+                    }
+                } catch (Throwable e) {
+                    InternalLogger.getInstance().error("Failed to fill local fallback display for recipe: %s [%s]", entry.display(), entry.id(), e);
+                }
+            }
+        }
+        InternalLogger.getInstance().info("[Local Recipes] Filled %d local fallback displays in %s", size() - lastSize, stopwatch.stop());
+    }
+
     public void removeRecipes(Set<RecipeDisplayId> ids) {
         List<Display> toRemove = new LinkedList<>();
         WeakHashMap<Display, Object> origins = this.holder().origins();
@@ -225,7 +263,44 @@ public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin
             this.holder().remove(display);
         }
     }
-    
+
+    public void removeFallbackRecipes() {
+        List<Display> toRemove = new LinkedList<>();
+        WeakHashMap<Display, Object> origins = this.holder().origins();
+        for (Map.Entry<Display, Object> entry : origins.entrySet()) {
+            if (entry.getValue() instanceof ClientFallbackOrigin) {
+                toRemove.add(entry.getKey());
+            }
+        }
+
+        for (Display display : toRemove) {
+            this.holder().remove(display);
+        }
+    }
+
+    /**
+     * Removes only the fallback displays whose originating recipe id is in {@code ids}. Used when
+     * the server advertises recipes mid-session (after the fallback already injected): the
+     * server-provided displays supersede the local ones, so the overlapping fallbacks are dropped.
+     */
+    public void removeFallbackRecipes(Set<RecipeDisplayId> ids) {
+        if (ids.isEmpty()) {
+            return;
+        }
+        List<Display> toRemove = new LinkedList<>();
+        WeakHashMap<Display, Object> origins = this.holder().origins();
+        for (Map.Entry<Display, Object> entry : origins.entrySet()) {
+            if (entry.getValue() instanceof ClientFallbackOrigin origin && ids.contains(origin.id())) {
+                toRemove.add(entry.getKey());
+            }
+        }
+        InternalLogger.getInstance().info("[Local Recipes] Removing %d overlapping fallback displays superseded by server recipe add", toRemove.size());
+
+        for (Display display : toRemove) {
+            this.holder().remove(display);
+        }
+    }
+
     private void removeFailedDisplays() {
         Multimap<CategoryIdentifier<?>, Display> failedDisplays = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
         for (List<Display> displays : getAll().values()) {

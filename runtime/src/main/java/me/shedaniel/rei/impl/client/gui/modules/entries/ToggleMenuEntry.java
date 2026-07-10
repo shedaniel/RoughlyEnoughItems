@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.modules.entries;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
@@ -31,7 +30,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -112,18 +111,12 @@ public class ToggleMenuEntry extends AbstractMenuEntry {
             Tooltip tooltip = this.tooltip.get();
             
             if (tooltip != null) {
-                RenderSystem.disableScissor();
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, 0, -400);
                 ScreenOverlayImpl.getInstance().renderTooltip(graphics, tooltip);
-                graphics.pose().popPose();
-                graphics.enableScissor(0, 0, 0, 0);
-                graphics.disableScissor();
             }
         }
-        graphics.drawString(font, text, getX() + 2, getY() + 2, isSelected() && active.getAsBoolean() ? 16777215 : 8947848, false);
+        graphics.drawString(font, text, getX() + 2, getY() + 2, isSelected() && active.getAsBoolean() ? 0xFFFFFFFF : 0xFF888888, false);
         if (supplier.getAsBoolean()) {
-            graphics.drawString(font, "✔", getX() + getWidth() - 2 - font.width("✔"), getY() + 2, isSelected() && active.getAsBoolean() ? 16777215 : 8947848, false);
+            graphics.drawString(font, "✔", getX() + getWidth() - 2 - font.width("✔"), getY() + 2, isSelected() && active.getAsBoolean() ? 0xFFFFFFFF : 0xFF888888, false);
         }
     }
     

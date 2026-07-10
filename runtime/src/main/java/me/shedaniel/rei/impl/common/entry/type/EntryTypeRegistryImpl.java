@@ -33,7 +33,7 @@ import me.shedaniel.rei.api.common.entry.type.EntryTypeBridge;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.plugins.REICommonPlugin;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -43,8 +43,8 @@ import java.util.Set;
 
 @ApiStatus.Internal
 public class EntryTypeRegistryImpl implements EntryTypeRegistry {
-    private final BiMap<ResourceLocation, EntryDefinition<?>> entryTypes = HashBiMap.create();
-    private final Table<ResourceLocation, ResourceLocation, List<EntryTypeBridge<?, ?>>> typeBridges = HashBasedTable.create();
+    private final BiMap<Identifier, EntryDefinition<?>> entryTypes = HashBiMap.create();
+    private final Table<Identifier, Identifier, List<EntryTypeBridge<?, ?>>> typeBridges = HashBasedTable.create();
     
     @Override
     public ReloadStage getStage() {
@@ -57,7 +57,7 @@ public class EntryTypeRegistryImpl implements EntryTypeRegistry {
     }
     
     @Override
-    public <T> void register(ResourceLocation id, EntryDefinition<T> definition) {
+    public <T> void register(Identifier id, EntryDefinition<T> definition) {
         this.entryTypes.put(id, definition);
     }
     
@@ -71,12 +71,12 @@ public class EntryTypeRegistryImpl implements EntryTypeRegistry {
     }
     
     @Override
-    public EntryDefinition<?> get(ResourceLocation id) {
+    public EntryDefinition<?> get(Identifier id) {
         return this.entryTypes.get(id);
     }
     
     @Override
-    public Set<ResourceLocation> keySet() {
+    public Set<Identifier> keySet() {
         return this.entryTypes.keySet();
     }
     

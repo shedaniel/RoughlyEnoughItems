@@ -40,7 +40,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -57,7 +57,7 @@ public class AutoCraftingEvaluator {
         public BiConsumer<Point, Consumer<Tooltip>> tooltipRenderer;
     }
     
-    public static AutoCraftingResult evaluateAutoCrafting(boolean actuallyCrafting, boolean stackedCrafting, Display display, Supplier<Collection<ResourceLocation>> idsSupplier) {
+    public static AutoCraftingResult evaluateAutoCrafting(boolean actuallyCrafting, boolean stackedCrafting, Display display, Supplier<Collection<Identifier>> idsSupplier) {
         AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
         AutoCraftingResult result = new AutoCraftingResult();
         final List<Tooltip.Entry> errorTooltip = new ArrayList<>();
@@ -70,10 +70,10 @@ public class AutoCraftingEvaluator {
             }
             
             if (Minecraft.getInstance().options.advancedItemTooltips && idsSupplier != null) {
-                Collection<ResourceLocation> locations = idsSupplier.get();
+                Collection<Identifier> locations = idsSupplier.get();
                 if (!locations.isEmpty()) {
                     str.add(Tooltip.entry(Component.literal(" ")));
-                    for (ResourceLocation location : locations) {
+                    for (Identifier location : locations) {
                         String t = I18n.get("text.rei.recipe_id", "", location.toString());
                         if (t.startsWith("\n")) {
                             t = t.substring("\n".length());
@@ -109,7 +109,7 @@ public class AutoCraftingEvaluator {
                 
                 if (transferResult.isBlocking() && actuallyCrafting) {
                     if (transferResult.isReturningToScreen()) {
-                        Minecraft.getInstance().setScreen(containerScreen);
+                        Minecraft.getInstance().setScreenAndShow(containerScreen);
                         REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                     }
                     

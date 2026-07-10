@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.forge;
 
+import me.shedaniel.rei.impl.client.forge.MobEffectLayoutHandlerImpl;
 import me.shedaniel.rei.impl.init.RoughlyEnoughItemsInitializer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.Mod;
@@ -39,7 +40,8 @@ public class RoughlyEnoughItemsForge {
         if (!DatagenModLoader.isRunningDataGen()) {
             RoughlyEnoughItemsInitializer.onInitialize();
             
-            if (FMLEnvironment.dist == Dist.CLIENT) {
+            if (FMLEnvironment.getDist() == Dist.CLIENT) {
+                MobEffectLayoutHandlerImpl.register();
                 run(() -> RoughlyEnoughItemsInitializer::onInitializeClient);
             }
         }

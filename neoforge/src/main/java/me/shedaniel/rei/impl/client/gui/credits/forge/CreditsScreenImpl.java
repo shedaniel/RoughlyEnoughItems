@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.impl.client.gui.credits.forge;
 
+import me.shedaniel.rei.api.common.util.Pair;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
-import net.minecraft.util.Tuple;
 
 import java.util.List;
 
 public class CreditsScreenImpl {
-    public static void fillTranslators(Exception[] exception, List<Tuple<String, List<CreditsScreen.TranslatorEntry>>> translators) {
+    public static void fillTranslators(Exception[] exception, List<Pair<String, List<CreditsScreen.TranslatorEntry>>> translators) {
     }
 }

@@ -39,12 +39,13 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.GameType;
 import org.apache.commons.lang3.StringUtils;
@@ -56,7 +57,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class GameModeFavoriteEntry extends FavoriteEntry {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "gamemode");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath("roughlyenoughitems", "gamemode");
     public static final String TRANSLATION_KEY = "favorite.section.gamemode";
     public static final String KEY = "mode";
     @Nullable
@@ -105,21 +106,21 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 int color = bounds.contains(mouseX, mouseY) ? 0xFFEEEEEE : 0xFFAAAAAA;
                 if (bounds.width > 4 && bounds.height > 4) {
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY(), 0);
-                    graphics.pose().scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f, 1);
+                    graphics.pose().pushMatrix();
+                    graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY());
+                    graphics.pose().scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f);
                     renderGameModeText(graphics, type, 0, 0, color);
-                    graphics.pose().popPose();
+                    graphics.pose().popMatrix();
                 }
             }
             
             private void renderGameModeText(GuiGraphics graphics, GameType type, int centerX, int centerY, int color) {
                 Component s = Component.translatable("text.rei.short_gamemode." + type.getName());
                 Font font = Minecraft.getInstance().font;
-                graphics.pose().pushPose();
-                graphics.pose().translate(centerX - font.width(s) / 2f + 0.5f, centerY - 3.5f, 0);
+                graphics.pose().pushMatrix();
+                graphics.pose().translate(centerX - font.width(s) / 2f + 0.5f, centerY - 3.5f);
                 graphics.drawString(font, s, 0, 0, color, false);
-                graphics.pose().popPose();
+                graphics.pose().popMatrix();
             }
             
             @Override
@@ -143,8 +144,8 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     }
     
     @Override
-    public boolean doAction(int button) {
-        if (button == 0) {
+    public boolean doAction(MouseButtonEvent event) {
+        if (event.button() == 0) {
             GameType mode = gameMode;
             if (mode == null) {
                 mode = GameType.byId(Minecraft.getInstance().gameMode.getPlayerMode().getId() + 1 % 4);
@@ -178,7 +179,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     }
     
     @Override
-    public ResourceLocation getType() {
+    public Identifier getType() {
         return ID;
     }
     
@@ -270,11 +271,11 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             if (disabled) {
                 s = ChatFormatting.STRIKETHROUGH + s;
             }
-            graphics.drawString(font, s, x + 2, y + 2, selected && !disabled ? 16777215 : 8947848, false);
+            graphics.drawString(font, s, x + 2, y + 2, selected && !disabled ? 0xFFFFFFFF : 0xFF888888, false);
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
             Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", gameMode.name().toLowerCase(Locale.ROOT)), "/"));
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             closeMenu();

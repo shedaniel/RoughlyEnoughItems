@@ -24,23 +24,25 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -71,9 +73,9 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     @Nullable
     protected E hoveredItem;
     protected E selectedItem;
-    protected ResourceLocation backgroundLocation;
+    protected Identifier backgroundLocation;
     
-    public DynamicErrorFreeEntryListWidget(Minecraft client, int width, int height, int top, int bottom, ResourceLocation backgroundLocation) {
+    public DynamicErrorFreeEntryListWidget(Minecraft client, int width, int height, int top, int bottom, Identifier backgroundLocation) {
         this.client = client;
         this.width = width;
         this.height = height;
@@ -219,17 +221,16 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     protected void clickedHeader(int int_1, int int_2) {
     }
     
-    public static void renderBackBackground(GuiGraphics graphics, ResourceLocation backgroundLocation,
+    public static void renderBackBackground(GuiGraphics graphics, Identifier backgroundLocation,
                                             int left, int top, int right, int bottom, int yOffset, int color) {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        graphics.drawSpecial(source -> {
+        /*graphics.drawSpecial(source -> {
             VertexConsumer buffer = source.getBuffer(RenderType.guiTextured(backgroundLocation));
             Matrix4f matrix = graphics.pose().last().pose();
             buffer.addVertex(matrix, left, bottom, 0.0F).setUv(left / 32.0F, ((bottom + yOffset) / 32.0F)).setColor(color, color, color, 255);
             buffer.addVertex(matrix, right, bottom, 0.0F).setUv(right / 32.0F, ((bottom + yOffset) / 32.0F)).setColor(color, color, color, 255);
             buffer.addVertex(matrix, right, top, 0.0F).setUv(right / 32.0F, ((top + yOffset) / 32.0F)).setColor(color, color, color, 255);
             buffer.addVertex(matrix, left, top, 0.0F).setUv(left / 32.0F, ((top + yOffset) / 32.0F)).setColor(color, color, color, 255);
-        });
+        });*/
     }
     
     protected void drawBackground() {
@@ -247,7 +248,6 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                 left, top, right, bottom, (int) getScroll(), 32);
     }
     
-    @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.drawBackground();
         int scrollbarPosition = this.getScrollbarPosition();
@@ -260,12 +260,16 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         this.renderList(graphics, rowLeft, startY, mouseX, mouseY, delta);
         this.renderHoleBackground(graphics, 0, this.top, 255, 255);
         this.renderHoleBackground(graphics, this.bottom, this.height, 255, 255);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        graphics.blit(RenderType::guiTextured, Screen.HEADER_SEPARATOR, this.left, this.top - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
-        graphics.blit(RenderType::guiTextured, Screen.FOOTER_SEPARATOR, this.left, this.bottom, 0.0F, 0.0F, this.width, 2, 32, 2);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, Screen.HEADER_SEPARATOR, this.left, this.top - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, Screen.FOOTER_SEPARATOR, this.left, this.bottom, 0.0F, 0.0F, this.width, 2, 32, 2);
         int maxScroll = this.getMaxScroll();
         this.renderScrollBar(graphics, maxScroll, scrollbarPosition, int_4);
         this.renderDecorations(graphics, mouseX, mouseY);
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        render(GuiGraphics.of(graphics), mouseX, mouseY, delta);
     }
     
     protected void renderScrollBar(GuiGraphics graphics, int maxScroll, int scrollbarPositionMinX, int scrollbarPositionMaxX) {
@@ -279,7 +283,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
             
             int finalY = y;
             int finalHeight = height;
-            graphics.drawSpecial(source -> {
+            /*graphics.drawSpecial(source -> {
                 VertexConsumer buffer = source.getBuffer(RenderType.gui());
                 Matrix4f matrix = graphics.pose().last().pose();
                 buffer.addVertex(matrix, scrollbarPositionMinX, this.bottom, 0.0F).setColor(0, 0, 0, 255);
@@ -294,7 +298,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                 buffer.addVertex((scrollbarPositionMaxX - 1), (finalY + finalHeight - 1), 0.0F).setColor(192, 192, 192, 255);
                 buffer.addVertex((scrollbarPositionMaxX - 1), finalY, 0.0F).setColor(192, 192, 192, 255);
                 buffer.addVertex(scrollbarPositionMinX, finalY, 0.0F).setColor(192, 192, 192, 255);
-            });
+            });*/
         }
     }
     
@@ -344,20 +348,21 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         return this.width / 2 + 124;
     }
     
-    public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        this.updateScrollingState(double_1, double_2, int_1);
-        if (!this.isMouseOver(double_1, double_2)) {
+    @Override
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        this.updateScrollingState(event.x(), event.y(), event.button());
+        if (!this.isMouseOver(event.x(), event.y())) {
             return false;
         } else {
-            E item = this.getItemAtPosition(double_1, double_2);
+            E item = this.getItemAtPosition(event.x(), event.y());
             if (item != null) {
-                if (item.mouseClicked(double_1, double_2, int_1)) {
+                if (item.mouseClicked(event, doubleClick)) {
                     this.setFocused(item);
                     this.setDragging(true);
                     return true;
                 }
-            } else if (int_1 == 0) {
-                this.clickedHeader((int) (double_1 - (double) (this.left + this.width / 2 - this.getItemWidth() / 2)), (int) (double_2 - (double) this.top) + (int) this.getScroll() - 4);
+            } else if (event.button() == 0) {
+                this.clickedHeader((int) (event.x() - (double) (this.left + this.width / 2 - this.getItemWidth() / 2)), (int) (event.y() - (double) this.top) + (int) this.getScroll() - 4);
                 return true;
             }
             
@@ -365,21 +370,23 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         }
     }
     
-    public boolean mouseReleased(double double_1, double double_2, int int_1) {
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
         if (this.getFocused() != null) {
-            this.getFocused().mouseReleased(double_1, double_2, int_1);
+            this.getFocused().mouseReleased(event);
         }
         
         return false;
     }
     
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (super.mouseDragged(event, deltaX, deltaY)) {
             return true;
-        } else if (button == 0 && this.scrolling) {
-            if (mouseY < (double) this.top) {
+        } else if (event.button() == 0 && this.scrolling) {
+            if (event.y() < (double) this.top) {
                 this.capYPosition(0.0F);
-            } else if (mouseY > (double) this.bottom) {
+            } else if (event.y() > (double) this.bottom) {
                 this.capYPosition(this.getMaxScroll());
             } else {
                 double double_5 = Math.max(1, this.getMaxScroll());
@@ -395,6 +402,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         }
     }
     
+    @Override
     public boolean mouseScrolled(double double_1, double double_2, double amountX, double amountY) {
         for (E entry : entries) {
             if (entry.mouseScrolled(double_1, double_2, amountX, amountY)) {
@@ -406,13 +414,14 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         return true;
     }
     
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (super.keyPressed(int_1, int_2, int_3)) {
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event)) {
             return true;
-        } else if (int_1 == 264) {
+        } else if (event.key() == 264) {
             this.moveSelection(1);
             return true;
-        } else if (int_1 == 265) {
+        } else if (event.key() == 265) {
             this.moveSelection(-1);
             return true;
         } else {
@@ -431,6 +440,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         
     }
     
+    @Override
     public boolean isMouseOver(double double_1, double double_2) {
         return double_2 >= (double) this.top && double_2 <= (double) this.bottom && double_1 >= (double) this.left && double_1 <= (double) this.right;
     }
@@ -438,7 +448,6 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     protected void renderList(GuiGraphics graphics, int startX, int startY, int int_3, int int_4, float float_1) {
         this.hoveredItem = this.isMouseOver(int_3, int_4) ? this.getItemAtPosition(int_3, int_4) : null;
         int itemCount = this.getItemCount();
-        Tesselator tessellator = Tesselator.getInstance();
         
         for (int renderIndex = 0; renderIndex < itemCount; ++renderIndex) {
             E item = this.getItem(renderIndex);
@@ -452,8 +461,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                 itemMinX = this.left + this.width / 2 - itemWidth / 2;
                 itemMaxX = itemMinX + itemWidth;
                 float float_2 = this.isFocused() ? 1.0F : 0.5F;
-                Matrix4f matrix = graphics.pose().last().pose();
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                /*Matrix4f matrix = graphics.pose().last().pose();
                 
                 int finalItemY = itemY;
                 graphics.drawSpecial(source -> {
@@ -466,7 +474,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                     buffer.addVertex(matrix, itemMaxX - 1, finalItemY + itemHeight + 1, 0.0F).setColor(0.0F, 0.0F, 0.0F, 1.0F);
                     buffer.addVertex(matrix, itemMaxX - 1, finalItemY - 1, 0.0F).setColor(0.0F, 0.0F, 0.0F, 1.0F);
                     buffer.addVertex(matrix, itemMinX + 1, finalItemY - 1, 0.0F).setColor(0.0F, 0.0F, 0.0F, 1.0F);
-                });
+                });*/
             }
             
             int y = this.getRowTop(renderIndex);
@@ -496,7 +504,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     }
     
     protected void renderHoleBackground(GuiGraphics graphics, int y1, int y2, int alpha1, int alpha2) {
-        Matrix4f matrix = graphics.pose().last().pose();
+        /*Matrix4f matrix = graphics.pose().last().pose();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         graphics.drawSpecial(source -> {
             VertexConsumer buffer = source.getBuffer(RenderType.guiTextured(backgroundLocation));
@@ -504,7 +512,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
             buffer.addVertex(matrix, this.left + this.width, y2, 0.0F).setUv(((float) this.width / 32.0F), ((float) y2 / 32.0F)).setColor(64, 64, 64, alpha2);
             buffer.addVertex(matrix, this.left + this.width, y1, 0.0F).setUv(((float) this.width / 32.0F), ((float) y1 / 32.0F)).setColor(64, 64, 64, alpha1);
             buffer.addVertex(matrix, this.left, y1, 0.0F).setUv(0, ((float) y1 / 32.0F)).setColor(64, 64, 64, alpha1);
-        });
+        });*/
     }
     
     protected E remove(int int_1) {
@@ -565,18 +573,18 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
             List<? extends NarratableEntry> list = this.narratables();
             Screen.NarratableSearchResult narratableSearchResult = Screen.findNarratableWidget(list, this.lastNarratable);
             if (narratableSearchResult != null) {
-                if (narratableSearchResult.priority.isTerminal()) {
-                    this.lastNarratable = narratableSearchResult.entry;
+                if (narratableSearchResult.priority().isTerminal()) {
+                    this.lastNarratable = narratableSearchResult.entry();
                 }
                 
                 if (list.size() > 1) {
-                    narrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.object_list", narratableSearchResult.index + 1, list.size()));
-                    if (narratableSearchResult.priority == NarrationPriority.FOCUSED) {
+                    narrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.object_list", narratableSearchResult.index() + 1, list.size()));
+                    if (narratableSearchResult.priority() == NarrationPriority.FOCUSED) {
                         narrationElementOutput.add(NarratedElementType.USAGE, Component.translatable("narration.component_list.usage"));
                     }
                 }
                 
-                narratableSearchResult.entry.updateNarration(narrationElementOutput.nest());
+                narratableSearchResult.entry().updateNarration(narrationElementOutput.nest());
             }
             
         }

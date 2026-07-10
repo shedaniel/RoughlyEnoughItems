@@ -60,11 +60,14 @@ import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -75,13 +78,12 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-public abstract class AbstractDisplayViewingScreen extends Screen implements DisplayScreen {
+public abstract class AbstractDisplayViewingScreen extends REIScreen implements DisplayScreen {
     protected final Map<DisplayCategory<?>, List<DisplaySpec>> categoryMap;
     protected final List<DisplayCategory<?>> categories;
     protected final TabContainerWidget tabs = new TabContainerWidget();
@@ -400,42 +402,40 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             }
             
             @Override
-            public void renderImage(Font font, int x, int y, int width, int height, GuiGraphics graphics) {
+            public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
+                GuiGraphics guiGraphics = GuiGraphics.of(graphics);
                 int entrySize = EntryListWidget.entrySize();
                 int w = Math.max(1, MAX_WIDTH / entrySize);
                 int i = 0;
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, 0, 50);
                 for (EntryStack<?> entry : widget.getEntries()) {
                     int x1 = x + (i % w) * entrySize;
                     int y1 = y + 13 + (i / w) * entrySize;
                     i++;
                     if (i / w > 5) {
                         Component text = Component.literal("+" + (widget.getEntries().size() - w * 6 + 1)).withStyle(ChatFormatting.GRAY);
-                        graphics.drawSpecial(source -> {
-                            font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, graphics.pose().last().pose(), source, Font.DisplayMode.NORMAL, 0, 15728880);
-                        });
-                        graphics.flush();
+                        guiGraphics.pose().pushMatrix();
+                        guiGraphics.pose().translate(x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1);
+                        guiGraphics.drawString(font, text, 0, 0, -1, true);
+                        guiGraphics.pose().popMatrix();
                         break;
                     } else {
-                        entry.render(graphics, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
+                        entry.render(guiGraphics, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
                     }
                 }
-                graphics.pose().popPose();
             }
             
             @Override
-            public void renderText(Font font, int x, int y, Matrix4f pose, MultiBufferSource.BufferSource buffers) {
-                font.drawInBatch(Component.translatable("text.rei.accepts").withStyle(ChatFormatting.GRAY),
-                        x, y + 2, -1, true, pose, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
+            public void extractText(GuiGraphicsExtractor graphics, Font font, int x, int y) {
+                GuiGraphics guiGraphics = GuiGraphics.of(graphics);
+                guiGraphics.drawString(font, Component.translatable("text.rei.accepts").withStyle(ChatFormatting.GRAY), x, y + 2, -1);
                 
                 if (widget.tagMatch != null) {
                     int entrySize = EntryListWidget.entrySize();
                     int w = Math.max(1, MAX_WIDTH / entrySize);
-                    font.drawInBatch(Component.translatable("text.rei.tag_accept", widget.tagMatch.toString())
+                    guiGraphics.drawString(font, Component.translatable("text.rei.tag_accept", widget.tagMatch.toString())
                                     .withStyle(ChatFormatting.GRAY),
                             x, y + 16 + Math.min(6, Mth.ceil(widget.getEntries().size() / (float) w)) * entrySize,
-                            -1, true, pose, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
+                            -1);
                 }
             }
         }
@@ -464,29 +464,29 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        Optional<GuiEventListener> hovered = this.getChildAt(mouseX, mouseY);
-        if (hovered.isPresent() && hovered.get().mouseClicked(mouseX, mouseY, button)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        Optional<GuiEventListener> hovered = this.getChildAt(event.x(), event.y());
+        if (hovered.isPresent() && hovered.get().mouseClicked(event, doubleClick)) {
             this.setFocused(hovered.get());
-            if (button == 0) {
+            if (event.button() == 0) {
                 this.setDragging(true);
             }
             
-            if (getOverlay().mouseClicked(mouseX, mouseY, button)) handleFocuses(button);
+            if (getOverlay().mouseClicked(event, doubleClick)) handleFocuses(event.button());
             return true;
         }
         
-        return getOverlay().mouseClicked(mouseX, mouseY, button) && handleFocuses(button);
+        return getOverlay().mouseClicked(event, doubleClick) && handleFocuses(event.button());
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return super.mouseReleased(mouseX, mouseY, button) || (getOverlay().mouseReleased(mouseX, mouseY, button) && handleFocuses());
+    public boolean mouseReleased(MouseButtonEvent event) {
+        return super.mouseReleased(event) || (getOverlay().mouseReleased(event) && handleFocuses(event.button()));
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || (getOverlay().mouseDragged(mouseX, mouseY, button, deltaX, deltaY) && handleFocuses());
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        return super.mouseDragged(event, deltaX, deltaY) || (getOverlay().mouseDragged(event, deltaX, deltaY) && handleFocuses(event.button()));
     }
     
     @Override
@@ -495,32 +495,32 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers) || (getOverlay().keyPressed(keyCode, scanCode, modifiers) && handleFocuses()))
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event) || (getOverlay().keyPressed(event) && handleFocuses()))
             return true;
-        if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(keyCode, scanCode)) {
+        if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(event.key(), event.scancode())) {
             if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+                minecraft.setScreenAndShow(REIRuntimeImpl.getInstance().getLastDisplayScreen());
             } else {
-                minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
+                minecraft.setScreenAndShow(REIRuntime.getInstance().getPreviousScreen());
             }
             return true;
         }
-        if (this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
-            Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
+        if (this.minecraft.options.keyInventory.matches(event)) {
+            Minecraft.getInstance().setScreenAndShow(REIRuntime.getInstance().getPreviousScreen());
             return true;
         }
         return false;
     }
     
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        return super.keyReleased(keyCode, scanCode, modifiers) || (getOverlay().keyReleased(keyCode, scanCode, modifiers) && handleFocuses());
+    public boolean keyReleased(KeyEvent event) {
+        return super.keyReleased(event) || (getOverlay().keyReleased(event) && handleFocuses());
     }
     
     @Override
-    public boolean charTyped(char character, int modifiers) {
-        return super.charTyped(character, modifiers) || (getOverlay().charTyped(character, modifiers) && handleFocuses());
+    public boolean charTyped(CharacterEvent event) {
+        return super.charTyped(event) || (getOverlay().charTyped(event) && handleFocuses());
     }
     
     private interface Limiter<T> {

@@ -35,12 +35,13 @@ import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigOptions;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionValueEntry;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -51,10 +52,10 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
     
     @Override
     public void configure(ConfigAccess access, CompositeOption<PanelBoundary> option, Runnable onClose) {
-        Minecraft.getInstance().setScreen(new BoundariesScreen(access, option, onClose));
+        Minecraft.getInstance().setScreenAndShow(new BoundariesScreen(access, option, onClose));
     }
     
-    private static class BoundariesScreen extends Screen {
+    private static class BoundariesScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
         private final ConfigAccess access;
         private final CompositeOption<PanelBoundary> option;
         private final Runnable onClose;
@@ -84,7 +85,7 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
                 PanelBoundary newBoundary = access.get(option);
                 access.set(option, new PanelBoundary(1.0, newBoundary.verticalPercentage(), 50, newBoundary.verticalLimit(), 1.0, newBoundary.verticalAlign()));
                 if (!isReducedMotion()) innerAlphaAnimator.setTo(-1.0F, 200);
-                init(minecraft, BoundariesScreen.this.width, BoundariesScreen.this.height);
+                init(BoundariesScreen.this.width, BoundariesScreen.this.height);
             }).build());
             double v = horizontalUsePercentage ? boundary.horizontalPercentage() : boundary.horizontalLimit() / 50.0;
             addRenderableWidget(horizontalSlider = new AbstractSliderButton(0, 0, 20, 20, getSliderMessage("config.rei.options.layout.boundaries.desc.limit", horizontalUsePercentage, v, 50), v) {
@@ -105,16 +106,16 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
                 }
                 
                 @Override
-                public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-                    if (horizontalUsePercentage) return super.keyPressed(keyCode, scanCode, modifiers);
-                    boolean leftArrow = keyCode == 263;
+                public boolean keyPressed(KeyEvent event) {
+                    if (horizontalUsePercentage) return super.keyPressed(event);
+                    boolean leftArrow = event.key() == 263;
                     double newValue;
                     if (leftArrow) {
                         newValue = Mth.clamp((valueToLimit(value, 50) - 1) / 50.0, 0, 1);
-                    } else if (keyCode == 262) {
+                    } else if (event.key() == 262) {
                         newValue = Mth.clamp((valueToLimit(value, 50) + 1) / 50.0, 0, 1);
                     } else {
-                        return super.keyPressed(keyCode, scanCode, modifiers);
+                        return super.keyPressed(event);
                     }
                     
                     if (newValue != value) {
@@ -146,7 +147,7 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
                 PanelBoundary newBoundary = access.get(option);
                 access.set(option, new PanelBoundary(newBoundary.horizontalPercentage(), 1.0, newBoundary.horizontalLimit(), 1000, newBoundary.horizontalAlign(), 0.5));
                 if (!isReducedMotion()) innerAlphaAnimator.setTo(-1.0F, 200);
-                init(minecraft, BoundariesScreen.this.width, BoundariesScreen.this.height);
+                init(BoundariesScreen.this.width, BoundariesScreen.this.height);
             }).build());
             v = verticalUsePercentage ? boundary.verticalPercentage() : boundary.verticalLimit() / 1000.0;
             addRenderableWidget(verticalSlider = new AbstractSliderButton(0, 0, 20, 20, getSliderMessage("config.rei.options.layout.boundaries.desc.limit", verticalUsePercentage, v, 1000), v) {
@@ -167,16 +168,16 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
                 }
                 
                 @Override
-                public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-                    if (verticalUsePercentage) return super.keyPressed(keyCode, scanCode, modifiers);
-                    boolean leftArrow = keyCode == 263;
+                public boolean keyPressed(KeyEvent event) {
+                    if (verticalUsePercentage) return super.keyPressed(event);
+                    boolean leftArrow = event.key() == 263;
                     double newValue;
                     if (leftArrow) {
                         newValue = Mth.clamp((valueToLimit(value, 1000) - 1) / 1000.0, 0, 1);
-                    } else if (keyCode == 262) {
+                    } else if (event.key() == 262) {
                         newValue = Mth.clamp((valueToLimit(value, 1000) + 1) / 1000.0, 0, 1);
                     } else {
-                        return super.keyPressed(keyCode, scanCode, modifiers);
+                        return super.keyPressed(event);
                     }
                     
                     if (newValue != value) {

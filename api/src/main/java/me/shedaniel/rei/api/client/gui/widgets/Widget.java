@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.api.client.gui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -33,11 +32,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Matrix4f;
-import org.joml.Vector4f;
+import org.joml.Matrix3x2f;
+import org.joml.Vector3f;
 
 import java.util.Stack;
 
@@ -71,17 +71,13 @@ public abstract class Widget extends AbstractContainerEventHandler implements Re
         return mouseStack.pop();
     }
     
-    public static Point translateMouse(PoseStack poses) {
-        return translateMouse(poses.last().pose());
+    public static Point translateMouse(double x, double y) {
+        return translateMouse(new Matrix3x2f().translate((float) x, (float) y));
     }
     
-    public static Point translateMouse(double x, double y, double z) {
-        return translateMouse(new Matrix4f().translate((float) x, (float) y, (float) z));
-    }
-    
-    public static Point translateMouse(Matrix4f pose) {
+    public static Point translateMouse(Matrix3x2f pose) {
         Point mouse = mouse();
-        Vector4f mouseVec = new Vector4f(mouse.x, mouse.y, 0, 1);
+        Vector3f mouseVec = new Vector3f(mouse.x, mouse.y, 1);
         pose.transform(mouseVec);
         return pushMouse(new Point(mouseVec.x(), mouseVec.y()));
     }
@@ -109,6 +105,14 @@ public abstract class Widget extends AbstractContainerEventHandler implements Re
     @Deprecated
     public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
         render(graphics, mouseX, mouseY, delta);
+    }
+
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        render(GuiGraphics.of(graphics), mouseX, mouseY, delta);
     }
     
     @ApiStatus.Experimental

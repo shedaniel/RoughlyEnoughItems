@@ -30,11 +30,13 @@ import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,7 +73,7 @@ public class ValueTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
             i++;
         }
         this.widget = Widgets.withTranslate(Widgets.concat(this.widgets),
-                $ -> new Matrix4f().translate(getBounds().x, getBounds().y, 0));
+                $ -> new Matrix3x2f().translate(getBounds().x, getBounds().y));
         this.children = Collections.singletonList(this.widget);
     }
     
@@ -83,17 +85,17 @@ public class ValueTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         Rectangle bounds = getBounds();
-        if (this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose().last().pose(), bounds))) {
-            graphics.pose().pushPose();
-            graphics.pose().translate(bounds.x, bounds.y, 0);
+        if (this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose(), bounds))) {
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(bounds.x, bounds.y);
             Point mouse = new Point(mouseX - bounds.x, mouseY - bounds.y);
             for (Widget widget : this.widgets) {
                 if (!(widget instanceof WidgetWithBounds withBounds) ||
-                        this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose().last().pose(), withBounds.getBounds()))) {
+                        this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose(), withBounds.getBounds()))) {
                     widget.render(graphics, mouse.x, mouse.y, delta);
                 }
             }
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }
     }
     
@@ -103,17 +105,17 @@ public class ValueTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         for (GuiEventListener element : children())
-            if (element.mouseReleased(mouseX, mouseY, button))
+            if (element.mouseReleased(event))
                 return true;
         return false;
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         for (GuiEventListener element : children())
-            if (element.keyPressed(keyCode, scanCode, modifiers))
+            if (element.keyPressed(event))
                 return true;
         return false;
     }

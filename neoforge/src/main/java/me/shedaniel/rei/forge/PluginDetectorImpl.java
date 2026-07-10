@@ -75,11 +75,11 @@ public class PluginDetectorImpl implements PluginDetector {
     
     static {
         Supplier<List<Map.Entry<REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>, List<String>>>> dist;
-        if (FMLEnvironment.dist == Dist.CLIENT) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             dist = Suppliers.memoize(() -> getPluginsLoader(REIPluginLoaderClient.class));
-        } else if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
+        } else if (FMLEnvironment.getDist() == Dist.DEDICATED_SERVER) {
             dist = Suppliers.memoize(() -> getPluginsLoader(REIPluginLoaderDedicatedServer.class));
-        } else throw new IllegalStateException("Unknown environment: " + FMLEnvironment.dist);
+        } else throw new IllegalStateException("Unknown environment: " + FMLEnvironment.getDist());
         loaderProvidedDist = dist;
     }
     
@@ -112,11 +112,11 @@ public class PluginDetectorImpl implements PluginDetector {
         });
         
         // Dist plugins
-        if (FMLEnvironment.dist == Dist.CLIENT) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             AnnotationUtils.<REIPluginClient, REICommonPlugin>scanAnnotation(REIPluginClient.class, REICommonPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
                 PluginView.getInstance().registerPlugin(wrapPlugin(modId, plugin.get()));
             });
-        } else if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
+        } else if (FMLEnvironment.getDist() == Dist.DEDICATED_SERVER) {
             AnnotationUtils.<REIPluginDedicatedServer, REICommonPlugin>scanAnnotation(REIPluginDedicatedServer.class, REICommonPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
                 PluginView.getInstance().registerPlugin(wrapPlugin(modId, plugin.get()));
             });
@@ -133,41 +133,43 @@ public class PluginDetectorImpl implements PluginDetector {
             PluginView.getInstance().registerPlugin(wrapPlugin(entry.getValue(), wrapAndFilter(entry.getKey(), REICommonPlugin.class)));
         }
     }
-    
-    @OnlyIn(Dist.CLIENT)
+
     @Override
     public Supplier<Runnable> detectClientPlugins() {
         return () -> () -> {
-            PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientPluginImpl()));
-            PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientRuntimePlugin()));
-            PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new HideIngredientsFromTagsPlugin()));
-            
-            // Legacy Annotation
-            AnnotationUtils.<REIPlugin, REIClientPlugin>scanAnnotation(REIPlugin.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
-                ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
-            });
-            
-            // Common plugins
-            AnnotationUtils.<REIPluginCommon, REIClientPlugin>scanAnnotation(REIPluginCommon.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
-                ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
-            });
-            
-            // Dist plugins
-            AnnotationUtils.<REIPluginClient, REIClientPlugin>scanAnnotation(REIPluginClient.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
-                ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
-            });
-            
-            // Loaders
-            for (Map.Entry<REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>, List<String>> entry : loaderProvided.get()) {
-                ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(entry.getValue(), wrapAndFilter(entry.getKey(), REIClientPlugin.class)));
-            }
-            for (Map.Entry<REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>, List<String>> entry : loaderProvidedCommon.get()) {
-                ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(entry.getValue(), wrapAndFilter(entry.getKey(), REIClientPlugin.class)));
-            }
-            for (Map.Entry<REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>, List<String>> entry : loaderProvidedDist.get()) {
-                ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(entry.getValue(), wrapAndFilter(entry.getKey(), REIClientPlugin.class)));
+            if (FMLEnvironment.getDist() == Dist.CLIENT) {
+                PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientPluginImpl()));
+                PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientRuntimePlugin()));
+                PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new HideIngredientsFromTagsPlugin()));
+
+                // Legacy Annotation
+                AnnotationUtils.<REIPlugin, REIClientPlugin>scanAnnotation(REIPlugin.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
+                    ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
+                });
+
+                // Common plugins
+                AnnotationUtils.<REIPluginCommon, REIClientPlugin>scanAnnotation(REIPluginCommon.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
+                    ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
+                });
+
+                // Dist plugins
+                AnnotationUtils.<REIPluginClient, REIClientPlugin>scanAnnotation(REIPluginClient.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
+                    ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
+                });
+
+                // Loaders
+                for (Map.Entry<REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>, List<String>> entry : loaderProvided.get()) {
+                    ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(entry.getValue(), wrapAndFilter(entry.getKey(), REIClientPlugin.class)));
+                }
+                for (Map.Entry<REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>, List<String>> entry : loaderProvidedCommon.get()) {
+                    ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(entry.getValue(), wrapAndFilter(entry.getKey(), REIClientPlugin.class)));
+                }
+                for (Map.Entry<REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>, List<String>> entry : loaderProvidedDist.get()) {
+                    ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(entry.getValue(), wrapAndFilter(entry.getKey(), REIClientPlugin.class)));
+                }
             }
         };
+
     }
     
     private static <P extends me.shedaniel.rei.api.common.plugins.REIPlugin<P>> REIPluginProvider<P> wrapAndFilter(REIPluginProvider<?> provider, Class<P> clazz) {

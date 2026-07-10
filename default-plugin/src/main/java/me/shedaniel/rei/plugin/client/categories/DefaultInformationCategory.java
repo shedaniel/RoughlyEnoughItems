@@ -24,7 +24,6 @@
 package me.shedaniel.rei.plugin.client.categories;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
@@ -43,13 +42,13 @@ import me.shedaniel.rei.plugin.common.displays.DefaultInformationDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.FormattedCharSequence;
-import org.joml.Matrix4f;
 
 import java.util.Collections;
 import java.util.List;
@@ -57,16 +56,6 @@ import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
 public class DefaultInformationCategory implements DisplayCategory<DefaultInformationDisplay> {
-    protected static void innerBlit(GuiGraphics graphics, Matrix4f matrix4f, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
-        graphics.drawSpecial(source -> {
-            VertexConsumer buffer = source.getBuffer(RenderType.guiTextured(REIRuntime.getInstance().getDefaultDisplayTexture()));
-            buffer.addVertex(matrix4f, xStart, yEnd, z).setUv(uStart, vEnd).setColor(0xFFFFFFFF);
-            buffer.addVertex(matrix4f, xEnd, yEnd, z).setUv(uEnd, vEnd).setColor(0xFFFFFFFF);
-            buffer.addVertex(matrix4f, xEnd, yStart, z).setUv(uEnd, vStart).setColor(0xFFFFFFFF);
-            buffer.addVertex(matrix4f, xStart, yStart, z).setUv(uStart, vStart).setColor(0xFFFFFFFF);
-        });
-    }
-    
     @Override
     public CategoryIdentifier<? extends DefaultInformationDisplay> getCategoryIdentifier() {
         return BuiltinPlugin.INFO;
@@ -98,11 +87,11 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
         return new Renderer() {
             @Override
             public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                graphics.pose().pushPose();
-                graphics.pose().translate(-1.2f, -1, 0);
-                Matrix4f matrix = graphics.pose().last().pose();
-                DefaultInformationCategory.innerBlit(graphics, matrix, bounds.getCenterX() - 8, bounds.getCenterX() + 8, bounds.getCenterY() - 8, bounds.getCenterY() + 8, 0, 116f / 256f, (116f + 16f) / 256f, 0f, 16f / 256f);
-                graphics.pose().popPose();
+                graphics.pose().pushMatrix();
+                graphics.pose().translate(-1.2f, -1);
+                graphics.innerBlit(RenderPipelines.GUI_TEXTURED, REIRuntime.getInstance().getDefaultDisplayTexture(), bounds.getCenterX() - 8, bounds.getCenterX() + 8, bounds.getCenterY() - 8, bounds.getCenterY() + 8, 116f / 256f, (116f + 16f) / 256f, 0f, 16f / 256f, -1);
+                //private void innerBlit(RenderPipeline renderPipeline, Identifier identifier, int x, int x, int y, int y, float r, float g, float b, float m, int n) {
+                graphics.pose().popMatrix();
             }
         };
     }
@@ -167,17 +156,17 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (scrolling.updateDraggingState(mouseX, mouseY, button))
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+            if (scrolling.updateDraggingState(event.x(), event.y(), event.button()))
                 return true;
-            return super.mouseClicked(mouseX, mouseY, button);
+            return super.mouseClicked(event, doubleClick);
         }
         
         @Override
-        public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-            if (scrolling.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+        public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+            if (scrolling.mouseDragged(event.x(), event.y(), event.button(), deltaX, deltaY))
                 return true;
-            return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+            return super.mouseDragged(event, deltaX, deltaY);
         }
         
         @Override

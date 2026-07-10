@@ -23,12 +23,13 @@
 
 package me.shedaniel.rei.impl.client.gui.screen;
 
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.*;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonColors;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,7 +37,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class ConfigReloadingScreen extends Screen {
+public class ConfigReloadingScreen extends REIScreen {
     private final Component title;
     private final BooleanSupplier predicate;
     private Supplier<@Nullable Component> subtitle = () -> null;
@@ -92,10 +93,10 @@ public class ConfigReloadingScreen extends Screen {
         int o = this.isFocused() ? -1 : -6250336;
         graphics.fill(k + 1, l, k + m, l + n, -16777216);
         graphics.renderOutline(k, l, m, n, o);
-        graphics.drawCenteredString(this.font, title, this.width / 2, l + 12, 0xffffff);
-        graphics.drawCenteredString(this.font, text, this.width / 2, l + 12 + 9, 0x808080);
+        graphics.drawCenteredString(this.font, title, this.width / 2, l + 12, CommonColors.WHITE);
+        graphics.drawCenteredString(this.font, text, this.width / 2, l + 12 + 9, 0xFF808080);
         if (subtitle != null) {
-            graphics.drawCenteredString(this.font, subtitle, this.width / 2, l + 12 + 9 + 9, 0x808080);
+            graphics.drawCenteredString(this.font, subtitle, this.width / 2, l + 12 + 9 + 9, 0xFF808080);
         }
     }
 }

@@ -36,14 +36,14 @@ import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigOptions;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +62,7 @@ public class ConfigOptionWidget {
                 .leftAligned()
                 .rainbow(Objects.equals(option.getId(), AllREIConfigOptions.RAINBOW.getId())));
         WidgetWithBounds optionValue = ConfigOptionValueWidget.create(access, option, width - 10 - fieldNameLabel.getBounds().width);
-        widgets.add(Widgets.withTranslate(optionValue, () -> new Matrix4f().translate(width - optionValue.getBounds().width - optionValue.getBounds().x, 0, 0)));
+        widgets.add(Widgets.withTranslate(optionValue, () -> new Matrix3x2f().translate(width - optionValue.getBounds().width - optionValue.getBounds().x, 0)));
         widgets.add(new WidgetWithBounds() {
             final MutableComponent description = Util.make(() -> {
                 MutableComponent description = option.getDescription().copy();
@@ -85,7 +85,7 @@ public class ConfigOptionWidget {
             @Nullable
             WidgetWithBounds preview = null;
             boolean previewVisible = false;
-            Matrix4f previewTranslation = new Matrix4f();
+            Matrix3x2f previewTranslation = new Matrix3x2f();
             final NumberAnimator<Float> previewHeight = ValueAnimator.ofFloat()
                     .withConvention(() -> previewVisible ? preview.getBounds().getHeight() : 0f, ValueAnimator.typicalTransitionTime());
             boolean nextLinePreview = false;
@@ -128,7 +128,7 @@ public class ConfigOptionWidget {
                     if (this.preview != null && this.previewHeight.value() > 0.1f) {
                         Rectangle rectangle = new Rectangle(0, 24 + 12 * split.size() - (nextLinePreview ? 0 : 12), width, this.previewHeight.value());
                         graphics.enableScissor(rectangle.x, rectangle.y, rectangle.getMaxX(), rectangle.getMaxY());
-                        this.previewTranslation = new Matrix4f().translate(0, 12 + 12 * split.size(), 100);
+                        this.previewTranslation = new Matrix3x2f().translate(0, 12 + 12 * split.size());
                         this.preview.render(graphics, mouseX, mouseY, delta);
                         graphics.disableScissor();
                     }

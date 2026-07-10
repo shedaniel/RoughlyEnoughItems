@@ -31,7 +31,7 @@ import net.minecraft.network.chat.MutableComponent;
 
 public interface ConfigUtils {
     static boolean isReducedMotion() {
-        if (Minecraft.getInstance().screen instanceof REIConfigScreen screen) {
+        if (Minecraft.getInstance().gui.screen() instanceof REIConfigScreen screen) {
             return screen.get(AllREIConfigOptions.REDUCED_MOTION);
         } else {
             return ConfigObject.getInstance().isReducedMotion();

@@ -29,9 +29,9 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.input.MouseButtonEvent;
 
 import java.util.Collections;
 import java.util.List;
@@ -67,10 +67,7 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
         int buttonColor = 0xFFFFFF | (Math.round(0x74 * alpha.floatValue()) << 24);
         graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), buttonColor, buttonColor);
         if (isVisible()) {
-            graphics.drawSpecial(source -> {
-                renderButtonText(graphics, source);
-            });
-            graphics.flush();
+            renderButtonText(graphics);
         }
         if (hovered) {
             queueTooltip();
@@ -79,7 +76,7 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
     
     protected abstract boolean isAvailable(int mouseX, int mouseY);
     
-    protected abstract void renderButtonText(GuiGraphics graphics, MultiBufferSource bufferSource);
+    protected abstract void renderButtonText(GuiGraphics graphics);
     
     @Override
     public Rectangle getBounds() {
@@ -102,8 +99,8 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (isVisible() && containsMouse(mouseX, mouseY)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (isVisible() && containsMouse(event.x(), event.y())) {
             this.wasClicked = true;
             return true;
         }
@@ -111,8 +108,8 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (wasClicked() && isVisible() && containsMouse(mouseX, mouseY)) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (wasClicked() && isVisible() && containsMouse(event.x(), event.y())) {
             onClick();
             return true;
         }

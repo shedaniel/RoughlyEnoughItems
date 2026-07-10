@@ -37,7 +37,7 @@ import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
 import me.shedaniel.rei.impl.client.util.ThreadCreator;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Nullable;
 

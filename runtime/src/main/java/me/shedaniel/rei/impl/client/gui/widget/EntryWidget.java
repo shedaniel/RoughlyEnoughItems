@@ -64,17 +64,19 @@ import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.item.Item;
@@ -103,7 +105,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     private long lastCycleTime = -1;
     @Nullable
     private Set<UnaryOperator<Tooltip>> tooltipProcessors;
-    public ResourceLocation tagMatch;
+    public Identifier tagMatch;
     public boolean removeTagMatch = true;
     
     private long lastCheckTime = -1;
@@ -421,19 +423,16 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     protected void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (background) {
             darkBackgroundAlpha.update(delta);
-            graphics.blit(RenderType::guiTextured, InternalTextures.CHEST_GUI_TEXTURE, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height, 256, 256);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height, 256, 256);
             if (darkBackgroundAlpha.value() > 0.0F) {
-                graphics.blit(RenderType::guiTextured, InternalTextures.CHEST_GUI_TEXTURE_DARK, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height, 256, 256, ARGB.white(darkBackgroundAlpha.value()));
+                graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE_DARK, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height, 256, 256, ARGB.white(darkBackgroundAlpha.value()));
             }
         }
     }
     
     protected void drawCurrentEntry(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         EntryStack<?> entry = getCurrentEntry();
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 100);
         entry.render(graphics, getInnerBounds(), mouseX, mouseY, delta);
-        graphics.pose().popPose();
     }
     
     protected void queueTooltip(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
@@ -451,7 +450,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public Tooltip getCurrentTooltip(TooltipContext context) {
         Tooltip tooltip = getCurrentEntry().getTooltip(context);
         
-        if (tooltip != null && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+        if (tooltip != null && !(Minecraft.getInstance().gui.screen() instanceof DisplayScreen)) {
             boolean exists = getTransferHandler(false) != null;
             
             if (!exists) {
@@ -560,26 +559,26 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (containsMouse(mouseX, mouseY)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (containsMouse(event.x(), event.y())) {
             this.wasClicked = true;
             return true;
         }
         
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
         if (REIRuntimeImpl.isWithinRecipeViewingScreen && this.getCyclingEntries().get().size() > 1 && containsMouse(mouseX, mouseY)) {
             if (amountY < 0) {
-                for (EntryWidget slot : Widgets.<EntryWidget>walk(minecraft.screen.children(), EntryWidget.class::isInstance)) {
+                for (EntryWidget slot : Widgets.<EntryWidget>walk(minecraft.gui.screen().children(), EntryWidget.class::isInstance)) {
                     slot.getCyclingEntries().previous();
                     slot.lastCycleTime = System.currentTimeMillis();
                 }
                 return true;
             } else if (amountY > 0) {
-                for (EntryWidget slot : Widgets.<EntryWidget>walk(minecraft.screen.children(), EntryWidget.class::isInstance)) {
+                for (EntryWidget slot : Widgets.<EntryWidget>walk(minecraft.gui.screen().children(), EntryWidget.class::isInstance)) {
                     slot.getCyclingEntries().next();
                     slot.lastCycleTime = System.currentTimeMillis();
                 }
@@ -590,11 +589,11 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         if (!interactable)
             return false;
-        if (wasClicked() && containsMouse(mouseX, mouseY)) {
-            if (doAction(mouseX, mouseY, button)) {
+        if (wasClicked() && containsMouse(event.x(), event.y())) {
+            if (doAction(event)) {
                 ((CurrentDraggingStack) DraggingContext.getInstance()).drop();
                 return true;
             }
@@ -602,10 +601,10 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return false;
     }
     
-    protected boolean doAction(double mouseX, double mouseY, int button) {
+    protected boolean doAction(MouseButtonEvent event) {
         if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && !getCurrentEntry().isEmpty()) {
             ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
-            if (keyCode.matchesMouse(button)) {
+            if (keyCode.matchesMouse(event.button())) {
                 FavoriteEntry favoriteEntry = asFavoriteEntry();
                 if (favoriteEntry != null) {
                     if (reverseFavoritesAction()) {
@@ -618,13 +617,13 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             }
         }
         
-        if (!(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
+        if (!(Minecraft.getInstance().gui.screen() instanceof DisplayScreen) && Minecraft.getInstance().hasControlDown()) {
             try {
                 TransferHandler handler = getTransferHandler(true);
                 
                 if (handler != null) {
                     AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
-                    TransferHandler.Context context = TransferHandler.Context.create(true, Screen.hasShiftDown() || button == 1, containerScreen, display);
+                    TransferHandler.Context context = TransferHandler.Context.create(true, Minecraft.getInstance().hasShiftDown() || event.button() == 1, containerScreen, display);
                     TransferHandler.ApplicabilityResult applicabilityResult = handler.checkApplicable(context);
                     if (!applicabilityResult.isApplicable()) return false;
                     TransferHandler.Result transferResult;
@@ -637,8 +636,8 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     
                     if (transferResult.isBlocking()) {
                         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                        if (transferResult.isReturningToScreen() && Minecraft.getInstance().screen != containerScreen) {
-                            Minecraft.getInstance().setScreen(containerScreen);
+                        if (transferResult.isReturningToScreen() && Minecraft.getInstance().gui.screen() != containerScreen) {
+                            Minecraft.getInstance().setScreenAndShow(containerScreen);
                             REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                         }
                         return true;
@@ -649,9 +648,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             }
         }
         
-        if ((ConfigObject.getInstance().getRecipeKeybind().getType() != InputConstants.Type.MOUSE && button == 0) || ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button))
+        if ((ConfigObject.getInstance().getRecipeKeybind().getType() != InputConstants.Type.MOUSE && event.button() == 0) || ConfigObject.getInstance().getRecipeKeybind().matchesMouse(event.button()))
             return ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).open();
-        else if ((ConfigObject.getInstance().getUsageKeybind().getType() != InputConstants.Type.MOUSE && button == 1) || ConfigObject.getInstance().getUsageKeybind().matchesMouse(button))
+        else if ((ConfigObject.getInstance().getUsageKeybind().getType() != InputConstants.Type.MOUSE && event.button() == 1) || ConfigObject.getInstance().getUsageKeybind().matchesMouse(event.button()))
             return ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).open();
         
         return false;
@@ -679,19 +678,19 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (containsMouse(mouse())) {
-            return keyPressedIgnoreContains(keyCode, scanCode, modifiers);
+            return keyPressedIgnoreContains(event);
         }
         
         return false;
     }
     
-    public boolean keyPressedIgnoreContains(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressedIgnoreContains(KeyEvent event) {
         if (!interactable) return false;
         
         if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && !getCurrentEntry().isEmpty()) {
-            if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
+            if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(event.key(), event.scancode())) {
                 FavoriteEntry favoriteEntry = asFavoriteEntry();
                 if (favoriteEntry != null) {
                     if (reverseFavoritesAction()) {
@@ -703,9 +702,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 }
             }
         }
-        if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(keyCode, scanCode))
+        if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(event.key(), event.scancode()))
             return ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).open();
-        else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(keyCode, scanCode))
+        else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(event.key(), event.scancode()))
             return ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).open();
         return false;
     }

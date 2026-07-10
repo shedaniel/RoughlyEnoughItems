@@ -27,31 +27,31 @@ import me.shedaniel.rei.api.client.gui.widgets.utils.PanelTextures;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Locale;
 
 @Environment(EnvType.CLIENT)
 public enum RecipeBorderType implements PanelTextures {
-    DEFAULT(ResourceLocation.parse("roughlyenoughitems:widget/panel_default"), ResourceLocation.parse("roughlyenoughitems:widget/panel_default_dark")),
-    LIGHTER(ResourceLocation.parse("roughlyenoughitems:widget/panel_lighter"), ResourceLocation.parse("roughlyenoughitems:widget/panel_lighter_dark")),
-    NONE(ResourceLocation.parse("roughlyenoughitems:widget/panel_none"), ResourceLocation.parse("roughlyenoughitems:widget/panel_none_dark"));
+    DEFAULT(Identifier.parse("roughlyenoughitems:widget/panel_default"), Identifier.parse("roughlyenoughitems:widget/panel_default_dark")),
+    LIGHTER(Identifier.parse("roughlyenoughitems:widget/panel_lighter"), Identifier.parse("roughlyenoughitems:widget/panel_lighter_dark")),
+    NONE(Identifier.parse("roughlyenoughitems:widget/panel_none"), Identifier.parse("roughlyenoughitems:widget/panel_none_dark"));
     
-    private final ResourceLocation texture;
-    private final ResourceLocation darkTexture;
+    private final Identifier texture;
+    private final Identifier darkTexture;
     
-    RecipeBorderType(ResourceLocation texture, ResourceLocation darkTexture) {
+    RecipeBorderType(Identifier texture, Identifier darkTexture) {
         this.texture = texture;
         this.darkTexture = darkTexture;
     }
     
     @Override
-    public ResourceLocation texture() {
+    public Identifier texture() {
         return texture;
     }
     
     @Override
-    public ResourceLocation darkTexture() {
+    public Identifier darkTexture() {
         return darkTexture;
     }
     

@@ -5,6 +5,8 @@
 **/bin
 /.gradle
 **/.gradle
+/.gradle-user
+/.gradle-user-home
 /minecraft
 */minecraft
 /out
@@ -12,6 +14,9 @@
 */out
 /run
 /classes
+**/remappedSrc
+*_unpacked
+unpacked_*.txt
 
 # IDE nonsense that could go in source control but really shouldn't
 .classpath

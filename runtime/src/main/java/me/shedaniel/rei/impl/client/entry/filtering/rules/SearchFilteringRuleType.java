@@ -31,11 +31,11 @@ import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.screen.generic.OptionEntriesScreen;
-import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
+import me.shedaniel.rei.impl.client.gui.widget.EntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
@@ -144,7 +144,7 @@ public enum SearchFilteringRuleType implements FilteringRuleType<SearchFiltering
         
         @Override
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-            BatchedEntryRendererManager<EntryWidget> manager = new BatchedEntryRendererManager<>();
+            EntryRendererManager<EntryWidget> manager = new EntryRendererManager<>();
             int entrySize = entrySize();
             int width = entryWidth / entrySize;
             int i = 0;

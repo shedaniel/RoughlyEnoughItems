@@ -28,9 +28,27 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.init.PlatformAdapter;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.neoforged.neoforge.resource.ResourcePackLoader;
+
+import java.util.List;
 
 public class PlatformAdapterImpl implements PlatformAdapter {
+    @Override
+    public List<PackResources> gatherClientDataPacks() {
+        // Start from the vanilla data pack, then let NeoForge add every mod's data pack as an
+        // additional repository source.
+        PackRepository repository = ServerPacksSource.createVanillaTrustedRepository();
+        ResourcePackLoader.populatePackRepository(repository, PackType.SERVER_DATA, false);
+        repository.reload();
+        repository.setSelected(repository.getAvailableIds());
+        return repository.openAllSelected();
+    }
+
     @Override
     public EntryIngredient fromIngredient(Ingredient ingredient) {
         if (ingredient.isEmpty()) return EntryIngredient.empty();

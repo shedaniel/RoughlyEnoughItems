@@ -25,7 +25,8 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import java.util.List;
@@ -40,8 +41,20 @@ public class UpdatedListWidget<E extends UpdatedListWidget.Entry<E>> extends Dyn
     public static void renderAs(Minecraft minecraft, int width, int height, int top, int bottom, GuiGraphics graphics, float delta) {
         new UpdatedListWidget(minecraft, width, height, top, bottom).render(graphics, -100, -100, delta);
     }
+
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        extractRenderState(graphics, mouseX, mouseY, delta);
+    }
     
     public static abstract class Entry<E extends Entry<E>> extends DynamicElementListWidget.ElementEntry<E> {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        }
+
+        @Override
+        public void extractRenderState(GuiGraphicsExtractor graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+            render(GuiGraphics.of(graphics), index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+        }
+
         @Override
         public List<? extends GuiEventListener> children() {
             return List.of();

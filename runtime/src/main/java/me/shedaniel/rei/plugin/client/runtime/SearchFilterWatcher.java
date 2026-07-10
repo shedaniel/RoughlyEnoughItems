@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListSearchManager;
 import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 

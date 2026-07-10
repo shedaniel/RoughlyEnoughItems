@@ -46,12 +46,14 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
+import me.shedaniel.rei.impl.client.gui.widget.EntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
+import me.shedaniel.rei.api.common.util.Pair;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 
@@ -108,7 +110,6 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         if (bounds.isEmpty()) return;
         
         int entrySize = entrySize();
-        boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
         updateEntriesPosition(entry -> true);
         for (RealRegionEntry<T> entry : entries.values()) {
             entry.update(delta);
@@ -130,7 +131,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         Stream<RegionEntryWidget<T>> entryStream = this.entriesList.stream()
                 .filter(entry -> entry.getBounds().getMaxY() >= this.bounds.getY() && entry.getBounds().y <= this.bounds.getMaxY());
         
-        new BatchedEntryRendererManager<>(entryStream.collect(Collectors.toList()))
+        new EntryRendererManager<>(entryStream.collect(Collectors.toList()))
                 .render(graphics, mouseX, mouseY, delta);
         
         updatePosition(delta);
@@ -144,11 +145,11 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (scrolling.updateDraggingState(mouseX, mouseY, button)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (scrolling.updateDraggingState(event.x(), event.y(), event.button())) {
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
     
     @Override
@@ -161,10 +162,10 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (scrolling.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (scrolling.mouseDragged(event.x(), event.y(), event.button(), deltaX, deltaY))
             return true;
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(event, deltaX, deltaY);
     }
     
     private void updatePosition(float delta) {
@@ -172,10 +173,10 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (containsMouse(mouse()))
             for (Widget widget : children())
-                if (widget.keyPressed(keyCode, scanCode, modifiers))
+                if (widget.keyPressed(event))
                     return true;
         return false;
     }
@@ -438,7 +439,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
             int width = innerBounds.width / entrySize;
             int currentX = 0;
             int currentY = 0;
-            List<Tuple<RealRegionEntry<T>, Point>> entriesPoints = Lists.newArrayList();
+            List<Pair<RealRegionEntry<T>, Point>> entriesPoints = Lists.newArrayList();
             for (RealRegionEntry<T> entry : this.entries.values()) {
                 while (true) {
                     int xPos = currentX * entrySize + innerBounds.x;
@@ -451,7 +452,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                     }
                     
                     if (listener.notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize)) {
-                        entriesPoints.add(new Tuple<>(entry, new Point(xPos, yPos)));
+                        entriesPoints.add(new Pair<>(entry, new Point(xPos, yPos)));
                         break;
                     } else {
                         blockedCount++;
@@ -465,7 +466,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                 int yPos = currentY * entrySize + innerBounds.y;
                 
                 if (listener.notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize)) {
-                    entriesPoints.add(new Tuple<>(null, new Point(xPos, yPos)));
+                    entriesPoints.add(new Pair<>(null, new Point(xPos, yPos)));
                 }
             }
             

@@ -39,12 +39,12 @@ import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -110,19 +110,19 @@ public final class Widgets {
         return ClientInternals.getWidgetsProvider().wrapVanillaWidget(element);
     }
     
-    public static WidgetWithBounds withTranslate(Widget widget, double x, double y, double z) {
-        return withTranslate(widget, new Matrix4f().translate((float) x, (float) y, (float) z));
+    public static WidgetWithBounds withTranslate(Widget widget, double x, double y) {
+        return withTranslate(widget, new Matrix3x2f().translate((float) x, (float) y));
     }
     
-    public static WidgetWithBounds withTranslate(Widget widget, Matrix4f translate) {
+    public static WidgetWithBounds withTranslate(Widget widget, Matrix3x2f translate) {
         return withTranslate(widget, () -> translate);
     }
     
-    public static <T extends Widget> WidgetWithBounds withTranslate(T widget, Function<T, Matrix4f> translate) {
+    public static <T extends Widget> WidgetWithBounds withTranslate(T widget, Function<T, Matrix3x2f> translate) {
         return withTranslate(widget, () -> translate.apply(widget));
     }
     
-    public static WidgetWithBounds withTranslate(Widget widget, Supplier<Matrix4f> translate) {
+    public static WidgetWithBounds withTranslate(Widget widget, Supplier<Matrix3x2f> translate) {
         WidgetWithBounds widgetWithBounds = wrapWidgetWithBounds(widget);
         return ClientInternals.getWidgetsProvider().withTranslate(widgetWithBounds, translate);
     }
@@ -180,36 +180,36 @@ public final class Widgets {
         return new DelegateWidgetWithBounds(widget, bounds);
     }
     
-    public static Widget createTexturedWidget(ResourceLocation identifier, Rectangle bounds) {
+    public static Widget createTexturedWidget(Identifier identifier, Rectangle bounds) {
         return createTexturedWidget(identifier, bounds, 0, 0);
     }
     
     
-    public static Widget createTexturedWidget(ResourceLocation identifier, int x, int y, int width, int height) {
+    public static Widget createTexturedWidget(Identifier identifier, int x, int y, int width, int height) {
         return createTexturedWidget(identifier, x, y, 0, 0, width, height);
     }
     
-    public static Widget createTexturedWidget(ResourceLocation identifier, Rectangle bounds, float u, float v) {
+    public static Widget createTexturedWidget(Identifier identifier, Rectangle bounds, float u, float v) {
         return createTexturedWidget(identifier, bounds, u, v, 256, 256);
     }
     
-    public static Widget createTexturedWidget(ResourceLocation identifier, int x, int y, float u, float v, int width, int height) {
+    public static Widget createTexturedWidget(Identifier identifier, int x, int y, float u, float v, int width, int height) {
         return createTexturedWidget(identifier, x, y, u, v, width, height, 256, 256);
     }
     
-    public static Widget createTexturedWidget(ResourceLocation identifier, Rectangle bounds, float u, float v, int textureWidth, int textureHeight) {
+    public static Widget createTexturedWidget(Identifier identifier, Rectangle bounds, float u, float v, int textureWidth, int textureHeight) {
         return createTexturedWidget(identifier, bounds.x, bounds.y, u, v, bounds.width, bounds.height, bounds.width, bounds.height, textureWidth, textureHeight);
     }
     
-    public static Widget createTexturedWidget(ResourceLocation identifier, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight) {
+    public static Widget createTexturedWidget(Identifier identifier, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight) {
         return createTexturedWidget(identifier, x, y, u, v, width, height, width, height, textureWidth, textureHeight);
     }
     
-    public static Widget createTexturedWidget(ResourceLocation identifier, Rectangle bounds, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
+    public static Widget createTexturedWidget(Identifier identifier, Rectangle bounds, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
         return createTexturedWidget(identifier, bounds.x, bounds.y, u, v, bounds.width, bounds.height, uWidth, vHeight, textureWidth, textureHeight);
     }
     
-    public static Widget createTexturedWidget(ResourceLocation identifier, int x, int y, float u, float v, int width, int height, int uWidth, int vHeight, int textureWidth, int textureHeight) {
+    public static Widget createTexturedWidget(Identifier identifier, int x, int y, float u, float v, int width, int height, int uWidth, int vHeight, int textureWidth, int textureHeight) {
         return createDrawableWidget(ClientInternals.getWidgetsProvider().createTexturedConsumer(identifier, x, y, width, height, u, v, uWidth, vHeight, textureWidth, textureHeight));
     }
     

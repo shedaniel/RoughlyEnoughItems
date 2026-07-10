@@ -54,7 +54,7 @@ import java.util.*;
 import java.util.function.Function;
 
 public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommonPlugin, ServerDisplayRegistryImpl.ServerDisplaysHolder> implements ServerDisplayRegistry, DisplayConsumerImpl {
-    private static final Comparator<RecipeHolder<?>> RECIPE_COMPARATOR = Comparator.comparing((RecipeHolder<?> o) -> o.id().location().getNamespace()).thenComparing(o -> o.id().location().getPath());
+    private static final Comparator<RecipeHolder<?>> RECIPE_COMPARATOR = Comparator.comparing((RecipeHolder<?> o) -> o.id().identifier().getNamespace()).thenComparing(o -> o.id().identifier().getPath());
     private final Object2LongMap<UUID> playerVersionMap = new Object2LongOpenHashMap<>();
     private int reloadVersionHash = UUID.randomUUID().hashCode();
     
@@ -79,7 +79,7 @@ public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommon
                     }
                     long versionHash = playerVersionMap.getLong(player.getUUID());
                     if (versionHash != currentVersion) {
-                        InternalLogger.getInstance().debug("Player %s has outdated displays version %X [latest version: %X]", player.getGameProfile().getName(), versionHash, currentVersion);
+                        InternalLogger.getInstance().debug("Player %s has outdated displays version %X [latest version: %X]", player.getGameProfile().name(), versionHash, currentVersion);
                         toUpdate.add(player);
                     }
                 }
@@ -111,7 +111,7 @@ public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommon
             long playerReloadHash = playerVersion >>> 32;
             playerVersionMap.put(player.getUUID(), version);
             if (playerReloadHash != reloadVersionHash) {
-                InternalLogger.getInstance().debug("Player %s has outdated displays version %X [latest version: %X], sending reset packet request.", player.getGameProfile().getName(), playerVersion, version);
+                InternalLogger.getInstance().debug("Player %s has outdated displays version %X [latest version: %X], sending reset packet request.", player.getGameProfile().name(), playerVersion, version);
                 for (Packet<?> packet : resetPacket.get()) {
                     player.connection.send(packet);
                 }
@@ -120,13 +120,13 @@ public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommon
                 int playerMinorVersion = (int) playerVersion;
                 int currentMinorVersion = (int) version;
                 if (playerMinorVersion > currentMinorVersion) {
-                    InternalLogger.getInstance().debug("Player %s has too new displays version %X [latest version: %X], sending reset packet request.", player.getGameProfile().getName(), playerVersion, version);
+                    InternalLogger.getInstance().debug("Player %s has too new displays version %X [latest version: %X], sending reset packet request.", player.getGameProfile().name(), playerVersion, version);
                     // Reset the player
                     for (Packet<?> packet : resetPacket.get()) {
                         player.connection.send(packet);
                     }
                 } else {
-                    InternalLogger.getInstance().debug("Player %s has outdated displays version %X [latest version: %X], sending update packets.", player.getGameProfile().getName(), playerVersion, version);
+                    InternalLogger.getInstance().debug("Player %s has outdated displays version %X [latest version: %X], sending update packets.", player.getGameProfile().name(), playerVersion, version);
                     // Update the player
                     for (Packet<?> packet : updatePackets.apply(IntIntPair.of(playerMinorVersion, currentMinorVersion))) {
                         player.connection.send(packet);
@@ -210,6 +210,11 @@ public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommon
     }
     
     private void fillRecipes() {
+        if (GameInstance.getServer() == null) {
+            InternalLogger.getInstance().debug("Skipping recipe fill: server not available");
+            return;
+        }
+
         Stopwatch stopwatch = Stopwatch.createStarted();
         int lastSize = size();
         if (!fillers().isEmpty()) {
@@ -227,6 +232,11 @@ public class ServerDisplayRegistryImpl extends AbstractDisplayRegistry<REICommon
     }
     
     private List<RecipeHolder<?>> getAllSortedRecipes() {
+        // No integrated/dedicated server (e.g. a client connected to a remote server): the server-side
+        // registry has no recipe source. Client-side recipe display is handled by DisplayRegistryImpl.
+        if (GameInstance.getServer() == null) {
+            return List.of();
+        }
         return GameInstance.getServer().getRecipeManager().getRecipes().parallelStream().sorted(RECIPE_COMPARATOR).toList();
     }
     

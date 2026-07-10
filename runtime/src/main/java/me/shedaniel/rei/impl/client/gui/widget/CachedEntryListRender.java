@@ -44,13 +44,13 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.TriState;
 import net.minecraft.util.Unit;
@@ -65,7 +65,7 @@ import java.util.OptionalInt;
 public class CachedEntryListRender {
     public static final int RESOLUTION = 64;
     public static DynamicTexture cachedTexture;
-    public static ResourceLocation cachedTextureLocation;
+    public static Identifier cachedTextureLocation;
     public static Long2LongMap hash = new Long2LongOpenHashMap();
     public static LazyResettable<RenderType> renderType = new LazyResettable<>(() -> RenderType.create("rei_cache", RenderType.TRANSIENT_BUFFER_SIZE, RenderPipelines.GUI_TEXTURED, VertexFormat.Mode.QUADS, 256,
             RenderType.CompositeState.builder()
@@ -89,7 +89,7 @@ public class CachedEntryListRender {
     static {
         ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, (barrier, resourceManager, preparationExecutor, reloadExecutor) -> {
             return barrier.wait(Unit.INSTANCE).thenRunAsync(CachedEntryListRender::refresh, reloadExecutor);
-        }, ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "cached_entries"));
+        }, Identifier.fromNamespaceAndPath("roughlyenoughitems", "cached_entries"));
     }
     
     public static void refresh() {
@@ -177,7 +177,7 @@ public class CachedEntryListRender {
         nativeImage.flipY();
         
         cachedTexture = new DynamicTexture(nativeImage);
-        cachedTextureLocation = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "rei_cached_entries");
+        cachedTextureLocation = Identifier.fromNamespaceAndPath("roughlyenoughitems", "rei_cached_entries");
         minecraft.getTextureManager().register(cachedTextureLocation, cachedTexture);
         renderType.reset();
         
@@ -193,13 +193,13 @@ public class CachedEntryListRender {
     }
 }*/
 
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.*;
+import net.minecraft.resources.Identifier;
 
 import java.util.function.Supplier;
 
 public class CachedEntryListRender {
-    public static final ResourceLocation cachedTextureLocation = null;
+    public static final Identifier cachedTextureLocation = null;
     public static final Supplier<RenderType> renderType = null;
     
     public static Sprite get(Object o) {

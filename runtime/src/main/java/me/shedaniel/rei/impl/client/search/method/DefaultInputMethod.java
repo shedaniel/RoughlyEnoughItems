@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl.client.search.method;
 
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -36,7 +36,7 @@ import java.util.concurrent.Executor;
 public enum DefaultInputMethod implements InputMethod<String> {
     INSTANCE;
     
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("rei", "default");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath("rei", "default");
     
     @Override
     public List<Locale> getMatchingLocales() {

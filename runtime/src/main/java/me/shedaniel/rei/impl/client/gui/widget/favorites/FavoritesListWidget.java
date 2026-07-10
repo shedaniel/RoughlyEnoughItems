@@ -62,8 +62,11 @@ import me.shedaniel.rei.impl.client.gui.widget.region.EntryStacksRegionWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionDraggableStack;
 import me.shedaniel.rei.impl.common.util.RectangleUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.Minecraft;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.ApiStatus;
@@ -93,7 +96,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
         if (fullBounds.contains(mouseX, mouseY)) {
-            if (Screen.hasControlDown() && amountY != 0) {
+            if (Minecraft.getInstance().hasControlDown() && amountY != 0) {
                 ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
                 ScreenOverlayImpl.getEntryListWidget().scaleIndicator.setAs(10.0D);
                 if (config.setEntrySize(config.getEntrySize() + amountY * 0.075)) {
@@ -263,19 +266,19 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (containsMouse(mouse()))
             for (Widget widget : children())
-                if (widget.keyPressed(keyCode, scanCode, modifiers))
+                if (widget.keyPressed(event))
                     return true;
-        if (displayHistory.keyPressed(keyCode, scanCode, modifiers))
+        if (displayHistory.keyPressed(event))
             return true;
         return false;
     }
     
     public void updateFavoritesBounds(@Nullable String searchTerm) {
         this.fullBounds = REIRuntime.getInstance().calculateFavoritesListArea();
-        this.excludedBounds = RectangleUtils.excludeZones(this.fullBounds, ScreenRegistry.getInstance().exclusionZones().getExclusionZones(minecraft.screen).stream());
+        this.excludedBounds = RectangleUtils.excludeZones(this.fullBounds, ScreenRegistry.getInstance().exclusionZones().getExclusionZones(minecraft.gui.screen()).stream());
         this.favoritesBounds = RectangleUtils.excludeZones(this.fullBounds, Stream.of(displayHistory.createBounds(this.fullBounds, null)));
     }
     
@@ -291,25 +294,25 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (systemRegion.mouseClicked(mouseX, mouseY, button) || region.mouseClicked(mouseX, mouseY, button))
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (systemRegion.mouseClicked(event, doubleClick) || region.mouseClicked(event, doubleClick))
             return true;
         for (Widget widget : children())
-            if (widget.mouseClicked(mouseX, mouseY, button))
+            if (widget.mouseClicked(event, doubleClick))
                 return true;
-        if (displayHistory.mouseClicked(mouseX, mouseY, button))
+        if (displayHistory.mouseClicked(event, doubleClick))
             return true;
         return false;
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (containsMouse(mouseX, mouseY)) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (containsMouse(event.x(), event.y())) {
             for (Widget widget : children())
-                if (widget.mouseReleased(mouseX, mouseY, button))
+                if (widget.mouseReleased(event))
                     return true;
         }
-        if (displayHistory.mouseReleased(mouseX, mouseY, button))
+        if (displayHistory.mouseReleased(event))
             return true;
         return false;
     }

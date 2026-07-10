@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -63,9 +62,12 @@ import me.shedaniel.rei.impl.client.gui.widget.hint.HintsContainerWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.common.util.RectangleUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.ApiStatus;
@@ -213,7 +215,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     private Rectangle getCenterSearchFieldArea(int widthRemoved) {
-        Rectangle screenBounds = ScreenRegistry.getInstance().getScreenBounds(minecraft.screen);
+        Rectangle screenBounds = ScreenRegistry.getInstance().getScreenBounds(minecraft.gui.screen());
         return new Rectangle(screenBounds.x, window.getGuiScaledHeight() - 22, screenBounds.width - widthRemoved, 18);
     }
     
@@ -228,7 +230,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             init();
             getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
         } else {
-            for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(minecraft.screen)) {
+            for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(minecraft.gui.screen())) {
                 if (decider != null && decider.shouldRecalculateArea(ConfigObject.getInstance().getDisplayPanelLocation(), bounds)) {
                     init();
                     break;
@@ -243,10 +245,9 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             EntryHighlighter.render(graphics);
         }
         if (!hasSpace()) return;
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         this.renderWidgets(graphics, mouseX, mouseY, delta);
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
-            Screen screen = Minecraft.getInstance().screen;
+            Screen screen = Minecraft.getInstance().gui.screen();
             ClickArea.ClickAreaContext<Screen> context = createClickAreaContext(mouseX, mouseY, screen);
             List<Component> clickAreaTooltips = ScreenRegistry.getInstance().getClickAreaTooltips((Class<Screen>) screen.getClass(), context);
             if (clickAreaTooltips != null && !clickAreaTooltips.isEmpty()) {
@@ -270,7 +271,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     private static Rectangle calculateOverlayBounds() {
-        Rectangle bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation(), Minecraft.getInstance().screen);
+        Rectangle bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation(), Minecraft.getInstance().gui.screen());
         
         double hAlign = ConfigObject.getInstance().getDisplayPanelLocation() == DisplayPanelLocation.LEFT ? 1 - ConfigObject.getInstance().getHorizontalEntriesBoundariesAlignments() : ConfigObject.getInstance().getHorizontalEntriesBoundariesAlignments();
         int widthReduction = (int) Math.round(bounds.width * (1 - ConfigObject.getInstance().getHorizontalEntriesBoundariesPercentage()));
@@ -292,7 +293,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) buttonsHeight += 22;
         Rectangle area = REIRuntime.getInstance().calculateEntryListArea(bounds).clone();
         area.height = buttonsHeight;
-        return RectangleUtils.excludeZones(bounds, ScreenRegistry.getInstance().exclusionZones().getExclusionZones(Minecraft.getInstance().screen).stream()
+        return RectangleUtils.excludeZones(bounds, ScreenRegistry.getInstance().exclusionZones().getExclusionZones(Minecraft.getInstance().gui.screen()).stream()
                 .filter(zone -> zone.intersects(area)));
     }
     
@@ -304,15 +305,9 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
                 else if (widget instanceof OverlaySearchField field)
                     field.laterRender(graphics, mouseX, mouseY, delta);
             }
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 500);
             menuHolder.lateRender(graphics, mouseX, mouseY, delta);
-            graphics.pose().popPose();
             if (choosePageWidget != null) {
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, 0, 500);
                 graphics.fillGradient(0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight(), -1072689136, -804253680);
-                graphics.pose().popPose();
                 choosePageWidget.render(graphics, mouseX, mouseY, delta);
             }
         }
@@ -325,10 +320,11 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (REIRuntime.getInstance().isOverlayVisible()) {
             menuHolder.afterRender();
         }
+        graphics.renderDeferredElements();
     }
     
     public void renderTooltip(GuiGraphics graphics, Tooltip tooltip) {
-        renderTooltipInner(minecraft.screen, graphics, tooltip, tooltip.getX(), tooltip.getY());
+        renderTooltipInner(minecraft.gui.screen(), graphics, tooltip, tooltip.getX(), tooltip.getY());
     }
     
     protected abstract void renderTooltipInner(Screen screen, GuiGraphics graphics, Tooltip tooltip, int mouseX, int mouseY);
@@ -376,33 +372,33 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (!hasSpace()) return false;
         if (REIRuntime.getInstance().isOverlayVisible()) {
-            if (keyCode == 256 && choosePageWidget != null) {
+            if (event.isEscape() && choosePageWidget != null) {
                 choosePageWidget = null;
                 return true;
             }
             if (choosePageWidget != null)
-                return choosePageWidget.keyPressed(keyCode, scanCode, modifiers);
-            if (REIRuntimeImpl.getSearchField().keyPressed(keyCode, scanCode, modifiers))
+                return choosePageWidget.keyPressed(event);
+            if (REIRuntimeImpl.getSearchField().keyPressed(event))
                 return true;
             for (GuiEventListener listener : widgets)
-                if (listener != REIRuntimeImpl.getSearchField() && listener.keyPressed(keyCode, scanCode, modifiers))
+                if (listener != REIRuntimeImpl.getSearchField() && listener.keyPressed(event))
                     return true;
         }
-        if (ConfigObject.getInstance().getHideKeybind().matchesKey(keyCode, scanCode)) {
+        if (ConfigObject.getInstance().getHideKeybind().matchesKey(event.key(), event.scancode())) {
             REIRuntime.getInstance().toggleOverlayVisible();
             return true;
         }
-        EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen, PointHelper.ofMouse());
+        EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().gui.screen(), PointHelper.ofMouse());
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
-            if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(keyCode, scanCode)) {
+            if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(event.key(), event.scancode())) {
                 return ViewSearchBuilder.builder().addRecipesFor(stack).open();
-            } else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(keyCode, scanCode)) {
+            } else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(event.key(), event.scancode())) {
                 return ViewSearchBuilder.builder().addUsagesFor(stack).open();
-            } else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
+            } else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(event.key(), event.scancode())) {
                 FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack);
                 ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                 return true;
@@ -410,25 +406,25 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         }
         if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
-        if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesKey(keyCode, scanCode)) {
+        if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesKey(event.key(), event.scancode())) {
             REIRuntimeImpl.getSearchField().setFocused(true);
             setFocused(REIRuntimeImpl.getSearchField());
             REIRuntimeImpl.getSearchField().keybindFocusTime = System.currentTimeMillis();
-            REIRuntimeImpl.getSearchField().keybindFocusKey = keyCode;
+            REIRuntimeImpl.getSearchField().keybindFocusKey = event.key();
             return true;
         }
         return false;
     }
     
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    public boolean keyReleased(KeyEvent event) {
         if (!hasSpace()) return false;
         if (REIRuntime.getInstance().isOverlayVisible()) {
             if (choosePageWidget == null) {
-                if (REIRuntimeImpl.getSearchField().keyReleased(keyCode, scanCode, modifiers))
+                if (REIRuntimeImpl.getSearchField().keyReleased(event))
                     return true;
                 for (GuiEventListener listener : widgets)
-                    if (listener != REIRuntimeImpl.getSearchField() && listener == getFocused() && listener.keyPressed(keyCode, scanCode, modifiers))
+                    if (listener != REIRuntimeImpl.getSearchField() && listener == getFocused() && listener.keyReleased(event))
                         return true;
             }
         }
@@ -436,17 +432,17 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     @Override
-    public boolean charTyped(char character, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
         if (!hasSpace()) return false;
         if (choosePageWidget != null) {
-            return choosePageWidget.charTyped(character, modifiers);
+            return choosePageWidget.charTyped(event);
         }
-        if (REIRuntimeImpl.getSearchField().charTyped(character, modifiers))
+        if (REIRuntimeImpl.getSearchField().charTyped(event))
             return true;
         for (GuiEventListener listener : widgets)
-            if (listener != REIRuntimeImpl.getSearchField() && listener.charTyped(character, modifiers))
+            if (listener != REIRuntimeImpl.getSearchField() && listener.charTyped(event))
                 return true;
         return false;
     }
@@ -457,11 +453,11 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         boolean visible = REIRuntime.getInstance().isOverlayVisible();
         if (choosePageWidget != null) {
-            if (choosePageWidget.containsMouse(mouseX, mouseY)) {
-                return choosePageWidget.mouseClicked(mouseX, mouseY, button);
+            if (choosePageWidget.containsMouse(event.x(), event.y())) {
+                return choosePageWidget.mouseClicked(event, doubleClick);
             } else {
                 choosePageWidget = null;
                 init();
@@ -469,24 +465,24 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             }
         }
         if (!hasSpace()) return false;
-        if (visible && configButton.mouseClicked(mouseX, mouseY, button)) {
+        if (visible && configButton.mouseClicked(event, doubleClick)) {
             this.setFocused(configButton);
-            if (button == 0)
+            if (event.button() == 0)
                 this.setDragging(true);
             return true;
         }
-        if (ConfigObject.getInstance().getHideKeybind().matchesMouse(button)) {
+        if (ConfigObject.getInstance().getHideKeybind().matchesMouse(event.button())) {
             REIRuntime.getInstance().toggleOverlayVisible();
             return REIRuntime.getInstance().isOverlayVisible();
         }
-        EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen, PointHelper.ofMouse());
+        EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().gui.screen(), PointHelper.ofMouse());
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
-            if (ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button)) {
+            if (ConfigObject.getInstance().getRecipeKeybind().matchesMouse(event.button())) {
                 return ViewSearchBuilder.builder().addRecipesFor(stack).open();
-            } else if (ConfigObject.getInstance().getUsageKeybind().matchesMouse(button)) {
+            } else if (ConfigObject.getInstance().getUsageKeybind().matchesMouse(event.button())) {
                 return ViewSearchBuilder.builder().addUsagesFor(stack).open();
-            } else if (visible && ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
+            } else if (visible && ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(event.button())) {
                 FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack);
                 ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                 return true;
@@ -494,24 +490,24 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         }
         if (visible) {
             Widget menuWidget = menuHolder.widget();
-            if (menuWidget != null && menuWidget.mouseClicked(mouseX, mouseY, button)) {
+            if (menuWidget != null && menuWidget.mouseClicked(event, doubleClick)) {
                 this.setFocused(menuWidget);
-                if (button == 0)
+                if (event.button() == 0)
                     this.setDragging(true);
                 REIRuntimeImpl.getSearchField().setFocused(false);
                 return true;
             }
-            if (hintsWidget.mouseClicked(mouseX, mouseY, button)) {
+            if (hintsWidget.mouseClicked(event, doubleClick)) {
                 this.setFocused(hintsWidget);
-                if (button == 0)
+                if (event.button() == 0)
                     this.setDragging(true);
                 REIRuntimeImpl.getSearchField().setFocused(false);
                 return true;
             }
         }
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
-            Screen screen = Minecraft.getInstance().screen;
-            ClickArea.ClickAreaContext<Screen> context = createClickAreaContext(mouseX, mouseY, screen);
+            Screen screen = Minecraft.getInstance().gui.screen();
+            ClickArea.ClickAreaContext<Screen> context = createClickAreaContext(event.x(), event.y(), screen);
             if (ScreenRegistry.getInstance().executeClickArea((Class<Screen>) screen.getClass(), context)) {
                 return true;
             }
@@ -519,20 +515,25 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (!visible) {
             return false;
         }
-        if (draggingStack != null) {
-            draggingStack.mouseClicked(mouseX, mouseY, button);
-        }
+        boolean updatedDraggingStack = false;
         for (GuiEventListener element : widgets) {
-            if (element != configButton && element != menuHolder.widget() && element != hintsWidget && element != draggingStack && element.mouseClicked(mouseX, mouseY, button)) {
+            if (!updatedDraggingStack && isHoveredOverlayList(element, event) && draggingStack != null) {
+                draggingStack.mouseClicked(event, doubleClick);
+                updatedDraggingStack = true;
+            }
+            if (element != configButton && element != menuHolder.widget() && element != hintsWidget && element != draggingStack && element.mouseClicked(event, doubleClick)) {
                 this.setFocused(element);
-                if (button == 0)
+                if (event.button() == 0)
                     this.setDragging(true);
                 if (!(element instanceof OverlaySearchField))
                     REIRuntimeImpl.getSearchField().setFocused(false);
                 return true;
             }
         }
-        if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesMouse(button)) {
+        if (!updatedDraggingStack && draggingStack != null) {
+            draggingStack.mouseClicked(event, doubleClick);
+        }
+        if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesMouse(event.button())) {
             REIRuntimeImpl.getSearchField().setFocused(true);
             setFocused(REIRuntimeImpl.getSearchField());
             REIRuntimeImpl.getSearchField().keybindFocusTime = -1;
@@ -541,25 +542,29 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         }
         return false;
     }
+
+    private static boolean isHoveredOverlayList(GuiEventListener element, MouseButtonEvent event) {
+        return element instanceof OverlayListWidget list && list.containsMouse(new Point(event.x(), event.y()));
+    }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
         if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
         if (!hasSpace()) return false;
         if (choosePageWidget != null) {
-            return choosePageWidget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+            return choosePageWidget.mouseDragged(event, deltaX, deltaY);
         }
-        return (this.getFocused() != null && this.isDragging() && button == 0) && this.getFocused().mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return (this.getFocused() != null && this.isDragging() && event.button() == 0) && this.getFocused().mouseDragged(event, deltaX, deltaY);
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         if (draggingStack != null) {
-            draggingStack.mouseReleased(mouseX, mouseY, button);
+            draggingStack.mouseReleased(event);
         }
         
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
     
     @Override
@@ -575,7 +580,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     
     @Override
     public boolean isNotInExclusionZones(double mouseX, double mouseY) {
-        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().screen)) {
+        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().gui.screen())) {
             InteractionResult in = decider.isInZone(mouseX, mouseY);
             if (in != InteractionResult.PASS)
                 return in == InteractionResult.SUCCESS;

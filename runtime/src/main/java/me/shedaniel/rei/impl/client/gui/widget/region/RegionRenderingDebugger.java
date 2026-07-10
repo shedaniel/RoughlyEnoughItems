@@ -25,11 +25,10 @@ package me.shedaniel.rei.impl.client.gui.widget.region;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.joml.Matrix4f;
 
 public class RegionRenderingDebugger {
     public boolean debugTime;
@@ -57,16 +56,10 @@ public class RegionRenderingDebugger {
                 lastAverageDebugTime = time.getValue() / size.doubleValue();
                 totalDebugTime = totalTime / 1000000d;
             }
-            Component debugText = Component.literal(String.format("%d entries, avg. %.0fns, ttl. %.2fms, %s fps", size.getValue(), lastAverageDebugTime, lastTotalDebugTime, minecraft.fpsString.split(" ")[0]));
+            Component debugText = Component.literal(String.format("%d entries, avg. %.0fns, ttl. %.2fms, %s fps", size.getValue(), lastAverageDebugTime, lastTotalDebugTime, minecraft.getFps()));
             int stringWidth = font.width(debugText);
-            graphics.fillGradient(Math.min(x, minecraft.screen.width - stringWidth - 2), y, x + stringWidth + 2, y + font.lineHeight + 2, -16777216, -16777216);
-            graphics.pose().pushPose();
-            graphics.pose().translate(0.0D, 0.0D, 500.0D);
-            graphics.drawSpecial(source -> {
-                Matrix4f matrix = graphics.pose().last().pose();
-                font.drawInBatch(debugText.getVisualOrderText(), Math.min(x + 2, minecraft.screen.width - stringWidth), y + 2, -1, false, matrix, source, Font.DisplayMode.NORMAL, 0, 15728880);
-            });
-            graphics.pose().popPose();
+            graphics.fillGradient(Math.min(x, minecraft.gui.screen().width - stringWidth - 2), y, x + stringWidth + 2, y + font.lineHeight + 2, -16777216, -16777216);
+            graphics.drawString(font, debugText, Math.min(x + 2, minecraft.gui.screen().width - stringWidth), y + 2, -1, false);
         }
         
         this.size.setValue(0);

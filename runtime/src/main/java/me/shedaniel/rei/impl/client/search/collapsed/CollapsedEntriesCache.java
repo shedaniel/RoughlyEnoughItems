@@ -29,7 +29,7 @@ import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -38,7 +38,7 @@ import java.util.Set;
 
 public class CollapsedEntriesCache {
     private static CollapsedEntriesCache instance = new CollapsedEntriesCache();
-    private final Long2ObjectMap<Set<ResourceLocation>> cache = new Long2ObjectOpenHashMap<>();
+    private final Long2ObjectMap<Set<Identifier>> cache = new Long2ObjectOpenHashMap<>();
     
     public static void reset() {
         CollapsedEntriesCache.instance = new CollapsedEntriesCache();
@@ -59,7 +59,7 @@ public class CollapsedEntriesCache {
                         cache.computeIfAbsent(stack.hashExact(), $ -> new HashSet<>())
                                 .add(entry.getId());
                     } else {
-                        Set<ResourceLocation> locations = cache.get(stack.hashExact());
+                        Set<Identifier> locations = cache.get(stack.hashExact());
                         if (locations != null) {
                             locations.remove(entry.getId());
                             if (locations.isEmpty()) {
@@ -75,7 +75,7 @@ public class CollapsedEntriesCache {
     }
     
     @Nullable
-    public Set<ResourceLocation> getEntries(long hash) {
+    public Set<Identifier> getEntries(long hash) {
         return cache.get(hash);
     }
 }

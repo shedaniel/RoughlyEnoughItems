@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 
@@ -43,14 +43,14 @@ public class DefaultShapelessDisplay extends DefaultCraftingDisplay {
             RecordCodecBuilder.mapCodec(instance -> instance.group(
                     EntryIngredient.codec().listOf().fieldOf("inputs").forGetter(DefaultCraftingDisplay::getInputEntries),
                     EntryIngredient.codec().listOf().fieldOf("outputs").forGetter(DefaultCraftingDisplay::getOutputEntries),
-                    ResourceLocation.CODEC.optionalFieldOf("location").forGetter(DefaultCraftingDisplay::getDisplayLocation)
+                    Identifier.CODEC.optionalFieldOf("location").forGetter(DefaultCraftingDisplay::getDisplayLocation)
             ).apply(instance, DefaultCustomShapelessDisplay::new)),
             StreamCodec.composite(
                     EntryIngredient.streamCodec().apply(ByteBufCodecs.list()),
                     DefaultCraftingDisplay::getInputEntries,
                     EntryIngredient.streamCodec().apply(ByteBufCodecs.list()),
                     DefaultCraftingDisplay::getOutputEntries,
-                    ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC),
+                    ByteBufCodecs.optional(Identifier.STREAM_CODEC),
                     DefaultCraftingDisplay::getDisplayLocation,
                     DefaultCustomShapelessDisplay::new
             ));
@@ -58,8 +58,8 @@ public class DefaultShapelessDisplay extends DefaultCraftingDisplay {
     public DefaultShapelessDisplay(RecipeHolder<ShapelessRecipe> recipe) {
         super(
                 CollectionUtils.map(recipe.value().placementInfo().ingredients(), EntryIngredients::ofIngredient),
-                List.of(EntryIngredients.of(recipe.value().result)),
-                Optional.of(recipe.id().location())
+                List.of(EntryIngredients.ofSlotDisplay(recipe.value().display().getFirst().result())),
+                Optional.of(recipe.id().identifier())
         );
     }
     

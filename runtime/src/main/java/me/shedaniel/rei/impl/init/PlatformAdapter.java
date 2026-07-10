@@ -24,16 +24,26 @@
 package me.shedaniel.rei.impl.init;
 
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.world.item.crafting.Ingredient;
 
+import java.util.List;
 import java.util.ServiceLoader;
 
 public interface PlatformAdapter {
     ServiceLoader<PlatformAdapter> LOADER = ServiceLoader.load(PlatformAdapter.class);
-    
+
     static PlatformAdapter get() {
         return LOADER.findFirst().orElseThrow();
     }
-    
+
     EntryIngredient fromIngredient(Ingredient ingredient);
+
+    /**
+     * Gathers the {@code SERVER_DATA} pack resources the client could load locally: the vanilla
+     * data pack plus every installed mod's data pack. Used by the local-recipes fallback to
+     * synthesise recipe displays when connected to a server that does not sync recipes. This is
+     * loader-specific because mod data packs are registered differently on Fabric and NeoForge.
+     */
+    List<PackResources> gatherClientDataPacks();
 }

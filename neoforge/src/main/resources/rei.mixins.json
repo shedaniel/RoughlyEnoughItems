@@ -4,8 +4,6 @@
   "compatibilityLevel": "JAVA_8",
   "client": [
     "MixinClientPacketListener",
-    "MixinEffectsInInventory",
-    "MixinFontSet",
     "MixinInputConstants",
     "MixinInputConstantsKey",
     "MixinRecipeToast"

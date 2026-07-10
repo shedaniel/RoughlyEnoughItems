@@ -1,14 +1,15 @@
 pluginManagement {
     repositories {
-        maven { url "https://maven.shedaniel.me/" }
         maven { url "https://maven.fabricmc.net/" }
+        maven { url "https://maven.shedaniel.me/" }
+        maven { url "https://maven.architectury.dev/" }
+        maven { url "https://maven.minecraftforge.net/" }
         gradlePluginPortal()
-        maven { url "https://files.minecraftforge.net/maven/" }
     }
 }
 
-if (JavaVersion.current().ordinal() + 1 < 21) {
-    throw new IllegalStateException("Please run gradle with Java 21+!")
+if (JavaVersion.current().ordinal() + 1 < 25) {
+    throw new IllegalStateException("Please run gradle with Java 25+!")
 }
 
 rootProject.name = "RoughlyEnoughItems"

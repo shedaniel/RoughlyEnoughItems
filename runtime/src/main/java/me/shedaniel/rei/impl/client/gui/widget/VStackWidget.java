@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,7 +113,7 @@ public class VStackWidget {
         private final int height;
         
         public CellWidget(WidgetWithBounds widget) {
-            super(widget, Matrix4f::new);
+            super(widget, Matrix3x2f::new);
             this.height = widget.getBounds().getHeight();
         }
         
@@ -123,9 +123,9 @@ public class VStackWidget {
         }
         
         @Override
-        protected Matrix4f translate() {
+        protected Matrix3x2f translate() {
             Rectangle bounds = delegate().getBounds();
-            return new Matrix4f().translate(position.x - bounds.x, position.y - bounds.y, 0);
+            return new Matrix3x2f().translate(position.x - bounds.x, position.y - bounds.y);
         }
     }
     

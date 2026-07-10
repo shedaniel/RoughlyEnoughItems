@@ -30,13 +30,12 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import org.joml.Matrix4f;
 
 import java.util.List;
 
@@ -68,36 +67,32 @@ public class MissingStacksTooltip implements ClientTooltipComponent, TooltipComp
     }
     
     @Override
-    public void renderImage(Font font, int x, int y, int width, int height, GuiGraphics graphics) {
+    public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
+        GuiGraphics guiGraphics = GuiGraphics.of(graphics);
         int entrySize = EntryListWidget.entrySize();
         int w = Math.max(1, MAX_WIDTH / entrySize);
         int i = 0;
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 50);
         for (EntryIngredient entry : stacks) {
             int x1 = x + (i % w) * entrySize;
             int y1 = y + 13 + (i / w) * entrySize;
             i++;
             if (i / w > 5) {
                 Component text = Component.literal("+" + (stacks.size() - w * 6 + 1)).withStyle(ChatFormatting.GRAY);
-                graphics.drawSpecial(source -> {
-                    font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, graphics.pose().last().pose(), source, Font.DisplayMode.NORMAL, 0, 15728880);
-                });
+                guiGraphics.drawString(font, text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1);
                 break;
             } else {
                 EntryStack<?> stack;
                 if (entry.isEmpty()) stack = EntryStack.empty();
                 else if (entry.size() == 1) stack = entry.get(0);
                 else stack = entry.get(Mth.floor((System.currentTimeMillis() / 1000 % (double) entry.size())));
-                stack.render(graphics, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
+                stack.render(guiGraphics, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
             }
         }
-        graphics.pose().popPose();
     }
     
     @Override
-    public void renderText(Font font, int x, int y, Matrix4f pose, MultiBufferSource.BufferSource buffers) {
-        font.drawInBatch(Component.translatable("text.rei.missing").withStyle(ChatFormatting.GRAY),
-                x, y + 2, -1, true, pose, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
+    public void extractText(GuiGraphicsExtractor graphics, Font font, int x, int y) {
+        GuiGraphics guiGraphics = GuiGraphics.of(graphics);
+        guiGraphics.drawString(font, Component.translatable("text.rei.missing").withStyle(ChatFormatting.GRAY), x, y + 2, -1);
     }
 }

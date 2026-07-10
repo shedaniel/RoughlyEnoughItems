@@ -41,7 +41,7 @@ public class CrashReportUtils {
             }
         }
         CrashReport report = CrashReport.forThrowable(throwable, task);
-        screen(report, Minecraft.getInstance().screen);
+        screen(report, Minecraft.getInstance().gui.screen());
         return report;
     }
     

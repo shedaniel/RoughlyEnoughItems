@@ -27,13 +27,13 @@ import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.NonExtendable
 @Environment(EnvType.CLIENT)
 public interface BuiltinClientEntryTypes {
-    ResourceLocation RENDERING_ID = ResourceLocation.withDefaultNamespace("rendering");
+    Identifier RENDERING_ID = Identifier.withDefaultNamespace("rendering");
     
     EntryType<Renderer> RENDERING = EntryType.deferred(RENDERING_ID);
 }

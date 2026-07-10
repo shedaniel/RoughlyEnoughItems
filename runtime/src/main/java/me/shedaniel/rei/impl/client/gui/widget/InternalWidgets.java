@@ -41,15 +41,16 @@ import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import java.util.Collection;
 import java.util.List;
@@ -62,11 +63,11 @@ public final class InternalWidgets {
     private InternalWidgets() {
     }
     
-    public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<Display> displaySupplier, Supplier<Collection<ResourceLocation>> idsSupplier, List<Widget> setupDisplay, DisplayCategory<?> category) {
+    public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<Display> displaySupplier, Supplier<Collection<Identifier>> idsSupplier, List<Widget> setupDisplay, DisplayCategory<?> category) {
         Button autoCraftingButton = Widgets.createButton(rectangle, text)
                 .focusable(false)
                 .onClick(button -> {
-                    AutoCraftingEvaluator.evaluateAutoCrafting(true, Screen.hasShiftDown(), displaySupplier.get(), idsSupplier);
+                    AutoCraftingEvaluator.evaluateAutoCrafting(true, Minecraft.getInstance().hasShiftDown(), displaySupplier.get(), idsSupplier);
                 });
         return new DelegateWidget(autoCraftingButton) {
             final Supplier<AutoCraftingEvaluator.AutoCraftingResult> result = Suppliers.memoizeWithExpiration(
@@ -108,15 +109,15 @@ public final class InternalWidgets {
             }
             
             @Override
-            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(keyCode, scanCode) && containsMouse(PointHelper.ofMouse())) {
+            public boolean keyPressed(KeyEvent event) {
+                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(event.key(), event.scancode()) && containsMouse(PointHelper.ofMouse())) {
                     minecraft.keyboardHandler.setClipboard(displaySupplier.get().getDisplayLocation().get().toString());
                     if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
                         CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getDisplayLocation().get().toString()));
                     }
                     return true;
                 } else if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse())) {
-                    if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
+                    if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(event.key(), event.scancode())) {
                         FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
                         
                         if (favoritesListWidget != null) {
@@ -126,19 +127,19 @@ public final class InternalWidgets {
                     }
                 }
                 
-                return super.keyPressed(keyCode, scanCode, modifiers);
+                return super.keyPressed(event);
             }
             
             @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesMouse(button) && containsMouse(PointHelper.ofMouse())) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesMouse(event.button()) && containsMouse(PointHelper.ofMouse())) {
                     minecraft.keyboardHandler.setClipboard(displaySupplier.get().getDisplayLocation().get().toString());
                     if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
                         CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getDisplayLocation().get().toString()));
                     }
                     return true;
                 } else if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse())) {
-                    if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
+                    if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(event.button())) {
                         FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
                         
                         if (favoritesListWidget != null) {
@@ -148,7 +149,7 @@ public final class InternalWidgets {
                     }
                 }
                 
-                return super.mouseClicked(mouseX, mouseY, button);
+                return super.mouseClicked(event, doubleClick);
             }
         };
     }
@@ -188,7 +189,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public WidgetWithBounds withTranslate(WidgetWithBounds widget, Supplier<Matrix4f> translate) {
+        public WidgetWithBounds withTranslate(WidgetWithBounds widget, Supplier<Matrix3x2f> translate) {
             return new DelegateWidgetWithTranslate(widget, translate);
         }
         
@@ -233,7 +234,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public DrawableConsumer createTexturedConsumer(ResourceLocation texture, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
+        public DrawableConsumer createTexturedConsumer(Identifier texture, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
             return new TexturedDrawableConsumer(texture, x, y, width, height, u, v, uWidth, vHeight, textureWidth, textureHeight);
         }
         
@@ -260,7 +261,7 @@ public final class InternalWidgets {
                 magnification = 4;
             }
             Rectangle bounds = new Rectangle(point.getX() - 9, point.getY() + 1, 8, 8);
-            Widget widget = Widgets.createTexturedWidget(ResourceLocation.parse("roughlyenoughitems:textures/gui/shapeless_icon_" + magnification + "x.png"), bounds.getX(), bounds.getY(), 0, 0, bounds.getWidth(), bounds.getHeight(), 1, 1, 1, 1);
+            Widget widget = Widgets.createTexturedWidget(Identifier.parse("roughlyenoughitems:textures/gui/shapeless_icon_" + magnification + "x.png"), bounds.getX(), bounds.getY(), 0, 0, bounds.getWidth(), bounds.getHeight(), 1, 1, 1, 1);
             return Widgets.withTooltip(Widgets.withBounds(widget, bounds),
                     Component.translatable("text.rei.shapeless"));
         }

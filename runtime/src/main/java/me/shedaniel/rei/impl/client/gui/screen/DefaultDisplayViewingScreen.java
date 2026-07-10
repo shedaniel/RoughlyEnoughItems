@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.gui.screen;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.Pair;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -60,18 +59,18 @@ import me.shedaniel.rei.impl.client.gui.widget.basewidgets.PanelWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.*;
 import java.util.function.Function;
@@ -118,24 +117,24 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(keyCode, scanCode)) {
+    public boolean keyPressed(KeyEvent event) {
+        if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(event.key(), event.scancode())) {
             if (recipeNext.isEnabled())
                 recipeNext.onClick();
             return recipeNext.isEnabled();
-        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesKey(keyCode, scanCode)) {
+        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesKey(event.key(), event.scancode())) {
             if (recipeBack.isEnabled())
                 recipeBack.onClick();
             return recipeBack.isEnabled();
         }
         for (GuiEventListener element : children())
-            if (element.keyPressed(keyCode, scanCode, modifiers))
+            if (element.keyPressed(event))
                 return true;
-        if (keyCode == 256) {
-            Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
+        if (event.isEscape()) {
+            Minecraft.getInstance().setScreenAndShow(REIRuntime.getInstance().getPreviousScreen());
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
     
     @Override
@@ -169,20 +168,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 .onClick(button -> nextCategory()).tooltipLine(Component.translatable("text.rei.next_category")));
         this.categoryBack.setEnabled(categories.size() > 1);
         this.categoryNext.setEnabled(categories.size() > 1);
-        this.widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
-            Rectangle recipeBackBounds = recipeBack.getBounds();
-            Rectangle recipeNextBounds = recipeNext.getBounds();
-            Rectangle categoryBackBounds = categoryBack.getBounds();
-            Rectangle categoryNextBounds = categoryNext.getBounds();
-            graphics.pose().pushPose();
-            graphics.pose().translate(0.5, 0.5, 0);
-            graphics.blit(RenderType::guiTextured, InternalTextures.ARROW_LEFT_TEXTURE, recipeBackBounds.x + 2, recipeBackBounds.y + 2, 0, 0, 8, 8, 8, 8);
-            graphics.blit(RenderType::guiTextured, InternalTextures.ARROW_LEFT_TEXTURE, categoryBackBounds.x + 2, categoryBackBounds.y + 2, 0, 0, 8, 8, 8, 8);
-            graphics.pose().translate(-0.5, 0, 0);
-            graphics.blit(RenderType::guiTextured, InternalTextures.ARROW_RIGHT_TEXTURE, recipeNextBounds.x + 2, recipeNextBounds.y + 2, 0, 0, 8, 8, 8, 8);
-            graphics.blit(RenderType::guiTextured, InternalTextures.ARROW_RIGHT_TEXTURE, categoryNextBounds.x + 2, categoryNextBounds.y + 2, 0, 0, 8, 8, 8, 8);
-            graphics.pose().popPose();
-        }), 0, 0, 1));
         
         this.widgets.add(recipeBack = Widgets.createButton(new Rectangle(bounds.getCenterX() - guiWidth / 2 + 5, bounds.getY() + 19, 12, 12), Component.literal(""))
                 .onClick(button -> {
@@ -192,7 +177,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                     DefaultDisplayViewingScreen.this.init();
                 }).tooltipLine(Component.translatable("text.rei.previous_page")));
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), Component.empty(), label -> {
-            if (!Screen.hasShiftDown()) {
+            if (!Minecraft.getInstance().hasShiftDown()) {
                 page = 0;
                 DefaultDisplayViewingScreen.this.init();
             } else {
@@ -212,15 +197,30 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                         page = 0;
                     DefaultDisplayViewingScreen.this.init();
                 }).tooltipLine(Component.translatable("text.rei.next_page")));
+        
+        this.widgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
+            Rectangle recipeBackBounds = recipeBack.getBounds();
+            Rectangle recipeNextBounds = recipeNext.getBounds();
+            Rectangle categoryBackBounds = categoryBack.getBounds();
+            Rectangle categoryNextBounds = categoryNext.getBounds();
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(0.5f, 0.5f);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.ARROW_LEFT_TEXTURE, recipeBackBounds.x + 2, recipeBackBounds.y + 2, 0, 0, 8, 8, 8, 8);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.ARROW_LEFT_TEXTURE, categoryBackBounds.x + 2, categoryBackBounds.y + 2, 0, 0, 8, 8, 8, 8);
+            graphics.pose().translate(-0.5f, 0);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.ARROW_RIGHT_TEXTURE, recipeNextBounds.x + 2, recipeNextBounds.y + 2, 0, 0, 8, 8, 8, 8);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.ARROW_RIGHT_TEXTURE, categoryNextBounds.x + 2, categoryNextBounds.y + 2, 0, 0, 8, 8, 8, 8);
+            graphics.pose().popMatrix();
+        }));
+        
         this.recipeBack.setEnabled(getCurrentTotalPages() > 1);
         this.recipeNext.setEnabled(getCurrentTotalPages() > 1);
         initDisplays();
-        widgets = CollectionUtils.map(widgets, widget -> Widgets.withTranslate(widget, 0, 0, 10));
-        widgets.add(Widgets.withTranslate(new PanelWidget(bounds), 0, 0, 5));
-        widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
+        this.widgets.add(0, new PanelWidget(bounds));
+        this.widgets.add(1, Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             graphics.fill(bounds.getCenterX() - guiWidth / 2 + 17, bounds.y + 5, bounds.getCenterX() + guiWidth / 2 - 17, bounds.y + 17, darkStripesColor.value().getColor());
             graphics.fill(bounds.getCenterX() - guiWidth / 2 + 17, bounds.y + 19, bounds.getCenterX() + guiWidth / 2 - 17, bounds.y + 31, darkStripesColor.value().getColor());
-        }), 0, 0, 6));
+        }));
         initWorkstations(widgets);
         
         children().addAll(widgets);
@@ -256,7 +256,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             this.recipeBounds.put(displayBounds, Pair.of(display, setupDisplay));
             this.widgets.add(new DisplayCompositeWidget(display, setupDisplay, displayBounds));
             if (plusButtonArea.isPresent()) {
-                this.widgets.add(Widgets.withTranslate(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, plusButtonArea.get().get(displayBounds), Component.literal(plusButtonArea.get().getButtonText()), displaySupplier, display::provideInternalDisplayIds, setupDisplay, getCurrentCategory()), 0, 0, 100));
+                this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, plusButtonArea.get().get(displayBounds), Component.literal(plusButtonArea.get().getButtonText()), displaySupplier, display::provideInternalDisplayIds, setupDisplay, getCurrentCategory()));
             }
         }
     }
@@ -270,12 +270,13 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             int innerWidth = Mth.ceil(workstations.size() / ((float) hh));
             int xx = bounds.x - (8 + innerWidth * 16) + 6;
             int yy = bounds.y + 16;
-            widgets.add(workingStationsBaseWidget = Widgets.createCategoryBase(new Rectangle(xx - 5, yy - 5, 15 + innerWidth * 16, 10 + actualHeight * 16)));
-            widgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, innerWidth * 16 + 2, actualHeight * 16 + 2)));
+            List<Widget> toAdd = new ArrayList<>();
+            toAdd.add(workingStationsBaseWidget = Widgets.createCategoryBase(new Rectangle(xx - 5, yy - 5, 15 + innerWidth * 16, 10 + actualHeight * 16)));
+            toAdd.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, innerWidth * 16 + 2, actualHeight * 16 + 2)));
             int index = 0;
             xx += (innerWidth - 1) * 16;
             for (EntryIngredient workingStation : workstations) {
-                widgets.add(new WorkstationSlotWidget(xx, yy, workingStation));
+                toAdd.add(new WorkstationSlotWidget(xx, yy, workingStation));
                 index++;
                 yy += 16;
                 if (index >= hh) {
@@ -284,6 +285,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                     xx -= 16;
                 }
             }
+            widgets.addAll(0, toAdd);
         }
     }
     
@@ -332,30 +334,22 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         super.render(graphics, mouseX, mouseY, delta);
         getOverlay().render(graphics, mouseX, mouseY, delta);
         for (Widget widget : widgets()) {
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             widget.render(graphics, mouseX, mouseY, delta);
         }
         {
             ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
             if (export.matchesCurrentKey() || export.matchesCurrentMouse()) {
                 for (Rectangle bounds : Iterables.concat(recipeBounds.keySet(), Iterables.transform(getTabs(), TabWidget::getBounds))) {
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(0.0D, 0.0D, 480.0D);
                     if (bounds.contains(mouseX, mouseY)) {
                         graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744822402, 1744822402);
                         Component text = Component.translatable("text.rei.release_export", export.getLocalizedName().plainCopy().getString());
-                        graphics.pose().pushPose();
-                        graphics.pose().translate(0.0D, 0.0D, 10.0D);
-                        graphics.drawSpecial(source -> {
-                            Matrix4f matrix4f = graphics.pose().last().pose();
-                            font.drawInBatch(text.getVisualOrderText(), bounds.getCenterX() - font.width(text) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f, source, Font.DisplayMode.NORMAL, 0, 15728880);
-                        });
-                        graphics.flush();
-                        graphics.pose().popPose();
+                        graphics.pose().pushMatrix();
+                        graphics.pose().translate(bounds.getCenterX() - font.width(text) / 2f, bounds.getCenterY() - 4.5f);
+                        graphics.drawString(font, text, 0, 0, 0xff000000, false);
+                        graphics.pose().popMatrix();
                     } else {
                         graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744830463, 1744830463);
                     }
-                    graphics.pose().popPose();
                 }
             }
         }
@@ -366,12 +360,12 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     }
     
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    public boolean keyReleased(KeyEvent event) {
         ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
-        if (export.matchesKey(keyCode, scanCode)) {
+        if (export.matchesKey(event.key(), event.scancode())) {
             if (checkExportDisplays()) return true;
         }
-        return super.keyReleased(keyCode, scanCode, modifiers);
+        return super.keyReleased(event);
     }
     
     public int getCurrentTotalPages() {
@@ -383,31 +377,31 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     }
     
     @Override
-    public boolean charTyped(char character, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         for (GuiEventListener listener : children())
-            if (listener.charTyped(character, modifiers))
+            if (listener.charTyped(event))
                 return true;
-        return super.charTyped(character, modifiers);
+        return super.charTyped(event);
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
         for (GuiEventListener entry : children())
-            if (entry.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+            if (entry.mouseDragged(event, deltaX, deltaY))
                 return true;
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(event, deltaX, deltaY);
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
-        if (export.matchesMouse(button)) {
+        if (export.matchesMouse(event.button())) {
             if (checkExportDisplays()) return true;
         }
         for (GuiEventListener entry : children())
-            if (entry.mouseReleased(mouseX, mouseY, button))
+            if (entry.mouseReleased(event))
                 return true;
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
     
     private boolean checkExportDisplays() {
@@ -421,7 +415,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         for (TabWidget tab : getTabs()) {
             Rectangle bounds = tab.getBounds();
             if (bounds.contains(PointHelper.ofMouse())) {
-                minecraft.setScreen(new ConfirmScreen(confirmed -> {
+                minecraft.setScreenAndShow(new ConfirmScreen(confirmed -> {
                     if (confirmed) {
                         for (DisplaySpec spec : categoryMap.getOrDefault(tab.category, Collections.emptyList())) {
                             Display display = spec.provideInternalDisplay();
@@ -451,7 +445,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                         }
                         ExportRecipeIdentifierToast.addToast(I18n.get("msg.rei.exported_recipe"), I18n.get("msg.rei.exported_recipe.desc"));
                     }
-                    minecraft.setScreen(null);
+                    minecraft.setScreenAndShow(null);
                 }, Component.translatable("text.rei.ask_to_export", tab.categoryName),
                         Component.translatable("text.rei.ask_to_export.subtitle", categoryMap.getOrDefault(tab.category, Collections.emptyList()).size())));
             }
@@ -479,24 +473,24 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (ConfigObject.getInstance().getNextPageKeybind().matchesMouse(button)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (ConfigObject.getInstance().getNextPageKeybind().matchesMouse(event.button())) {
             if (recipeNext.isEnabled())
                 recipeNext.onClick();
             return recipeNext.isEnabled();
-        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesMouse(button)) {
+        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesMouse(event.button())) {
             if (recipeBack.isEnabled())
                 recipeBack.onClick();
             return recipeBack.isEnabled();
-        } else if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesMouse(button)) {
+        } else if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesMouse(event.button())) {
             if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+                minecraft.setScreenAndShow(REIRuntimeImpl.getInstance().getLastDisplayScreen());
             } else {
-                minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
+                minecraft.setScreenAndShow(REIRuntime.getInstance().getPreviousScreen());
             }
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
     
     @Override

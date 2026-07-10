@@ -45,7 +45,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
@@ -125,7 +125,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * @return the codec for {@link EntryStack}
      */
     static Codec<EntryStack<?>> codec() {
-        Codec<EntryType<?>> typeCodec = ResourceLocation.CODEC.flatXmap(id -> {
+        Codec<EntryType<?>> typeCodec = Identifier.CODEC.flatXmap(id -> {
             return Optional.ofNullable(EntryTypeRegistry.getInstance().get(id))
                     .map(DataResult::success)
                     .orElseGet(() -> DataResult.error(() -> "Read missing entry type: " + id))
@@ -137,7 +137,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     }
     
     static StreamCodec<RegistryFriendlyByteBuf, EntryStack<?>> streamCodec() {
-        StreamCodec<RegistryFriendlyByteBuf, EntryType<?>> typeCodec = ResourceLocation.STREAM_CODEC.<EntryType<?>>map(id -> EntryTypeRegistry.getInstance().get(id).getType(), EntryType::getId).cast();
+        StreamCodec<RegistryFriendlyByteBuf, EntryType<?>> typeCodec = Identifier.STREAM_CODEC.<EntryType<?>>map(id -> EntryTypeRegistry.getInstance().get(id).getType(), EntryType::getId).cast();
         return typeCodec.dispatch(EntryStack::getType, type -> type.getDefinition().getSerializer().streamCodec()
                 .map(o -> EntryStack.of((EntryType<Object>) type, o), EntryStack::castValue));
     }
@@ -242,7 +242,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * @see EntryDefinition#getIdentifier(EntryStack, Object)
      */
     @Nullable
-    ResourceLocation getIdentifier();
+    Identifier getIdentifier();
     
     /**
      * Returns the container namespace of this {@link EntryStack}, used for determining the

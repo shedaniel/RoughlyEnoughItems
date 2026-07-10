@@ -109,7 +109,7 @@ public interface AllREIConfigOptions {
             .enabledDisabled();
     CompositeOption<SearchFieldLocation> SEARCH_FIELD_LOCATION = make("layout.search_field_location", i -> i.appearance.layout.searchFieldLocation, (i, v) -> i.appearance.layout.searchFieldLocation = v)
             .entry(OptionValueEntry.<SearchFieldLocation>enumOptions().overrideText(location -> {
-                if (Minecraft.getInstance().screen instanceof REIConfigScreen configScreen) {
+                if (Minecraft.getInstance().gui.screen() instanceof REIConfigScreen configScreen) {
                     return literal(location.toString(configScreen.getOptions().get(AllREIConfigOptions.LOCATION) == DisplayPanelLocation.RIGHT));
                 } else {
                     return literal(location.toString(true));
@@ -117,7 +117,7 @@ public interface AllREIConfigOptions {
             }));
     CompositeOption<ConfigButtonPosition> CONFIG_BUTTON_LOCATION = make("layout.config_button_location", i -> i.appearance.layout.configButtonLocation, (i, v) -> i.appearance.layout.configButtonLocation = v)
             .entry(OptionValueEntry.<ConfigButtonPosition>enumOptions().overrideText(location -> {
-                if (Minecraft.getInstance().screen instanceof REIConfigScreen configScreen) {
+                if (Minecraft.getInstance().gui.screen() instanceof REIConfigScreen configScreen) {
                     return literal(location.toString(configScreen.getOptions().get(AllREIConfigOptions.LOCATION) == DisplayPanelLocation.RIGHT));
                 } else {
                     return literal(location.toString(true));
@@ -173,8 +173,8 @@ public interface AllREIConfigOptions {
         i.setCategoryOrdering(screen.getCategoryOrdering());
     }).configure((access, option, onClose) -> {
         ConfigureCategoriesScreen screen = access.get(option);
-        screen.parent = Minecraft.getInstance().screen;
-        Minecraft.getInstance().setScreen(screen);
+        screen.parent = Minecraft.getInstance().gui.screen();
+        Minecraft.getInstance().setScreenAndShow(screen);
     }).requiresLevel();
     CompositeOption<FilteringEntry> CUSTOMIZED_FILTERING = make("filtering.customized_filtering", i -> {
         return FilteringEntry.of(
@@ -186,8 +186,8 @@ public interface AllREIConfigOptions {
         i.advanced.filtering.filteringRules = new ArrayList<>(entry.rules());
     }).configure((access, option, onClose) -> {
         FilteringEntry entry = access.get(option);
-        entry.filteringRulesScreen().parent = Minecraft.getInstance().screen;
-        Minecraft.getInstance().setScreen(entry.filteringRulesScreen());
+        entry.filteringRulesScreen().parent = Minecraft.getInstance().gui.screen();
+        Minecraft.getInstance().setScreenAndShow(entry.filteringRulesScreen());
     }).requiresLevel();
     CompositeOption<Boolean> FILTER_DISPLAYS = make("filtering.filter_displays", i -> i.advanced.filtering.shouldFilterDisplays, (i, v) -> i.advanced.filtering.shouldFilterDisplays = v)
             .enabledDisabled();
@@ -216,7 +216,7 @@ public interface AllREIConfigOptions {
         CollapsibleConfigManager.getInstance().saveConfig();
         ((CollapsibleEntryRegistryImpl) CollapsibleEntryRegistry.getInstance()).recollectCustomEntries();
     }).configure((access, option, onClose) -> {
-        Minecraft.getInstance().setScreen(new CollapsibleEntriesScreen(onClose, access.get(option)));
+        Minecraft.getInstance().setScreenAndShow(new CollapsibleEntriesScreen(onClose, access.get(option)));
     }).requiresLevel();
     CompositeOption<Boolean> FAVORITES_MODE = make("favorites.mode", i -> i.basics.favoritesEnabled, (i, v) -> i.basics.favoritesEnabled = v)
             .enabledDisabled();
@@ -248,23 +248,23 @@ public interface AllREIConfigOptions {
             .enumOptions();
     CompositeOption<String> GIVE_COMMAND = make("cheats.give_command", i -> i.advanced.commands.giveCommand, (i, v) -> i.advanced.commands.giveCommand = v)
             .string();
-    CompositeOption<Boolean> BATCHED_RENDERING = make("performance.batched_rendering", i -> i.advanced.miscellaneous.newFastEntryRendering, (i, v) -> i.advanced.miscellaneous.newFastEntryRendering = v)
-            .enabledDisabled();
     CompositeOption<Boolean> CACHED_RENDERING = make("performance.cached_rendering", i -> i.advanced.miscellaneous.cachingFastEntryRendering, (i, v) -> i.advanced.miscellaneous.cachingFastEntryRendering = v)
             .enabledDisabled();
     CompositeOption<Boolean> RELOAD_THREAD = make("performance.reload_thread", i -> i.advanced.miscellaneous.registerRecipesInAnotherThread, (i, v) -> i.advanced.miscellaneous.registerRecipesInAnotherThread = v)
             .ofBoolean(translatable("config.rei.values.performance.reload_thread.main_thread"), translatable("config.rei.values.performance.reload_thread.rei_thread"));
     CompositeOption<Boolean> CACHED_DISPLAY_LOOKUP = make("performance.cached_display_lookup", i -> i.advanced.miscellaneous.cachingDisplayLookup, (i, v) -> i.advanced.miscellaneous.cachingDisplayLookup = v)
             .enabledDisabled();
+    CompositeOption<ForceLocalRecipesMode> FORCE_LOCAL_RECIPES = make("filtering.force_local_recipes", i -> i.advanced.miscellaneous.forceLocalRecipes, (i, v) -> i.advanced.miscellaneous.forceLocalRecipes = v)
+            .enumOptions();
     CompositeOption<Object> PLUGINS_PERFORMANCE = make("debug.plugins_performance", i -> null, (i, v) -> new Object())
-            .details((access, option, onClose) -> Minecraft.getInstance().setScreen(new PerformanceScreen(onClose)))
+            .details((access, option, onClose) -> Minecraft.getInstance().setScreenAndShow(new PerformanceScreen(onClose)))
             .requiresLevel();
     CompositeOption<Boolean> SEARCH_PERFORMANCE = make("debug.search_performance", i -> i.advanced.search.debugSearchTimeRequired, (i, v) -> i.advanced.search.debugSearchTimeRequired = v)
             .enabledDisabled();
     CompositeOption<Boolean> ENTRY_LIST_PERFORMANCE = make("debug.entry_list_performance", i -> i.advanced.layout.debugRenderTimeRequired, (i, v) -> i.advanced.layout.debugRenderTimeRequired = v)
             .enabledDisabled();
     CompositeOption<Object> DISPLAY_REGISTRY_ANALYSIS = make("debug.display_registry_analysis", i -> null, (i, v) -> new Object())
-            .details((access, option, onClose) -> Minecraft.getInstance().setScreen(new DisplayRegistryInfoScreen(onClose)))
+            .details((access, option, onClose) -> Minecraft.getInstance().setScreenAndShow(new DisplayRegistryInfoScreen(onClose)))
             .requiresLevel();
     CompositeOption<Object> RELOAD_PLUGINS = make("reset.reload_plugins", i -> null, (i, v) -> new Object())
             .reload((access, option, onClose) -> {
@@ -276,7 +276,7 @@ public interface AllREIConfigOptions {
                         throw new RuntimeException(e);
                     }
                 }
-                Minecraft.getInstance().setScreen(new ConfigReloadingScreen(translatable("text.rei.config.is.reloading"), PluginManager::areAnyReloading, onClose, null));
+                Minecraft.getInstance().setScreenAndShow(new ConfigReloadingScreen(translatable("text.rei.config.is.reloading"), PluginManager::areAnyReloading, onClose, null));
             }).requiresLevel();
     CompositeOption<Object> RELOAD_SEARCH = make("reset.reload_search", i -> null, (i, v) -> new Object())
             .reload((access, option, onClose) -> {

@@ -32,8 +32,9 @@ import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import net.minecraft.client.gui.GuiGraphics;
-import org.joml.Matrix4f;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.input.MouseButtonEvent;
+import org.joml.Matrix3x2f;
 
 @SuppressWarnings("UnstableApiUsage")
 public class OverflowWidget extends DelegateWidgetWithTranslate {
@@ -44,7 +45,7 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     private boolean dragging;
     
     public OverflowWidget(Rectangle bounds, WidgetWithBounds widget) {
-        super(widget, Matrix4f::new);
+        super(widget, Matrix3x2f::new);
         this.bounds = bounds;
         this.scale = ValueAnimator.ofFloat()
                 .setAs(1f);
@@ -55,11 +56,11 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     }
     
     @Override
-    protected Matrix4f translate() {
+    protected Matrix3x2f translate() {
         FloatingPoint translate = this.translate.value();
         float scale = 1 / Math.max(this.scale.floatValue(), 0.001f);
-        Matrix4f matrix = new Matrix4f().translate(bounds.getCenterX() + (float) translate.x * scale, bounds.getCenterY() + (float) translate.y * scale, 0);
-        matrix.mul(new Matrix4f().scale(scale, scale, 1));
+        Matrix3x2f matrix = new Matrix3x2f().translate(bounds.getCenterX() + (float) translate.x * scale, bounds.getCenterY() + (float) translate.y * scale);
+        matrix.mul(new Matrix3x2f().scale(scale, scale));
         return matrix;
     }
     
@@ -119,10 +120,10 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) return true;
-        if (containsMouse(mouseX, mouseY)) {
-            if (button == 0) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (super.mouseClicked(event, doubleClick)) return true;
+        if (containsMouse(event.x(), event.y())) {
+            if (event.button() == 0) {
                 dragging = true;
             }
             
@@ -133,18 +134,18 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (dragging && button == 0) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (dragging && event.button() == 0) {
             dragging = false;
             return true;
         }
         
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (dragging && button == 0) {
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (dragging && event.button() == 0) {
             double newXTranslate = translate.target().x;
             double newYTranslate = translate.target().y;
             newXTranslate += deltaX * scale.doubleValue();
@@ -155,6 +156,6 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
             return true;
         }
         
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(event, deltaX, deltaY);
     }
 }

@@ -28,7 +28,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,7 +74,7 @@ public interface FilteringRuleType<T extends FilteringRule<?>> {
      */
     @Nullable
     static FilteringRule<?> read(CompoundTag tag) {
-        FilteringRuleType<?> type = FilteringRuleTypeRegistry.getInstance().get(ResourceLocation.tryParse(tag.getString("id").orElseThrow()));
+        FilteringRuleType<?> type = FilteringRuleTypeRegistry.getInstance().get(Identifier.tryParse(tag.getString("id").orElseThrow()));
         if (type == null) return null;
         return type.readFrom(tag.getCompoundOrEmpty("rule"));
     }
@@ -127,7 +127,7 @@ public interface FilteringRuleType<T extends FilteringRule<?>> {
      *
      * @return the id of the filtering rule type
      */
-    default ResourceLocation getId() {
+    default Identifier getId() {
         return Objects.requireNonNull(FilteringRuleTypeRegistry.getInstance().getId(this), "Id of " + this);
     }
     

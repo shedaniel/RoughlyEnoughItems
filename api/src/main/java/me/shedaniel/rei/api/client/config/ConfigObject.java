@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -114,14 +114,6 @@ public interface ConfigObject {
      * @return whether grabbing items is used to cheat items
      */
     boolean isGrabbingItems();
-    
-    /**
-     * Returns whether favorites motions are animated.
-     *
-     * @return whether favorites motions are animated
-     */
-    @Deprecated(forRemoval = true)
-    boolean isFavoritesAnimated();
     
     /**
      * Returns whether motions are reduced.
@@ -255,7 +247,7 @@ public interface ConfigObject {
     
     @ApiStatus.Experimental
     @Nullable
-    ResourceLocation getInputMethodId();
+    Identifier getInputMethodId();
     
     boolean doesDisableRecipeBook();
     
@@ -281,12 +273,20 @@ public interface ConfigObject {
     @ApiStatus.Experimental
     boolean doDisplayIMEHints();
     
-    boolean doesFastEntryRendering();
-    
     boolean doesCacheEntryRendering();
     
     @ApiStatus.Experimental
     boolean doesCacheDisplayLookup();
+    
+    /**
+     * Returns the mode controlling whether REI synthesizes recipe displays from
+     * the client's own data packs, for servers that do not send recipe data.
+     * Useful for multiplayer servers that do not synchronize recipes.
+     *
+     * @return the force local recipes mode
+     */
+    @ApiStatus.Experimental
+    ForceLocalRecipesMode getForceLocalRecipes();
     
     boolean doDebugRenderTimeRequired();
     

@@ -24,8 +24,9 @@
 package me.shedaniel.rei.impl.client.gui.hints;
 
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.config.ForceLocalRecipesMode;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -36,8 +37,9 @@ import me.shedaniel.rei.impl.common.entry.type.EntryRegistryListener;
 import me.shedaniel.rei.impl.common.util.InstanceHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -57,13 +59,14 @@ public class ImportantWarningsWidget extends WidgetWithBounds {
         if (((EntryRegistryImpl) EntryRegistry.getInstance()).listeners.add(LISTENER)) {
             String newId = Minecraft.getInstance().hasSingleplayerServer() ?
                     "integrated:" + Minecraft.getInstance().getSingleplayerServer().getWorldData().getLevelName()
-                    : InstanceHelper.connectionFromClient() != null ? "server:" + InstanceHelper.connectionFromClient().getId()
+                    : InstanceHelper.connectionFromClient() != null && InstanceHelper.connectionFromClient().getServerData() != null
+                    ? "server:" + InstanceHelper.connectionFromClient().getServerData().ip
                     : "null";
             if (!newId.equals(prevId)) {
                 prevId = newId;
                 dirty = true;
             }
-            dirty = dirty && !ClientHelper.getInstance().canUseMovePackets();
+            dirty = dirty && !ClientHelper.getInstance().canUseMovePackets() && ConfigObject.getInstance().getForceLocalRecipes() == ForceLocalRecipesMode.NEVER;
         }
         
         this.visible = dirty;
@@ -71,7 +74,7 @@ public class ImportantWarningsWidget extends WidgetWithBounds {
                 Component.translatable("text.rei.recipes.not.full.title").withStyle(ChatFormatting.RED),
                 Component.translatable("text.rei.recipes.not.full.desc", Component.translatable("text.rei.recipes.not.full.desc.command").withStyle(ChatFormatting.AQUA, ChatFormatting.UNDERLINE)).withStyle(ChatFormatting.GRAY)
         );
-        this.bounds = ScreenRegistry.getInstance().getOverlayBounds(DisplayPanelLocation.LEFT, Minecraft.getInstance().screen);
+        this.bounds = ScreenRegistry.getInstance().getOverlayBounds(DisplayPanelLocation.LEFT, Minecraft.getInstance().gui.screen());
         this.bounds.setBounds(this.bounds.x + 10, this.bounds.y + 10, this.bounds.width - 20, this.bounds.height - 20);
         int heightRequired = -5;
         for (Component text : texts) {
@@ -90,33 +93,32 @@ public class ImportantWarningsWidget extends WidgetWithBounds {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (!visible)
             return;
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 900);
+        graphics.pose().pushMatrix();
         graphics.fill(bounds.x - 5, bounds.y - 5, bounds.getMaxX() + 5, bounds.getMaxY() + 5, 0x90111111);
         int y = bounds.y;
         for (Component text : texts) {
-            graphics.pose().pushPose();
-            graphics.pose().translate(bounds.x, y, 0);
-            graphics.pose().scale(0.5f, 0.5f, 1);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(bounds.x, y);
+            graphics.pose().scale(0.5f, 0.5f);
             graphics.drawWordWrap(Minecraft.getInstance().font, text, 0, 0, bounds.width * 2, -1);
             y += Minecraft.getInstance().font.wordWrapHeight(text, bounds.width * 2) / 2 + 5;
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }
         
         MutableComponent okayText = Component.translatable("text.rei.recipes.not.full.button.okay");
-        graphics.pose().pushPose();
-        graphics.pose().translate(bounds.x + bounds.width / 2 - Minecraft.getInstance().font.width(okayText) * 0.75 / 2, bounds.getMaxY() - 9, 0);
-        graphics.pose().scale(0.75f, 0.75f, 1);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(bounds.x + bounds.width / 2 - Minecraft.getInstance().font.width(okayText) * 0.75f / 2, bounds.getMaxY() - 9);
+        graphics.pose().scale(0.75f, 0.75f);
         this.buttonBounds.setBounds(bounds.x, bounds.getMaxY() - 20, bounds.width, 20);
         graphics.drawString(Minecraft.getInstance().font, okayText, 0, 0,
                 buttonBounds.contains(mouseX, mouseY) ? 0xfffff8de : 0xAAFFFFFF);
-        graphics.pose().popPose();
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
+        graphics.pose().popMatrix();
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.visible && button == 0 && buttonBounds.contains(mouseX, mouseY)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (this.visible && event.button() == 0 && buttonBounds.contains(event.x(), event.y())) {
             dirty = false;
             this.visible = false;
             Widgets.produceClickSound();

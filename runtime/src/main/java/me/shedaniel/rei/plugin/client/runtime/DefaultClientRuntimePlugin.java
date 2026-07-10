@@ -77,14 +77,15 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -114,11 +115,11 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
     public void registerEntries(EntryRegistry registry) {
         if (ClientHelperImpl.getInstance().isAprilFools.get()) {
             registry.addEntry(ClientEntryStacks.of(new Renderer() {
-                private final ResourceLocation id = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/kirb.png");
+                private final Identifier id = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/kirb.png");
                 
                 @Override
                 public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                    graphics.innerBlit(RenderType::guiTextured, id, bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), 0, 0, 1, 0, 1);
+                    graphics.innerBlit(RenderPipelines.GUI_TEXTURED, id, bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), 0, 0, 1, 0, 1);
                 }
                 
                 @Override
@@ -181,19 +182,19 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
     public void registerInputMethods(InputMethodRegistry registry) {
         registry.add(DefaultInputMethod.ID, DefaultInputMethod.INSTANCE);
         UniHanManager manager = new UniHanManager(Platform.getConfigFolder().resolve("roughlyenoughitems/unihan.zip"));
-        registry.add(ResourceLocation.parse("rei:pinyin"), new PinyinInputMethod(manager));
-        registry.add(ResourceLocation.parse("rei:jyutping"), new JyutpingInputMethod(manager));
-        registry.add(ResourceLocation.parse("rei:bomopofo"), new BomopofoInputMethod(manager));
-        registry.add(ResourceLocation.parse("rei:double_pinyin"), new DoublePinyinInputMethod(manager));
+        registry.add(Identifier.parse("rei:pinyin"), new PinyinInputMethod(manager));
+        registry.add(Identifier.parse("rei:jyutping"), new JyutpingInputMethod(manager));
+        registry.add(Identifier.parse("rei:bomopofo"), new BomopofoInputMethod(manager));
+        registry.add(Identifier.parse("rei:double_pinyin"), new DoublePinyinInputMethod(manager));
     }
     
     private enum EntryStackFavoriteType implements FavoriteEntryType<EntryStackFavoriteEntry> {
         INSTANCE(FavoriteEntryType.ENTRY_STACK);
         
         private final String key = "data";
-        private final ResourceLocation id;
+        private final Identifier id;
         
-        EntryStackFavoriteType(ResourceLocation id) {
+        EntryStackFavoriteType(Identifier id) {
             this.id = id;
         }
         
@@ -246,7 +247,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         }
         
         @Override
-        public boolean doAction(int button) {
+        public boolean doAction(MouseButtonEvent event) {
             return false;
         }
         
@@ -261,7 +262,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         }
         
         @Override
-        public ResourceLocation getType() {
+        public Identifier getType() {
             return EntryStackFavoriteType.INSTANCE.id;
         }
         
@@ -276,9 +277,9 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         INSTANCE(FavoriteEntryType.DISPLAY);
         
         private final String key = "data";
-        private final ResourceLocation id;
+        private final Identifier id;
         
-        DisplayFavoriteType(ResourceLocation id) {
+        DisplayFavoriteType(Identifier id) {
             this.id = id;
         }
         
@@ -361,17 +362,17 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
             return new Renderer() {
                 @Override
                 public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(bounds.getX(), bounds.getY(), 1);
-                    graphics.pose().scale(bounds.width / (float) panel.getBounds().getWidth(), bounds.height / (float) panel.getBounds().getHeight(), 1);
+                    graphics.pose().pushMatrix();
+                    graphics.pose().translate(bounds.getX(), bounds.getY());
+                    graphics.pose().scale(bounds.width / (float) panel.getBounds().getWidth(), bounds.height / (float) panel.getBounds().getHeight());
                     panel.render(graphics, mouseX, mouseY, delta);
-                    graphics.pose().popPose();
+                    graphics.pose().popMatrix();
                     if (bounds.width > 4 && bounds.height > 4) {
-                        graphics.pose().pushPose();
-                        graphics.pose().translate(0, 0.5, 0);
+                        graphics.pose().pushMatrix();
+                        graphics.pose().translate(0, 0.5f);
                         slot.getBounds().setBounds(bounds.x + 2, bounds.y + 2, bounds.width - 4, bounds.height - 4);
                         slot.render(graphics, mouseX, mouseY, delta);
-                        graphics.pose().popPose();
+                        graphics.pose().popMatrix();
                     }
                 }
                 
@@ -387,11 +388,11 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         }
         
         @Override
-        public boolean doAction(int button) {
+        public boolean doAction(MouseButtonEvent event) {
             Widgets.produceClickSound();
             
-            if (!(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
-                AutoCraftingEvaluator.evaluateAutoCrafting(true, Screen.hasShiftDown(), display, Collections::emptyList);
+            if (!(Minecraft.getInstance().gui.screen() instanceof DisplayScreen) && event.hasControlDown()) {
+                AutoCraftingEvaluator.evaluateAutoCrafting(true, event.hasShiftDown(), display, Collections::emptyList);
                 return true;
             }
             
@@ -412,7 +413,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         }
         
         @Override
-        public ResourceLocation getType() {
+        public Identifier getType() {
             return DisplayFavoriteType.INSTANCE.id;
         }
         

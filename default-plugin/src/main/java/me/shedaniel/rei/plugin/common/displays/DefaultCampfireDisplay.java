@@ -35,7 +35,7 @@ import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
@@ -48,7 +48,7 @@ public class DefaultCampfireDisplay extends BasicDisplay implements CampfireDisp
             RecordCodecBuilder.mapCodec(instance -> instance.group(
                     EntryIngredient.codec().listOf().fieldOf("inputs").forGetter(DefaultCampfireDisplay::getInputEntries),
                     EntryIngredient.codec().listOf().fieldOf("outputs").forGetter(DefaultCampfireDisplay::getOutputEntries),
-                    ResourceLocation.CODEC.optionalFieldOf("location").forGetter(DefaultCampfireDisplay::getDisplayLocation),
+                    Identifier.CODEC.optionalFieldOf("location").forGetter(DefaultCampfireDisplay::getDisplayLocation),
                     Codec.DOUBLE.fieldOf("cookTime").forGetter(d -> d.cookTime)
             ).apply(instance, DefaultCampfireDisplay::new)),
             StreamCodec.composite(
@@ -56,7 +56,7 @@ public class DefaultCampfireDisplay extends BasicDisplay implements CampfireDisp
                     DefaultCampfireDisplay::getInputEntries,
                     EntryIngredient.streamCodec().apply(ByteBufCodecs.list()),
                     DefaultCampfireDisplay::getOutputEntries,
-                    ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC),
+                    ByteBufCodecs.optional(Identifier.STREAM_CODEC),
                     DefaultCampfireDisplay::getDisplayLocation,
                     ByteBufCodecs.DOUBLE,
                     d -> d.cookTime,
@@ -67,15 +67,15 @@ public class DefaultCampfireDisplay extends BasicDisplay implements CampfireDisp
     
     public DefaultCampfireDisplay(RecipeHolder<CampfireCookingRecipe> recipe) {
         this(List.of(EntryIngredients.ofIngredient(recipe.value().input())),
-                List.of(EntryIngredients.of(recipe.value().result())),
-                Optional.of(recipe.id().location()), recipe.value().cookingTime());
+                List.of(EntryIngredients.ofSlotDisplay(recipe.value().display().getFirst().result())),
+                Optional.of(recipe.id().identifier()), recipe.value().cookingTime());
     }
     
-    public DefaultCampfireDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location, CompoundTag tag) {
+    public DefaultCampfireDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<Identifier> location, CompoundTag tag) {
         this(inputs, outputs, location, tag.getDouble("cookTime").orElseThrow());
     }
     
-    public DefaultCampfireDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location, double cookTime) {
+    public DefaultCampfireDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<Identifier> location, double cookTime) {
         super(inputs, outputs, location);
         this.cookTime = cookTime;
     }

@@ -50,14 +50,14 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
+import org.joml.Matrix3x2f;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -81,7 +81,6 @@ public final class ClientInternals {
     private static BiFunction<Component, BooleanValue, FavoriteMenuEntry> toggleEntry = (supplier, toJson) -> throwNotSetup();
     private static Function<CompoundTag, DataResult<FavoriteEntry>> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
-    private static BiConsumer<List<ClientTooltipComponent>, TooltipComponent> clientTooltipComponentProvider = (tooltip, result) -> throwNotSetup();
     private static BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
     private static QuadFunction<Point, @Nullable TooltipFlag, Boolean, Item.TooltipContext, TooltipContext> tooltipContextProvider = (point, texts, search, context) -> throwNotSetup();
     private static Function<Object, Tooltip.Entry> tooltipEntryProvider = (component) -> throwNotSetup();
@@ -136,10 +135,6 @@ public final class ClientInternals {
     
     public static ClickArea.Result createClickAreaHandlerResult(boolean applicable) {
         return clickAreaHandlerResult.apply(applicable);
-    }
-    
-    public static void getClientTooltipComponent(List<ClientTooltipComponent> tooltip, TooltipComponent component) {
-        clientTooltipComponentProvider.accept(tooltip, component);
     }
     
     public static Tooltip createTooltip(@Nullable Point point, Collection<Tooltip.Entry> texts) {
@@ -200,7 +195,7 @@ public final class ClientInternals {
         
         WidgetWithBounds wrapRenderer(Supplier<Rectangle> bounds, Renderer renderer);
         
-        WidgetWithBounds withTranslate(WidgetWithBounds widget, Supplier<Matrix4f> translate);
+        WidgetWithBounds withTranslate(WidgetWithBounds widget, Supplier<Matrix3x2f> translate);
         
         Widget createDrawableWidget(DrawableConsumer drawable);
         
@@ -218,7 +213,7 @@ public final class ClientInternals {
         
         BurningFire createBurningFire(Rectangle rectangle);
         
-        DrawableConsumer createTexturedConsumer(ResourceLocation texture, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight);
+        DrawableConsumer createTexturedConsumer(Identifier texture, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight);
         
         DrawableConsumer createFillRectangleConsumer(Rectangle rectangle, int color);
         

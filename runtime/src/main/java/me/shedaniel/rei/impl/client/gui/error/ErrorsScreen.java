@@ -25,11 +25,12 @@ package me.shedaniel.rei.impl.client.gui.error;
 
 import me.shedaniel.rei.impl.client.gui.error.ErrorsEntryListWidget.TextEntry;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -38,7 +39,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class ErrorsScreen extends Screen {
+public class ErrorsScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private List<Object> components;
     private AbstractButton doneButton;
     private ErrorsEntryListWidget listWidget;
@@ -53,13 +54,13 @@ public class ErrorsScreen extends Screen {
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 256) {
-            Minecraft.getInstance().setScreen(parent);
+    public boolean keyPressed(KeyEvent event) {
+        if (event.key() == 256) {
+            Minecraft.getInstance().setScreenAndShow(parent);
             return true;
         }
         
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
     
     @Override
@@ -80,20 +81,20 @@ public class ErrorsScreen extends Screen {
         }
         listWidget._addEntry(new TextEntry(Component.empty(), listWidget.getItemWidth()));
         if (quitable) {
-            addRenderableWidget(doneButton = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> Minecraft.getInstance().setScreen(parent), Supplier::get) {});
+            addRenderableWidget(doneButton = new Button.Plain(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> Minecraft.getInstance().setScreenAndShow(parent), Supplier::get) {});
         } else {
-            addRenderableWidget(doneButton = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("menu.quit"), button -> exit(), Supplier::get) {});
+            addRenderableWidget(doneButton = new Button.Plain(width / 2 - 100, height - 26, 200, 20, Component.translatable("menu.quit"), button -> exit(), Supplier::get) {});
         }
     }
     
     private void exit() {
         boolean localServer = this.minecraft.isLocalServer();
-        this.minecraft.level.disconnect();
+        this.minecraft.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
         
         if (localServer) {
-            this.minecraft.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")));
+            this.minecraft.disconnectWithSavingScreen();
         } else {
-            this.minecraft.disconnect();
+            this.minecraft.disconnectWithProgressScreen();
         }
         
         System.exit(-1);
@@ -109,7 +110,7 @@ public class ErrorsScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         super.render(graphics, mouseX, mouseY, delta);
-        graphics.drawCenteredString(this.font, getTitle(), this.width / 2, 16, 16777215);
+        graphics.drawCenteredString(this.font, getTitle(), this.width / 2, 16, 0xFFFFFFFF);
     }
     
     @Override

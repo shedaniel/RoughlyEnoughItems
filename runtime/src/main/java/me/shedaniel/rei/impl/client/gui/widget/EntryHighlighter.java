@@ -28,9 +28,8 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListSearchManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.inventory.Slot;
 
 public class EntryHighlighter {
@@ -40,22 +39,18 @@ public class EntryHighlighter {
         int dimColor = Color.ofRGBA(20 / 255F, 20 / 255F, 20 / 255F, dimOpacity).getColor();
         int borderColor = Color.ofRGBA(0x5f / 255F, 0xff / 255F, 0x3b / 255F, opacity).getColor();
         int color = Color.ofRGBA(0x5f / 255F, 0xff / 255F, 0x3b / 255F, opacity * 0x34 / 255F).getColor();
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> containerScreen) {
+        if (Minecraft.getInstance().gui.screen() instanceof AbstractContainerScreen<?> containerScreen) {
             int x = containerScreen.leftPos, y = containerScreen.topPos;
             for (Slot slot : containerScreen.getMenu().slots) {
                 if (!slot.hasItem() || !EntryListSearchManager.INSTANCE.matches(EntryStacks.of(slot.getItem()))) {
-                    graphics.fillGradient(RenderType.guiOverlay(), x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, dimColor, dimColor, 0);
+                    graphics.fillGradient(x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, dimColor, dimColor);
                 } else {
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(0, 0, 200f);
                     graphics.fillGradient(x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, color, color);
                     
                     graphics.fillGradient(x + slot.x - 1, y + slot.y - 1, x + slot.x, y + slot.y + 16 + 1, borderColor, borderColor);
                     graphics.fillGradient(x + slot.x + 16, y + slot.y - 1, x + slot.x + 16 + 1, y + slot.y + 16 + 1, borderColor, borderColor);
                     graphics.fillGradient(x + slot.x - 1, y + slot.y - 1, x + slot.x + 16, y + slot.y, borderColor, borderColor);
                     graphics.fillGradient(x + slot.x - 1, y + slot.y + 16, x + slot.x + 16, y + slot.y + 16 + 1, borderColor, borderColor);
-                    
-                    graphics.pose().popPose();
                 }
             }
         }

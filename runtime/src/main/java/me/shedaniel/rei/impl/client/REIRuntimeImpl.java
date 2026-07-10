@@ -52,7 +52,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,8 +64,8 @@ import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class REIRuntimeImpl implements REIRuntime {
-    private static final ResourceLocation DISPLAY_TEXTURE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/display.png");
-    private static final ResourceLocation DISPLAY_TEXTURE_DARK = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/display_dark.png");
+    private static final Identifier DISPLAY_TEXTURE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/display.png");
+    private static final Identifier DISPLAY_TEXTURE_DARK = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/display_dark.png");
     @ApiStatus.Internal
     public static boolean isWithinRecipeViewingScreen = false;
     private ScreenOverlayImpl overlay;
@@ -153,7 +153,7 @@ public class REIRuntimeImpl implements REIRuntime {
     public Optional<ScreenOverlay> getOverlay(boolean reset, boolean init) {
         if ((overlay == null && init) || reset) {
             try {
-                overlay = (ScreenOverlayImpl) Class.forName(Platform.isForge() ? "me.shedaniel.rei.impl.client.gui.forge.ScreenOverlayImplForge"
+                overlay = (ScreenOverlayImpl) Class.forName(Platform.isNeoForge() ? "me.shedaniel.rei.impl.client.gui.forge.ScreenOverlayImplForge"
                                 : "me.shedaniel.rei.impl.client.gui.fabric.ScreenOverlayImplFabric")
                         .getDeclaredConstructor()
                         .newInstance();
@@ -197,12 +197,12 @@ public class REIRuntimeImpl implements REIRuntime {
     }
     
     @Override
-    public ResourceLocation getDefaultDisplayTexture() {
+    public Identifier getDefaultDisplayTexture() {
         return getDefaultDisplayTexture(isDarkThemeEnabled());
     }
     
     @Override
-    public ResourceLocation getDefaultDisplayTexture(boolean darkTheme) {
+    public Identifier getDefaultDisplayTexture(boolean darkTheme) {
         return darkTheme ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
     }
     
@@ -210,7 +210,7 @@ public class REIRuntimeImpl implements REIRuntime {
     public SearchFieldLocation getContextualSearchFieldLocation() {
         SearchFieldLocation location = ConfigObject.getInstance().getSearchFieldLocation();
         Window window = Minecraft.getInstance().getWindow();
-        Rectangle screenBounds = ScreenRegistry.getInstance().getScreenBounds(Minecraft.getInstance().screen);
+        Rectangle screenBounds = ScreenRegistry.getInstance().getScreenBounds(Minecraft.getInstance().gui.screen());
         if (location == SearchFieldLocation.CENTER && window.getGuiScaledHeight() - 20 <= screenBounds.getMaxY()) {
             return SearchFieldLocation.BOTTOM_SIDE;
         }
@@ -232,7 +232,7 @@ public class REIRuntimeImpl implements REIRuntime {
     
     @Override
     public Rectangle calculateFavoritesListArea() {
-        Rectangle bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation().mirror(), Minecraft.getInstance().screen);
+        Rectangle bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation().mirror(), Minecraft.getInstance().gui.screen());
         
         int yOffset = 8;
         if (!ConfigObject.getInstance().isLowerConfigButton()) yOffset += 25;

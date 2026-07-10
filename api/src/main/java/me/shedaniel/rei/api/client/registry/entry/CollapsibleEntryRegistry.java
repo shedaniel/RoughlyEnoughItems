@@ -29,7 +29,7 @@ import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -60,7 +60,7 @@ public interface CollapsibleEntryRegistry extends Reloadable<REIClientPlugin> {
      * @param stacks the stacks to group
      * @param <T>    the type of the stacks
      */
-    <T> void group(ResourceLocation id, Component name, List<? extends EntryStack<? extends T>> stacks);
+    <T> void group(Identifier id, Component name, List<? extends EntryStack<? extends T>> stacks);
     
     /**
      * Groups the given {@link EntryStack}s into a single entry in the entry panel.
@@ -70,7 +70,7 @@ public interface CollapsibleEntryRegistry extends Reloadable<REIClientPlugin> {
      * @param stacks the stacks to group
      * @param <T>    the type of the stacks
      */
-    default <T> void group(ResourceLocation id, Component name, EntryStack<? extends T>... stacks) {
+    default <T> void group(Identifier id, Component name, EntryStack<? extends T>... stacks) {
         group(id, name, Arrays.asList(stacks));
     }
     
@@ -82,7 +82,7 @@ public interface CollapsibleEntryRegistry extends Reloadable<REIClientPlugin> {
      * @param name      the name of the group
      * @param predicate the predicate to match the stacks
      */
-    void group(ResourceLocation id, Component name, Predicate<? extends EntryStack<?>> predicate);
+    void group(Identifier id, Component name, Predicate<? extends EntryStack<?>> predicate);
     
     /**
      * Groups the matching {@link EntryStack}s via the given predicate into
@@ -94,7 +94,7 @@ public interface CollapsibleEntryRegistry extends Reloadable<REIClientPlugin> {
      * @param predicate the predicate to match the stacks
      * @param <T>       the type of the stacks
      */
-    default <T> void group(ResourceLocation id, Component name, EntryType<T> type, Predicate<EntryStack<T>> predicate) {
+    default <T> void group(Identifier id, Component name, EntryType<T> type, Predicate<EntryStack<T>> predicate) {
         group(id, name, stack -> stack.getType() == type && predicate.test(stack.cast()));
     }
 }

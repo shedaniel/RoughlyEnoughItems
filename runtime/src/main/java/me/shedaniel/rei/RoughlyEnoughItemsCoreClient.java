@@ -39,6 +39,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
+import me.shedaniel.rei.api.client.gui.config.ForceLocalRecipesMode;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
@@ -61,6 +62,7 @@ import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
@@ -76,6 +78,7 @@ import me.shedaniel.rei.impl.client.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.client.gui.widget.TooltipContextImpl;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.client.registry.category.CategoryRegistryImpl;
+import me.shedaniel.rei.impl.client.registry.display.ClientRecipeFallback;
 import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
 import me.shedaniel.rei.impl.client.registry.screen.ScreenRegistryImpl;
 import me.shedaniel.rei.impl.client.search.SearchProviderImpl;
@@ -90,6 +93,7 @@ import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.types.EmptyEntryDefinition;
 import me.shedaniel.rei.impl.common.networking.DisplaySyncPacket;
+import me.shedaniel.rei.impl.common.networking.REIPackets;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.plugins.ReloadManagerImpl;
 import me.shedaniel.rei.impl.common.util.InstanceHelper;
@@ -99,6 +103,9 @@ import me.shedaniel.rei.plugin.test.REITestPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.util.context.ContextMap;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -111,7 +118,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundRecipeBookAddPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -135,12 +142,25 @@ public class RoughlyEnoughItemsCoreClient {
     
     public static void attachClientInternals() {
         InternalWidgets.attach();
+        Internals.attachInstance((Supplier<ContextMap>) () -> {
+            Minecraft client = Minecraft.getInstance();
+            if (client.level != null) {
+                return SlotDisplayContext.fromLevel(client.level);
+            }
+            ContextMap.Builder builder = new ContextMap.Builder()
+                    .withParameter(SlotDisplayContext.REGISTRIES, Internals.getRegistryAccess());
+            ClientPacketListener connection = client.getConnection();
+            if (connection != null) {
+                builder.withParameter(SlotDisplayContext.FUEL_VALUES, connection.fuelValues());
+            }
+            return builder.create(SlotDisplayContext.CONTEXT);
+        }, "slotDisplayContext");
         EmptyEntryDefinition.EmptyRenderer emptyEntryRenderer = new EmptyEntryDefinition.EmptyRenderer();
         ClientInternals.attachInstance((Supplier<EntryRenderer<?>>) () -> emptyEntryRenderer, "emptyEntryRenderer");
         ClientInternals.attachInstance((BiFunction<Supplier<DataResult<FavoriteEntry>>, Supplier<CompoundTag>, FavoriteEntry>) DelegatingFavoriteEntryProviderImpl::new, "delegateFavoriteEntry");
         ClientInternals.attachInstance((Function<CompoundTag, DataResult<FavoriteEntry>>) (object) -> {
             String type = object.getString(FavoriteEntry.TYPE_KEY).orElseThrow();
-            ResourceLocation id = ResourceLocation.parse(type);
+            Identifier id = Identifier.parse(type);
             FavoriteEntryType<FavoriteEntry> entryType = FavoriteEntryType.registry().get(id);
             if (entryType == null) return DataResult.error(() -> "Unknown favorite type: " + id + ", json: " + object);
             return entryType.read(object);
@@ -235,15 +255,15 @@ public class RoughlyEnoughItemsCoreClient {
         loadTestPlugins();
         
         Minecraft client = Minecraft.getInstance();
-        NetworkManager.registerReceiver(NetworkManager.s2c(), RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (buf, context) -> {
-            ItemStack stack = buf.readJsonWithCodec(ItemStack.OPTIONAL_CODEC);
-            String player = buf.readUtf(32767);
+        NetworkManager.registerReceiver(NetworkManager.s2c(), REIPackets.CreateItemsMessage.TYPE, REIPackets.CreateItemsMessage.STREAM_CODEC, (payload, context) -> {
+            ItemStack stack = payload.stack();
+            String player = payload.playerName();
             if (client.player != null) {
-                client.player.displayClientMessage(Component.literal(I18n.get("text.rei.cheat_items").replaceAll("\\{item_name}", EntryStacks.of(stack.copy()).asFormattedText().getString()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
+                client.player.sendSystemMessage(Component.literal(I18n.get("text.rei.cheat_items").replaceAll("\\{item_name}", EntryStacks.of(stack.copy()).asFormattedText().getString()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)));
             }
         });
-        NetworkManager.registerReceiver(NetworkManager.s2c(), RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (buf, context) -> {
-            Screen currentScreen = Minecraft.getInstance().screen;
+        NetworkManager.registerReceiver(NetworkManager.s2c(), REIPackets.NotEnoughItems.TYPE, REIPackets.NotEnoughItems.STREAM_CODEC, (payload, context) -> {
+            Screen currentScreen = Minecraft.getInstance().gui.screen();
             if (currentScreen instanceof CraftingScreen craftingScreen) {
                 // TODO: Recipe Ghost
                 /*RecipeBookComponent recipeBookGui = craftingScreen.getRecipeBookComponent();
@@ -272,7 +292,15 @@ public class RoughlyEnoughItemsCoreClient {
                 }*/
             }
         });
-        NetworkManager.registerReceiver(NetworkManager.s2c(), DisplaySyncPacket.TYPE, DisplaySyncPacket.STREAM_CODEC, List.of(new SplitPacketTransformer()), DisplaySyncPacket::handle);
+        NetworkManager.registerReceiver(NetworkManager.s2c(), DisplaySyncPacket.TYPE, DisplaySyncPacket.STREAM_CODEC, List.of(new SplitPacketTransformer()), (payload, context) -> {
+            ClientRecipeFallback.onServerDisplaySync();
+            if (ConfigObject.getInstance().getForceLocalRecipes() == ForceLocalRecipesMode.ALWAYS && !Minecraft.getInstance().isLocalServer()) {
+                // Local recipes take precedence in ALWAYS mode; ignore the server's display sync.
+                InternalLogger.getInstance().info("[Local Recipes] Ignoring server display sync because local recipes mode is ALWAYS.");
+                return;
+            }
+            payload.handle(context);
+        });
     }
     
     private void loadTestPlugins() {
@@ -285,7 +313,7 @@ public class RoughlyEnoughItemsCoreClient {
     public static boolean shouldReturn(Screen screen) {
         if (REIRuntime.getInstance().getOverlay().isEmpty()) return true;
         if (screen == null) return true;
-        if (screen != Minecraft.getInstance().screen) return true;
+        if (screen != Minecraft.getInstance().gui.screen()) return true;
         return _shouldReturn(screen);
     }
     
@@ -308,7 +336,7 @@ public class RoughlyEnoughItemsCoreClient {
     
     private void registerEvents() {
         Minecraft client = Minecraft.getInstance();
-        final ResourceLocation recipeButtonTex = ResourceLocation.withDefaultNamespace("textures/gui/recipe_button.png");
+        final Identifier recipeButtonTex = Identifier.withDefaultNamespace("textures/gui/recipe_button.png");
         MutableLong endReload = new MutableLong(-1);
         PRE_UPDATE_RECIPES.register((recipeAccess, registryAccess) -> {
             reloadPlugins(null, ReloadStage.START, registryAccess);
@@ -320,26 +348,30 @@ public class RoughlyEnoughItemsCoreClient {
             if (ClientHelperImpl.getInstance().canUsePackets()) {
                 return;
             }
-            
+
             InternalLogger.getInstance().debug("Received server's request to add %d recipes.", entries.size());
             DisplayRegistryImpl registry = (DisplayRegistryImpl) DisplayRegistry.getInstance();
             List<RecipeDisplayEntry> mapped = CollectionUtils.map(entries, ClientboundRecipeBookAddPacket.Entry::contents);
+            // Record the server-advertised ids so the local fallback can dedup against them.
+            ClientRecipeFallback.onServerRecipeBookAdd(CollectionUtils.map(mapped, RecipeDisplayEntry::id));
             registry.addJob(() -> registry.addRecipes(mapped));
         });
         ClientRecipeUpdateEvent.REMOVE.register((recipeAccess, entries) -> {
             if (ClientHelperImpl.getInstance().canUsePackets()) {
                 return;
             }
-            
+
             InternalLogger.getInstance().debug("Received server's request to remove %d recipes.", entries.size());
             DisplayRegistryImpl registry = (DisplayRegistryImpl) DisplayRegistry.getInstance();
             Set<RecipeDisplayId> ids = new HashSet<>(entries);
+            ClientRecipeFallback.onServerRecipeBookRemove(ids);
             registry.addJob(() -> registry.removeRecipes(ids));
         });
         ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> {
             InternalLogger.getInstance().debug("Player quit, clearing reload tasks!");
             endReload.setValue(-1);
             ReloadManagerImpl.terminateReloadTasks();
+            ClientRecipeFallback.reset();
         });
         ClientGuiEvent.INIT_PRE.register((screen, access) -> {
             List<ReloadStage> stages = ((PluginManagerImpl<REICommonPlugin>) PluginManager.getInstance()).getObservedStages();
@@ -358,7 +390,7 @@ public class RoughlyEnoughItemsCoreClient {
         });
         ClientGuiEvent.INIT_POST.register((screen, access) -> {
             REIRuntime.getInstance().getOverlay(false, true);
-            if (Minecraft.getInstance().screen == screen) {
+            if (Minecraft.getInstance().gui.screen() == screen) {
                 if (REIRuntime.getInstance().getPreviousScreen() != screen) {
                     OverlaySearchField searchField = REIRuntimeImpl.getSearchField();
                     
@@ -376,13 +408,13 @@ public class RoughlyEnoughItemsCoreClient {
                 screen.children().removeIf(widget -> widget instanceof ImageButton button && button.sprites.enabled().equals(recipeButtonTex));
             }
         });
-        ClientScreenInputEvent.MOUSE_CLICKED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
+        ClientScreenInputEvent.MOUSE_CLICKED_PRE.register((minecraftClient, screen, event, doubleClick) -> {
             isLeftMousePressed = true;
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             resetFocused(screen);
-            if (getOverlay().mouseClicked(mouseX, mouseY, button)) {
-                if (button == 0) {
+            if (getOverlay().mouseClicked(event, doubleClick)) {
+                if (event.button() == 0) {
                     screen.setDragging(true);
                 }
                 resetFocused(screen);
@@ -390,12 +422,12 @@ public class RoughlyEnoughItemsCoreClient {
             }
             return EventResult.pass();
         });
-        ClientScreenInputEvent.MOUSE_RELEASED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
+        ClientScreenInputEvent.MOUSE_RELEASED_PRE.register((minecraftClient, screen, event) -> {
             isLeftMousePressed = false;
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             resetFocused(screen);
-            if (REIRuntime.getInstance().isOverlayVisible() && getOverlay().mouseReleased(mouseX, mouseY, button)
+            if (REIRuntime.getInstance().isOverlayVisible() && getOverlay().mouseReleased(event)
                     && resetFocused(screen)) {
                 return EventResult.interruptFalse();
             }
@@ -410,7 +442,7 @@ public class RoughlyEnoughItemsCoreClient {
                 return EventResult.interruptFalse();
             return EventResult.pass();
         });
-        ClientScreenInputEvent.CHAR_TYPED_PRE.register((minecraftClient, screen, character, keyCode) -> {
+        ClientScreenInputEvent.CHAR_TYPED_PRE.register((minecraftClient, screen, event) -> {
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             if (!REIRuntimeImpl.getSearchField().isFocused()) {
@@ -421,25 +453,25 @@ public class RoughlyEnoughItemsCoreClient {
                 }
             }
             resetFocused(screen);
-            if (getOverlay().charTyped(character, keyCode)
+            if (getOverlay().charTyped(event)
                     && resetFocused(screen))
                 return EventResult.interruptFalse();
             return EventResult.pass();
         });
-        ClientScreenInputEvent.MOUSE_DRAGGED_PRE.register((minecraftClient, screen, mouseX1, mouseY1, button, mouseX2, mouseY2) -> {
+        ClientScreenInputEvent.MOUSE_DRAGGED_PRE.register((minecraftClient, screen, event, mouseX2, mouseY2) -> {
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             resetFocused(screen);
-            if (getOverlay().mouseDragged(mouseX1, mouseY1, button, mouseX2, mouseY2)
+            if (getOverlay().mouseDragged(event, mouseX2, mouseY2)
                     && resetFocused(screen))
                 return EventResult.interruptFalse();
             return EventResult.pass();
         });
-        ClientScreenInputEvent.KEY_PRESSED_PRE.register((minecraftClient, screen, i, i1, i2) -> {
+        ClientScreenInputEvent.KEY_PRESSED_PRE.register((minecraftClient, screen, event) -> {
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             if (screen instanceof AbstractContainerScreen && ConfigObject.getInstance().doesDisableRecipeBook() && ConfigObject.getInstance().doesFixTabCloseContainer()) {
-                if (i == 258 && minecraftClient.options.keyInventory.matches(i, i1)) {
+                if (event.key() == 258 && minecraftClient.options.keyInventory.matches(event)) {
                     minecraftClient.player.closeContainer();
                     return EventResult.interruptFalse();
                 }
@@ -452,12 +484,12 @@ public class RoughlyEnoughItemsCoreClient {
                 }
             }
             resetFocused(screen);
-            if (getOverlay().keyPressed(i, i1, i2)
+            if (getOverlay().keyPressed(event)
                     && resetFocused(screen))
                 return EventResult.interruptFalse();
             return EventResult.pass();
         });
-        ClientScreenInputEvent.KEY_RELEASED_PRE.register((minecraftClient, screen, i, i1, i2) -> {
+        ClientScreenInputEvent.KEY_RELEASED_PRE.register((minecraftClient, screen, event) -> {
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             if (!REIRuntimeImpl.getSearchField().isFocused()) {
@@ -468,7 +500,7 @@ public class RoughlyEnoughItemsCoreClient {
                 }
             }
             resetFocused(screen);
-            if (getOverlay().keyReleased(i, i1, i2)
+            if (getOverlay().keyReleased(event)
                     && resetFocused(screen))
                 return EventResult.interruptFalse();
             return EventResult.pass();

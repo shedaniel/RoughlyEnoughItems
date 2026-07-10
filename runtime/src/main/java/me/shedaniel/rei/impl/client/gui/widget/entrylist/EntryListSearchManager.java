@@ -46,7 +46,7 @@ import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistr
 import me.shedaniel.rei.impl.common.util.HNEntryStackWrapper;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -153,7 +153,7 @@ public class EntryListSearchManager {
             long hashExact = wrapper.hashExact();
             EntryStack<?> stack = wrapper.unwrap();
             boolean matchedAny = false;
-            Set<ResourceLocation> locations = CollapsedEntriesCache.getInstance().getEntries(hashExact);
+            Set<Identifier> locations = CollapsedEntriesCache.getInstance().getEntries(hashExact);
             
             for (Map.Entry<CollapsibleEntryRegistryImpl.Entry, @Nullable CollapsedStack> mapEntry : entries.entrySet()) {
                 CollapsibleEntryRegistryImpl.Entry entry = mapEntry.getKey();

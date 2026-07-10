@@ -27,9 +27,8 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -78,7 +77,7 @@ public class MenuHolder implements MenuAccess {
     
     @Override
     public void open(UUID uuid, Menu menu, Predicate<Point> or, Predicate<Point> and) {
-        this.menu = new OverlayMenu(uuid, menu, Widgets.withTranslate(menu, 0, 0, 400), or, and);
+        this.menu = new OverlayMenu(uuid, menu, menu, or, and);
     }
     
     @Override

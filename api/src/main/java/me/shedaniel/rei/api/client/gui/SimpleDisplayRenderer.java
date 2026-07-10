@@ -34,10 +34,10 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHolder {
-    protected static final ResourceLocation CHEST_GUI_TEXTURE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    protected static final Identifier CHEST_GUI_TEXTURE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/recipecontainer.png");
     protected List<Slot> inputWidgets;
     protected List<Slot> outputWidgets;
     protected List<GuiEventListener> widgets;
@@ -120,8 +120,6 @@ public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHold
         int xx = bounds.x + 4, yy = bounds.y + 2;
         int j = 0;
         int itemsPerLine = getItemsPerLine();
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 50);
         for (Slot entryWidget : inputWidgets) {
             entryWidget.getBounds().setLocation(xx, yy);
             entryWidget.render(graphics, mouseX, mouseY, delta);
@@ -133,20 +131,16 @@ public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHold
                 j = 0;
             }
         }
-        graphics.pose().popPose();
         xx = bounds.x + 4 + 18 * (getItemsPerLine() - 2);
         yy = bounds.y + getHeight() / 2 - 8;
-        graphics.blit(RenderType::guiTextured, CHEST_GUI_TEXTURE, xx, yy, 0, 28, 18, 18, 256, 256);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CHEST_GUI_TEXTURE, xx, yy, 0, 28, 18, 18, 256, 256);
         xx += 18;
         yy += outputWidgets.size() * -9 + 9;
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 50);
         for (Slot outputWidget : outputWidgets) {
             outputWidget.getBounds().setLocation(xx, yy);
             outputWidget.render(graphics, mouseX, mouseY, delta);
             yy += 18;
         }
-        graphics.pose().popPose();
     }
     
     @Nullable

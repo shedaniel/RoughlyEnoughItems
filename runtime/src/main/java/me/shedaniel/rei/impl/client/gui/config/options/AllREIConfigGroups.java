@@ -80,7 +80,8 @@ public interface AllREIConfigGroups {
             .add(CUSTOMIZED_FILTERING);
     OptionGroup FILTERING_ADVANCED = make("filtering.advanced")
             .add(FILTER_DISPLAYS)
-            .add(MERGE_DISPLAYS);
+            .add(MERGE_DISPLAYS)
+            .add(FORCE_LOCAL_RECIPES);
     OptionGroup LIST_ENTRIES = make("list.entries")
             .add(DISPLAY_MODE)
             .add(ORDERING)
@@ -110,9 +111,8 @@ public interface AllREIConfigGroups {
             .add(CHEATS_AMOUNT);
     OptionGroup CHEATS_ADVANCED = make("cheats.advanced")
             .add(GIVE_COMMAND);
-    OptionGroup PERFORMANCE_RENDERING = make("performance.rendering")
-            .add(BATCHED_RENDERING)
-            /*.add(CACHED_RENDERING)*/;
+    /*OptionGroup PERFORMANCE_RENDERING = make("performance.rendering")
+            .add(CACHED_RENDERING);*/
     OptionGroup PERFORMANCE_RELOAD = make("performance.reload")
             .add(RELOAD_THREAD)
             .add(CACHED_DISPLAY_LOOKUP);

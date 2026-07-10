@@ -27,24 +27,38 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.init.PlatformAdapter;
+import net.fabricmc.fabric.impl.resource.pack.ModResourcePackCreator;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.world.item.crafting.Ingredient;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlatformAdapterImpl implements PlatformAdapter {
     @Override
+    public List<PackResources> gatherClientDataPacks() {
+        List<PackResources> packs = new ArrayList<>();
+        // Vanilla data pack (the recipe JSONs under data/minecraft/recipe/).
+        packs.add(ServerPacksSource.createVanillaPackSource());
+        // Every mod's built-in data pack. Fabric only exposes mod CLIENT resources through a public
+        // constant, so construct a SERVER_DATA creator explicitly to enumerate modded recipes.
+        // ModResourcePackCreator is Fabric-internal API; if it ever changes, fall back to vanilla
+        // recipes only rather than breaking the whole local-recipes feature.
+        try {
+            new ModResourcePackCreator(PackType.SERVER_DATA).loadPacks(pack -> packs.add(pack.open()));
+        } catch (Throwable throwable) {
+            InternalLogger.getInstance().error("[Local Recipes] Failed to gather mod data packs; modded recipes will be missing from the local fallback", throwable);
+        }
+        return packs;
+    }
+
+    @Override
     public EntryIngredient fromIngredient(Ingredient ingredient) {
         if (ingredient.isEmpty()) return EntryIngredient.empty();
-        if (ingredient.getCustomIngredient() != null) {
-            EntryIngredient.Builder result = EntryIngredient.builder();
-            ingredient.items().forEach(item -> {
-                EntryStack<?> stack = EntryStacks.ofItemHolder(item);
-                if (!stack.isEmpty()) {
-                    result.add(stack);
-                }
-            });
-            return result.build();
-        } else {
-            return EntryIngredients.ofItemsHolderSet(ingredient.values);
-        }
+        return EntryIngredients.ofSlotDisplay(ingredient.display());
     }
 }

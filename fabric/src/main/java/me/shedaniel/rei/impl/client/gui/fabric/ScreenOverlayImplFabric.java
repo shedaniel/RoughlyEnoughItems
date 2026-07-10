@@ -24,17 +24,16 @@
 package me.shedaniel.rei.impl.client.gui.fabric;
 
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.Nullable;
@@ -64,25 +63,20 @@ public class ScreenOverlayImplFabric extends ScreenOverlayImpl {
                 
                 if (component instanceof ClientTooltipComponent client) {
                     lines.add(client);
-                    continue;
-                }
-                
-                try {
-                    ClientInternals.getClientTooltipComponent(lines, component);
-                } catch (Throwable exception) {
-                    throw new IllegalArgumentException("Failed to add tooltip component! " + component + ", Class: " + (component == null ? null : component.getClass().getCanonicalName()), exception);
+                } else {
+                    lines.add(ClientTooltipComponent.create(component));
                 }
             }
         }
         renderTooltipInner(graphics, lines, tooltip.getX(), tooltip.getY(), tooltip.getTooltipStyle());
     }
     
-    public static void renderTooltipInner(GuiGraphics graphics, List<ClientTooltipComponent> lines, int mouseX, int mouseY, @Nullable ResourceLocation tooltipStyle) {
+    public static void renderTooltipInner(GuiGraphics graphics, List<ClientTooltipComponent> lines, int mouseX, int mouseY, @Nullable Identifier tooltipStyle) {
         if (lines.isEmpty()) {
             return;
         }
-        graphics.pose().pushPose();
-        graphics.renderTooltipInternal(Minecraft.getInstance().font, lines, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, tooltipStyle);
-        graphics.pose().popPose();
+        graphics.pose().pushMatrix();
+        graphics.tooltip(Minecraft.getInstance().font, lines, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, tooltipStyle);
+        graphics.pose().popMatrix();
     }
 }

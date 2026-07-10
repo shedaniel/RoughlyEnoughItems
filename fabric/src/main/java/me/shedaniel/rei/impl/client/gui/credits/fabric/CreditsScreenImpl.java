@@ -24,17 +24,17 @@
 package me.shedaniel.rei.impl.client.gui.credits.fabric;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.rei.api.common.util.Pair;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.CustomValue;
-import net.minecraft.util.Tuple;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CreditsScreenImpl {
-    public static void fillTranslators(Exception[] exception, List<Tuple<String, List<CreditsScreen.TranslatorEntry>>> translators) {
+    public static void fillTranslators(Exception[] exception, List<Pair<String, List<CreditsScreen.TranslatorEntry>>> translators) {
         FabricLoader.getInstance().getModContainer("roughlyenoughitems").ifPresent(rei -> {
             try {
                 if (rei.getMetadata().containsCustomValue("rei:translators")) {
@@ -56,10 +56,10 @@ public class CreditsScreenImpl {
                                 .sorted(Comparator.comparing(CreditsScreen.TranslatorEntry::getName, String::compareToIgnoreCase))
                                 .collect(Collectors.toList())
                                 : Lists.newArrayList(new CreditsScreen.TranslatorEntry(value.getAsString()));
-                        translators.add(new Tuple<>(entry.getKey(), behind));
+                        translators.add(new Pair<>(entry.getKey(), behind));
                     });
                 }
-                translators.sort(Comparator.comparing(Tuple::getA, String::compareToIgnoreCase));
+                translators.sort(Comparator.comparing(Pair::getA, String::compareToIgnoreCase));
             } catch (Exception e) {
                 exception[0] = e;
                 e.printStackTrace();

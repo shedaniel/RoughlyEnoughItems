@@ -30,7 +30,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -64,7 +64,7 @@ public final class IdentifierArgumentType extends ArgumentType<Unit, String> {
     
     @Override
     public String cacheData(EntryStack<?> stack) {
-        ResourceLocation identifier = stack.getIdentifier();
+        Identifier identifier = stack.getIdentifier();
         if (identifier != null) {
             String s = identifier.getPath();
             if (!s.isEmpty()) {

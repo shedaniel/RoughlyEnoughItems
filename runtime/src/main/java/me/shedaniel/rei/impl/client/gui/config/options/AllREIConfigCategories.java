@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.config.options;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.transl
 
 public interface AllREIConfigCategories {
     static OptionCategory make(String key) {
-        return OptionCategory.of(key, ResourceLocation.parse("roughlyenoughitems:textures/gui/config/" + key + ".png"),
+        return OptionCategory.of(key, Identifier.parse("roughlyenoughitems:textures/gui/config/" + key + ".png"),
                 translatable("config.rei.categories." + key),
                 translatable("config.rei.categories." + key + ".desc"));
     }
@@ -70,7 +70,7 @@ public interface AllREIConfigCategories {
             .add(CHEATS_CHEATS)
             .add(CHEATS_ADVANCED);
     OptionCategory PERFORMANCE = make("performance")
-            .add(PERFORMANCE_RENDERING)
+            /*.add(PERFORMANCE_RENDERING)*/
             .add(PERFORMANCE_RELOAD);
     OptionCategory DEBUG = make("debug")
             .add(DEBUG_PERFORMANCE);

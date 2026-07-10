@@ -50,7 +50,7 @@ public interface ConfigAddon {
     
     /**
      * Opens the config screen for this addon, given the parent screen.
-     * Do not call {@link net.minecraft.client.Minecraft#setScreen(Screen)} directly,
+     * Do not call {@link net.minecraft.client.Minecraft#setScreenAndShow(Screen)} directly,
      * and make sure to set the screen as the parent screen to exit the config screen.
      *
      * @param parent the parent screen

@@ -75,14 +75,14 @@ public class BookCloningRecipeFiller implements CraftingRecipeFiller<BookCloning
                     inputs[k + 1].add(EntryStacks.of(bookAndQuill));
                 }
                 ItemStack cloned = writtenBook.copy();
-                cloned.update(DataComponents.WRITTEN_BOOK_CONTENT, WrittenBookContent.EMPTY, WrittenBookContent::tryCraftCopy);
+                cloned.update(DataComponents.WRITTEN_BOOK_CONTENT, WrittenBookContent.EMPTY, WrittenBookContent::craftCopy);
                 cloned.setCount(i);
                 output.add(EntryStacks.of(cloned));
             }
             displays.add(new DefaultCustomShapelessDisplay(
                     CollectionUtils.map(inputs, EntryIngredient.Builder::build),
                     List.of(output.build()),
-                    Optional.of(recipe.id().location())));
+                    Optional.of(recipe.id().identifier())));
         }
         
         return displays;

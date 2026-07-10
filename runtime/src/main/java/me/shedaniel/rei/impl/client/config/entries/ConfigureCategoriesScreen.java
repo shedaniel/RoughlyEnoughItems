@@ -32,11 +32,12 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
@@ -46,7 +47,7 @@ import net.minecraft.sounds.SoundEvents;
 import java.util.*;
 import java.util.function.Supplier;
 
-public class ConfigureCategoriesScreen extends Screen {
+public class ConfigureCategoriesScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private final Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories;
     private final Set<CategoryIdentifier<?>> hiddenCategories;
     private final List<CategoryIdentifier<?>> categoryOrdering;
@@ -84,11 +85,10 @@ public class ConfigureCategoriesScreen extends Screen {
         super.init();
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
-            addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
-                minecraft.setScreen(parent);
+            addRenderableWidget(new Button.Plain(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+                minecraft.setScreenAndShow(parent);
                 this.parent = null;
-            }, Supplier::get) {
-            });
+            }, Supplier::get) {});
         }
         listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height));
         this.resetListEntries();
@@ -115,7 +115,7 @@ public class ConfigureCategoriesScreen extends Screen {
     
     @Override
     public void onClose() {
-        this.minecraft.setScreen(parent);
+        this.minecraft.setScreenAndShow(parent);
     }
     
     private static class ListWidget extends UpdatedListWidget<ListEntry> {
@@ -141,10 +141,10 @@ public class ConfigureCategoriesScreen extends Screen {
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (super.mouseClicked(mouseX, mouseY, button))
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+            if (super.mouseClicked(event, doubleClick))
                 return true;
-            ListEntry item = getItemAtPosition(mouseX, mouseY);
+            ListEntry item = getItemAtPosition(event.x(), event.y());
             if (item != null) {
                 client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 selectItem(item);
@@ -217,7 +217,7 @@ public class ConfigureCategoriesScreen extends Screen {
                 }).leftAligned();
             }
             {
-                this.upButton = new Button(0, 0, 20, 20, Component.literal("↑"), button -> {
+                this.upButton = new Button.Plain(0, 0, 20, 20, Component.literal("↑"), button -> {
                     int index = categoryOrdering.indexOf(configuration.getCategoryIdentifier());
                     if (index > 0) {
                         categoryOrdering.remove(index);
@@ -225,9 +225,8 @@ public class ConfigureCategoriesScreen extends Screen {
                         editedSink.run();
                         resetListEntries();
                     }
-                }, Supplier::get) {
-                };
-                this.downButton = new Button(0, 0, 20, 20, Component.literal("↓"), button -> {
+                }, Supplier::get) {};
+                this.downButton = new Button.Plain(0, 0, 20, 20, Component.literal("↓"), button -> {
                     int index = categoryOrdering.indexOf(configuration.getCategoryIdentifier());
                     if (index < categoryOrdering.size() - 1) {
                         categoryOrdering.remove(index);
@@ -235,8 +234,7 @@ public class ConfigureCategoriesScreen extends Screen {
                         editedSink.run();
                         resetListEntries();
                     }
-                }, Supplier::get) {
-                };
+                }, Supplier::get) {};
                 this.upButton.active = categoryOrdering.indexOf(configuration.getCategoryIdentifier()) > 0;
                 this.downButton.active = categoryOrdering.indexOf(configuration.getCategoryIdentifier()) < categoryOrdering.size() - 1;
             }
@@ -249,19 +247,16 @@ public class ConfigureCategoriesScreen extends Screen {
             }
             
             Minecraft client = Minecraft.getInstance();
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 100);
             configuration.getCategory().getIcon().render(graphics, new Rectangle(x + 2, y, 16, 16), mouseY, mouseY, delta);
-            graphics.pose().popPose();
             int xPos = x + 22;
             {
                 Component title = configuration.getCategory().getTitle();
                 int i = client.font.width(title);
                 if (i > entryWidth - 28) {
                     FormattedText titleTrimmed = FormattedText.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 0xFFFFFFFF);
                 } else {
-                    graphics.drawString(client.font, title.getVisualOrderText(), xPos, y + 1, 16777215);
+                    graphics.drawString(client.font, title.getVisualOrderText(), xPos, y + 1, 0xFFFFFFFF);
                 }
             }
             {
@@ -270,23 +265,25 @@ public class ConfigureCategoriesScreen extends Screen {
                 int i = client.font.width(id);
                 if (i > entryWidth - 28) {
                     FormattedText idTrimmed = FormattedText.composite(client.font.substrByWidth(id, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(idTrimmed), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(idTrimmed), x + 2, y + 12, 0xFF808080);
                 } else {
-                    graphics.drawString(client.font, id.getVisualOrderText(), xPos, y + 12, 8421504);
+                    graphics.drawString(client.font, id.getVisualOrderText(), xPos, y + 12, 0xFF808080);
                 }
             }
             boolean shown = !hiddenCategories.contains(configuration.getCategoryIdentifier());
             {
                 Component subtitle = Component.translatable("config.roughlyenoughitems.configureCategories.visibility." + shown)
                         .withStyle(shown ? ChatFormatting.GREEN : ChatFormatting.RED);
-                int i = graphics.drawString(client.font, subtitle.getVisualOrderText(), xPos, y + 22, 8421504);
+                graphics.drawString(client.font, subtitle, xPos, y + 22, 0xFF808080);
+                int i = xPos + client.font.width(subtitle);
                 visibilityToggleButton.getPoint().setLocation(i + 3, y + 22);
                 visibilityToggleButton.render(graphics, mouseX, mouseY, delta);
             }
             if (shown) {
                 Component subtitle = Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure." + filteringQuickCraftCategories.getOrDefault(configuration.getCategoryIdentifier(), configuration.isQuickCraftingEnabledByDefault()))
                         .withStyle(ChatFormatting.GRAY);
-                int i = graphics.drawString(client.font, subtitle.getVisualOrderText(), xPos, y + 32, 8421504);
+                graphics.drawString(client.font, subtitle, xPos, y + 32, 0xFF808080);
+                int i = xPos + client.font.width(subtitle);
                 quickCraftToggleButton.getPoint().setLocation(i + 3, y + 32);
                 quickCraftToggleButton.render(graphics, mouseX, mouseY, delta);
             } else {
@@ -294,10 +291,10 @@ public class ConfigureCategoriesScreen extends Screen {
             }
             upButton.setX(x + entryWidth - 20);
             upButton.setY(y + entryHeight / 2 - 21);
-            upButton.render(graphics, mouseX, mouseY, delta);
+            upButton.extractRenderState(graphics, mouseX, mouseY, delta);
             downButton.setX(x + entryWidth - 20);
             downButton.setY(y + entryHeight / 2 + 1);
-            downButton.render(graphics, mouseX, mouseY, delta);
+            downButton.extractRenderState(graphics, mouseX, mouseY, delta);
         }
         
         @Override

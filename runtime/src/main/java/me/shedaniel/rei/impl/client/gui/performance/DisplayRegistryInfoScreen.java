@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.performance;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -36,7 +35,7 @@ import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -63,25 +62,23 @@ public class DisplayRegistryInfoScreen extends ScreenWithMenu {
     public void init() {
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
-            addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+            addRenderableWidget(new Button.Plain(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 this.onClose.run();
                 this.onClose = null;
-            }, Supplier::get) {
-            });
+            }, Supplier::get) {});
         }
         {
             Component text = Component.translatable("text.rei.sort");
             Rectangle bounds = new Rectangle(this.width - 4 - Minecraft.getInstance().font.width(text) - 10, 4, Minecraft.getInstance().font.width(text) + 10, 20);
-            addRenderableWidget(new Button(bounds.x, bounds.y, bounds.width, bounds.height, text, button -> {
+            addRenderableWidget(new Button.Plain(bounds.x, bounds.y, bounds.width, bounds.height, text, button -> {
                 this.setMenu(new Menu(bounds, CollectionUtils.map(SortType.values(), type -> {
                     return ToggleMenuEntry.of(Component.translatable("text.rei.sort.by", type.name().toLowerCase(Locale.ROOT)), () -> false, o -> {
                         this.closeMenu();
                         this.sortType = type;
-                        this.init(this.minecraft, this.width, this.height);
+                        this.init(this.width, this.height);
                     });
                 }), false));
-            }, Supplier::get) {
-            });
+            }, Supplier::get) {});
         }
         list = new ListWidget();
         list.addItem(new EntryImpl(Component.literal("Total Displays"), DisplayRegistry.getInstance().size()));
@@ -145,7 +142,6 @@ public class DisplayRegistryInfoScreen extends ScreenWithMenu {
         
         @Override
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             graphics.drawString(Minecraft.getInstance().font, this.component.getVisualOrderText(), x + 4, y + 6, -1);
             FormattedCharSequence rightText = Component.translatable("text.rei.display_registry_analysis.displays", count).getVisualOrderText();
             graphics.drawString(Minecraft.getInstance().font, rightText, x + entryWidth - 6 - 8 - Minecraft.getInstance().font.width(rightText), y + 6, -1);

@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.screen.collapsible.selection;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
@@ -40,23 +39,23 @@ import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,7 +67,7 @@ import java.util.function.Supplier;
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 @ApiStatus.Internal
-public class CustomCollapsibleEntrySelectionScreen extends Screen {
+public class CustomCollapsibleEntrySelectionScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private final List<EntryStack<?>> selectedStacks;
     protected List<EntryStack<?>> selected = Lists.newArrayList();
     protected final ScrollingContainer scrolling = new ScrollingContainer() {
@@ -116,22 +115,20 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         this.searchField = new OverlaySearchField(0, 0, 0, 0);
         {
             Component selectAllText = Component.translatable("config.roughlyenoughitems.filteredEntries.selectAll");
-            this.selectAllButton = new Button(0, 0, Minecraft.getInstance().font.width(selectAllText) + 10, 20, selectAllText, button -> {
+            this.selectAllButton = new Button.Plain(0, 0, Minecraft.getInstance().font.width(selectAllText) + 10, 20, selectAllText, button -> {
                 this.points.clear();
                 this.points.add(new PointPair(new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2), new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2)));
-            }, Supplier::get) {
-            };
+            }, Supplier::get) {};
         }
         {
             Component selectNoneText = Component.translatable("config.roughlyenoughitems.filteredEntries.selectNone");
-            this.selectNoneButton = new Button(0, 0, Minecraft.getInstance().font.width(selectNoneText) + 10, 20, selectNoneText, button -> {
+            this.selectNoneButton = new Button.Plain(0, 0, Minecraft.getInstance().font.width(selectNoneText) + 10, 20, selectNoneText, button -> {
                 this.points.clear();
-            }, Supplier::get) {
-            };
+            }, Supplier::get) {};
         }
         {
             Component addText = Component.translatable("text.rei.collapsible.entries.custom.select.add");
-            this.addButton = new Button(0, 0, Minecraft.getInstance().font.width(addText) + 10, 20, addText, button -> {
+            this.addButton = new Button.Plain(0, 0, Minecraft.getInstance().font.width(addText) + 10, 20, addText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack<?> stack = entryStacks.get(i);
                     InnerStackEntry entry = entries.get(i);
@@ -141,12 +138,11 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
                         entry.dirty = true;
                     }
                 }
-            }, Supplier::get) {
-            };
+            }, Supplier::get) {};
         }
         {
             Component removeText = Component.translatable("text.rei.collapsible.entries.custom.select.remove");
-            this.removeButton = new Button(0, 0, Minecraft.getInstance().font.width(removeText) + 10, 20, removeText, button -> {
+            this.removeButton = new Button.Plain(0, 0, Minecraft.getInstance().font.width(removeText) + 10, 20, removeText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack<?> stack = entryStacks.get(i);
                     InnerStackEntry entry = entries.get(i);
@@ -155,23 +151,21 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
                         entry.dirty = true;
                     }
                 }
-            }, Supplier::get) {
-            };
+            }, Supplier::get) {};
         }
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
-            this.backButton = new Button(0, 0, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
-                minecraft.setScreen(parent);
+            this.backButton = new Button.Plain(0, 0, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+                minecraft.setScreenAndShow(parent);
                 this.parent = null;
-            }, Supplier::get) {
-            };
+            }, Supplier::get) {};
         }
         this.searchField.isMain = false;
     }
     
     @Override
     public void onClose() {
-        this.minecraft.setScreen(parent);
+        this.minecraft.setScreenAndShow(parent);
         this.parent = null;
     }
     
@@ -219,7 +213,6 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) entrySize()));
         int nextIndex = skip * innerBounds.width / entrySize();
         int i = nextIndex;
-        BatchedEntryRendererManager<InnerStackEntry> manager = new BatchedEntryRendererManager<>();
         for (; i < entryStacks.size(); i++) {
             EntryStack<?> stack = entryStacks.get(i);
             InnerStackEntry entry = entries.get(nextIndex);
@@ -227,32 +220,21 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
             if (entry.getBounds().y > bounds.getMaxY())
                 break;
             entry.entry(stack);
-            manager.add(entry);
+            entry.render(graphics, mouseX, mouseY, delta);
             nextIndex++;
         }
-        manager.render(graphics, mouseX, mouseY, delta);
         updatePosition(delta);
         scrolling.renderScrollBar(graphics, 0, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8F : 1F);
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 300);
-        this.searchField.render(graphics, mouseX, mouseY, delta);
-        this.selectAllButton.render(graphics, mouseX, mouseY, delta);
-        this.selectNoneButton.render(graphics, mouseX, mouseY, delta);
-        this.addButton.render(graphics, mouseX, mouseY, delta);
-        this.removeButton.render(graphics, mouseX, mouseY, delta);
-        graphics.pose().popPose();
+        this.searchField.extractRenderState(graphics, mouseX, mouseY, delta);
+        this.selectAllButton.extractRenderState(graphics, mouseX, mouseY, delta);
+        this.selectNoneButton.extractRenderState(graphics, mouseX, mouseY, delta);
+        this.addButton.extractRenderState(graphics, mouseX, mouseY, delta);
+        this.removeButton.extractRenderState(graphics, mouseX, mouseY, delta);
         
         graphics.disableScissor();
-        graphics.drawSpecial(source -> {
-            VertexConsumer buffer = source.getBuffer(RenderType.gui());
-            Matrix4f matrix = graphics.pose().last().pose();
-            buffer.addVertex(matrix, 0, bounds.y + 4, 0.0F).setColor(0, 0, 0, 0);
-            buffer.addVertex(matrix, width, bounds.y + 4, 0.0F).setColor(0, 0, 0, 0);
-            buffer.addVertex(matrix, width, bounds.y, 0.0F).setColor(0, 0, 0, 255);
-            buffer.addVertex(matrix, 0, bounds.y, 0.0F).setColor(0, 0, 0, 255);
-        });
+        graphics.fillGradient(0, bounds.y, width, bounds.y + 4, 0xFF000000, 0x00000000);
         
-        this.backButton.render(graphics, mouseX, mouseY, delta);
+        this.backButton.extractRenderState(graphics, mouseX, mouseY, delta);
         
         if (tooltip != null) {
             ScreenOverlayImpl.getInstance().renderTooltip(graphics, tooltip);
@@ -291,10 +273,10 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-        if (scrolling.mouseDragged(mouseX, mouseY, button, dx, dy))
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (scrolling.mouseDragged(event.x(), event.y(), event.button(), deltaX, deltaY))
             return true;
-        return super.mouseDragged(mouseX, mouseY, button, dx, dy);
+        return super.mouseDragged(event, deltaX, deltaY);
     }
     
     private void updatePosition(float delta) {
@@ -348,74 +330,74 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (scrolling.updateDraggingState(mouseX, mouseY, button))
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (scrolling.updateDraggingState(event.x(), event.y(), event.button()))
             return true;
         
-        if (getBounds().contains(mouseX, mouseY)) {
-            if (searchField.mouseClicked(mouseX, mouseY, button)) {
+        if (getBounds().contains(event.x(), event.y())) {
+            if (searchField.mouseClicked(event, doubleClick)) {
                 this.points.clear();
                 return true;
-            } else if (selectAllButton.mouseClicked(mouseX, mouseY, button)) {
+            } else if (selectAllButton.mouseClicked(event, doubleClick)) {
                 return true;
-            } else if (selectNoneButton.mouseClicked(mouseX, mouseY, button)) {
+            } else if (selectNoneButton.mouseClicked(event, doubleClick)) {
                 return true;
-            } else if (addButton.mouseClicked(mouseX, mouseY, button)) {
+            } else if (addButton.mouseClicked(event, doubleClick)) {
                 return true;
-            } else if (removeButton.mouseClicked(mouseX, mouseY, button)) {
+            } else if (removeButton.mouseClicked(event, doubleClick)) {
                 return true;
-            } else if (button == 0) {
-                if (!Screen.hasShiftDown()) {
+            } else if (event.button() == 0) {
+                if (!event.hasShiftDown()) {
                     this.points.clear();
                 }
-                this.points.add(new PointPair(new Point(mouseX, mouseY + scrolling.scrollAmount()), null));
+                this.points.add(new PointPair(new Point(event.x(), event.y() + scrolling.scrollAmount()), null));
                 return true;
             }
         }
         
-        return backButton.mouseClicked(mouseX, mouseY, button);
+        return backButton.mouseClicked(event, doubleClick);
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (button == 0 && !points.isEmpty()) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (event.button() == 0 && !points.isEmpty()) {
             PointPair pair = this.points.get(points.size() - 1);
             if (pair.secondPoint() == null) {
-                this.points.set(points.size() - 1, new PointPair(pair.firstPoint(), new Point(mouseX, mouseY + scrolling.scrollAmount())));
+                this.points.set(points.size() - 1, new PointPair(pair.firstPoint(), new Point(event.x(), event.y() + scrolling.scrollAmount())));
                 return true;
             }
         }
         
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
     
     @Override
-    public boolean charTyped(char chr, int keyCode) {
+    public boolean charTyped(CharacterEvent event) {
         for (GuiEventListener element : children()) {
-            if (element.charTyped(chr, keyCode)) {
+            if (element.charTyped(event)) {
                 return true;
             }
         }
         
-        return super.charTyped(chr, keyCode);
+        return super.charTyped(event);
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         for (GuiEventListener element : children()) {
-            if (element.keyPressed(keyCode, scanCode, modifiers)) {
+            if (element.keyPressed(event)) {
                 return true;
             }
         }
         
-        if (Screen.isSelectAll(keyCode)) {
+        if (event.isSelectAll()) {
             this.points.clear();
             this.points.add(new PointPair(new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2), new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2)));
             return true;
         }
         
-        if (keyCode == 256 && this.shouldCloseOnEsc()) {
-            this.backButton.onPress();
+        if (event.isEscape() && this.shouldCloseOnEsc()) {
+            this.backButton.onPress(event);
             return true;
         }
         return false;

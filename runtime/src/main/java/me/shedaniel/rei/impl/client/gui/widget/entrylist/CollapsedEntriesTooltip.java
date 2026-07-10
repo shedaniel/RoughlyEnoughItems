@@ -28,7 +28,8 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -58,28 +59,25 @@ public class CollapsedEntriesTooltip implements ClientTooltipComponent, TooltipC
     }
     
     @Override
-    public void renderImage(Font font, int x, int y, int weight, int height, GuiGraphics graphics) {
+    public void extractImage(Font font, int x, int y, int weight, int height, GuiGraphicsExtractor graphics) {
+        GuiGraphics guiGraphics = GuiGraphics.of(graphics);
         int entrySize = EntryListWidget.entrySize();
         int w = Math.max(1, MAX_WIDTH / entrySize);
         int i = 0;
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 50);
         for (EntryStack<?> entry : stack.getIngredient()) {
             int x1 = x + (i % w) * entrySize;
             int y1 = y + (i / w) * entrySize;
             i++;
             if (i / w > 3 - 1) {
-                graphics.pose().translate(0, 0, 200);
                 Component text = Component.literal("+" + (stack.getIngredient().size() - w * 3 + 1)).withStyle(ChatFormatting.GRAY);
-                graphics.drawSpecial(source -> {
-                    font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, graphics.pose().last().pose(), source, Font.DisplayMode.NORMAL, 0, 15728880);
-                });
-                graphics.flush();
+                guiGraphics.pose().pushMatrix();
+                guiGraphics.pose().translate(x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1);
+                guiGraphics.drawString(font, text, 0, 0, -1);
+                guiGraphics.pose().popMatrix();
                 break;
             } else {
-                entry.render(graphics, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
+                entry.render(guiGraphics, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
             }
         }
-        graphics.pose().popPose();
     }
 }

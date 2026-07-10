@@ -38,7 +38,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.rows.*;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.Nullable;
 
@@ -93,14 +93,14 @@ public class FavoritesPanel extends WidgetWithBounds {
         
         if (expendState.value()) {
             graphics.enableScissor(innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY());
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, -scroller.scrollAmount(), 0);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(0, (float) -scroller.scrollAmount());
             int y = innerBounds.y;
             for (FavoritesPanelRow row : rows.get()) {
                 row.render(graphics, innerBounds, innerBounds.x, y, innerBounds.width, row.getRowHeight(), mouseX, mouseY + scroller.scrollAmountInt(), delta);
                 y += row.getRowHeight();
             }
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
             graphics.disableScissor();
         }
     }

@@ -27,13 +27,12 @@ import me.shedaniel.rei.impl.init.PrimitivePlatformAdapter;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.fml.loading.FMLLoader;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
 public class PrimitivePlatformAdapterImpl implements PrimitivePlatformAdapter {
     @Override
     public boolean isClient() {
-        return FMLEnvironment.dist == Dist.CLIENT;
+        return FMLEnvironment.getDist() == Dist.CLIENT;
     }
     
     @Override
@@ -42,7 +41,7 @@ public class PrimitivePlatformAdapterImpl implements PrimitivePlatformAdapter {
     
     @Override
     public boolean isDev() {
-        return !FMLLoader.isProduction();
+        return !FMLEnvironment.isProduction();
     }
     
     @Override

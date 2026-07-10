@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
@@ -48,8 +47,11 @@ import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
@@ -157,7 +159,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         this.widgets.addAll(setupDisplay);
         Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
-            this.widgets.add(Widgets.withTranslate(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), Component.literal(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category), 0, 0, 100));
+            this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), Component.literal(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category));
 
         this.initTabs(this.bounds.width);
         this.widgets.addAll(this.tabs.widgets());
@@ -188,39 +190,39 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (scrolling.updateDraggingState(mouseX, mouseY, button)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (scrolling.updateDraggingState(event.x(), event.y(), event.button())) {
             scrollBarAlpha = 1;
             return true;
         }
-        if (ConfigObject.getInstance().getNextPageKeybind().matchesMouse(button)) {
+        if (ConfigObject.getInstance().getNextPageKeybind().matchesMouse(event.button())) {
             selectedRecipeIndex++;
             if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
                 selectedRecipeIndex = 0;
             init();
             return true;
-        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesMouse(button)) {
+        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesMouse(event.button())) {
             selectedRecipeIndex--;
             if (selectedRecipeIndex < 0)
                 selectedRecipeIndex = categoryMap.get(categories.get(selectedCategoryIndex)).size() - 1;
             init();
             return true;
-        } else if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesMouse(button)) {
+        } else if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesMouse(event.button())) {
             if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+                minecraft.setScreenAndShow(REIRuntimeImpl.getInstance().getLastDisplayScreen());
             } else {
-                minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
+                minecraft.setScreenAndShow(REIRuntime.getInstance().getPreviousScreen());
             }
             return true;
         }
         for (GuiEventListener entry : children())
-            if (entry.mouseClicked(mouseX, mouseY, button)) {
+            if (entry.mouseClicked(event, doubleClick)) {
                 setFocused(entry);
-                if (button == 0)
+                if (event.button() == 0)
                     setDragging(true);
                 return true;
             }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
     
     @Override
@@ -237,11 +239,11 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
     }
     
     @Override
-    public boolean charTyped(char char_1, int int_1) {
+    public boolean charTyped(CharacterEvent event) {
         for (GuiEventListener listener : children())
-            if (listener.charTyped(char_1, int_1))
+            if (listener.charTyped(event))
                 return true;
-        return super.charTyped(char_1, int_1);
+        return super.charTyped(event);
     }
     
     @Override
@@ -310,35 +312,34 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         super.render(graphics, mouseX, mouseY, delta);
         getOverlay().render(graphics, mouseX, mouseY, delta);
         for (Widget widget : widgets) {
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             widget.render(graphics, mouseX, mouseY, delta);
         }
     }
     
     @Override
-    public boolean mouseReleased(double double_1, double double_2, int int_1) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         for (GuiEventListener entry : children())
-            if (entry.mouseReleased(double_1, double_2, int_1))
+            if (entry.mouseReleased(event))
                 return true;
-        return super.mouseReleased(double_1, double_2, int_1);
+        return super.mouseReleased(event);
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
-        if (scrolling.mouseDragged(mouseX, mouseY, int_1, double_3, double_4)) {
+    public boolean mouseDragged(MouseButtonEvent event, double double_3, double double_4) {
+        if (scrolling.mouseDragged(event.x(), event.y(), event.button(), double_3, double_4)) {
             scrollBarAlphaFutureTime = System.currentTimeMillis();
             scrollBarAlphaFuture = 1f;
             return true;
         }
         for (GuiEventListener entry : children())
-            if (entry.mouseDragged(mouseX, mouseY, int_1, double_3, double_4))
+            if (entry.mouseDragged(event, double_3, double_4))
                 return true;
-        return super.mouseDragged(mouseX, mouseY, int_1, double_3, double_4);
+        return super.mouseDragged(event, double_3, double_4);
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(keyCode, scanCode)) {
+    public boolean keyPressed(KeyEvent event) {
+        if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(event.key(), event.scancode())) {
             if (categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex++;
                 if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
@@ -347,7 +348,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 return true;
             }
             return false;
-        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesKey(keyCode, scanCode)) {
+        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesKey(event.key(), event.scancode())) {
             if (categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex--;
                 if (selectedRecipeIndex < 0)
@@ -358,13 +359,13 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             return false;
         }
         for (GuiEventListener element : children())
-            if (element.keyPressed(keyCode, scanCode, modifiers))
+            if (element.keyPressed(event))
                 return true;
-        if (keyCode == 256) {
-            Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
+        if (event.isEscape()) {
+            Minecraft.getInstance().setScreenAndShow(REIRuntime.getInstance().getPreviousScreen());
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
     
     private class ButtonListWidget extends Widget {
@@ -377,7 +378,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         @Override
         public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             int yOffset = 0;
-            graphics.pose().pushPose();
+            graphics.pose().pushMatrix();
             graphics.enableScissor(scrolling.getBounds().x, scrolling.getBounds().y, scrolling.getBounds().getMaxX(), scrolling.getBounds().getMaxY());
             for (Button button : buttonList) {
                 button.getBounds().y = scrollListBounds.y + 1 + yOffset - scrolling.scrollAmountInt();
@@ -394,7 +395,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             }
             scrolling.renderScrollBar(graphics, 0, scrollBarAlpha);
             graphics.disableScissor();
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }
         
         @Override

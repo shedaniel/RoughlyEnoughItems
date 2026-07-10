@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api.client.gui.widgets;
 
 import me.shedaniel.math.Rectangle;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 
 import java.util.function.Supplier;
 

@@ -41,11 +41,11 @@ import me.shedaniel.rei.impl.client.gui.modules.entries.ToggleMenuEntry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -89,7 +89,7 @@ public class ConfigOptionValueWidget {
                 .color(0xFFE0E0E0)
                 .hoveredColor(0xFFE0E0E0)
                 .onRender((poses, l) -> {
-                    if (MatrixUtils.transform(poses.pose().last().pose(), l.getBounds()).contains(PointHelper.ofMouse())) {
+                    if (MatrixUtils.transform(poses.pose(), l.getBounds()).contains(PointHelper.ofMouse())) {
                         l.setMessage(text[0].copy().withStyle(ChatFormatting.UNDERLINE));
                     } else {
                         l.setMessage(text[0]);
@@ -103,7 +103,7 @@ public class ConfigOptionValueWidget {
         } else if (option.getEntry() instanceof OptionValueEntry.Configure<T>) {
             label.clickable().onClick($ -> {
                 ((OptionValueEntry.Configure<T>) option.getEntry()).configure(access, option, () -> {
-                    Minecraft.getInstance().setScreen((Screen) access);
+                    Minecraft.getInstance().setScreenAndShow((Screen) access);
                     setText.accept(option.getEntry().getOption(access.get(option)));
                 });
             });
@@ -111,8 +111,8 @@ public class ConfigOptionValueWidget {
         
         return Widgets.concatWithBounds(() -> new Rectangle(-label.getBounds().width, 0, label.getBounds().width + 8, 14),
                 label,
-                Widgets.withTranslate(Widgets.createTexturedWidget(ResourceLocation.parse("roughlyenoughitems:textures/gui/config/selector.png"),
-                        new Rectangle(1, 1, 4, 6), 0, 0, 1, 1, 1, 1), 0, 0.5, 0)
+                Widgets.withTranslate(Widgets.createTexturedWidget(Identifier.parse("roughlyenoughitems:textures/gui/config/selector.png"),
+                        new Rectangle(1, 1, 4, 6), 0, 0, 1, 1, 1, 1), 0, 0.5)
         );
     }
     
@@ -121,7 +121,7 @@ public class ConfigOptionValueWidget {
         BiConsumer<GuiGraphics, Label> render = label.getOnRender();
         label.onRender((poses, $) -> {
             render.accept(poses, $);
-            bounds.setBounds(MatrixUtils.transform(poses.pose().last().pose(), label.getBounds()));
+            bounds.setBounds(MatrixUtils.transform(poses.pose(), label.getBounds()));
         });
         int noOfOptions = selection.getOptions().size();
         if (noOfOptions == 2) {
@@ -138,7 +138,7 @@ public class ConfigOptionValueWidget {
                     }
                     
                     return ToggleMenuEntry.of(selectionOption, () -> false, o -> {
-                        ((REIConfigScreen) Minecraft.getInstance().screen).closeMenu();
+                        ((REIConfigScreen) Minecraft.getInstance().gui.screen()).closeMenu();
                         access.set(option, opt);
                         setText.accept(selection.getOption(opt));
                     });

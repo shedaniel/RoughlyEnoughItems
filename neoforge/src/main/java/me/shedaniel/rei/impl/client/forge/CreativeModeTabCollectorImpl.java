@@ -25,8 +25,6 @@ package me.shedaniel.rei.impl.client.forge;
 
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.impl.common.InternalLogger;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.CreativeModeTab;
@@ -48,10 +46,7 @@ public class CreativeModeTabCollectorImpl {
             if (tab.getType() != CreativeModeTab.Type.HOTBAR && tab.getType() != CreativeModeTab.Type.INVENTORY) {
                 try {
                     CreativeModeTab.ItemDisplayBuilder builder = new CreativeModeTab.ItemDisplayBuilder(tab, featureFlags);
-                    ResourceKey<CreativeModeTab> resourceKey = BuiltInRegistries.CREATIVE_MODE_TAB
-                            .getResourceKey(tab)
-                            .orElseThrow(() -> new IllegalStateException("Unregistered creative tab: " + tab));
-                    EventHooks.onCreativeModeTabBuildContents(tab, resourceKey, tab.displayItemsGenerator, parameters, (stack, visibility) -> {
+                    EventHooks.onCreativeModeTabBuildContents(tab, tab.displayItemsGenerator, parameters, (stack, visibility) -> {
                         if (visibility == CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY) return;
                         builder.accept(stack, visibility);
                     });

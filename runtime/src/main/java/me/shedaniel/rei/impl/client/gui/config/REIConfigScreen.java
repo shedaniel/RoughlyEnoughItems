@@ -52,10 +52,14 @@ import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.widget.HoleWidget;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.TextFieldWidget;
 import net.minecraft.ChatFormatting;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.Mutable;
@@ -68,7 +72,7 @@ import java.util.function.BiConsumer;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
-public class REIConfigScreen extends Screen implements ConfigAccess {
+public class REIConfigScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen implements ConfigAccess {
     private final Screen parent;
     private final List<OptionCategory> categories;
     private final List<Widget> widgets = new ArrayList<>();
@@ -188,7 +192,7 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
         }
         
         this.widgets.add(Widgets.createButton(new Rectangle(width / 2 - 150 - 10, height - 26, 150, 20), translatable("gui.cancel")).onClick(button -> {
-            Minecraft.getInstance().setScreen(this.parent);
+            Minecraft.getInstance().setScreenAndShow(this.parent);
         }));
         this.widgets.add(Widgets.createButton(new Rectangle(width / 2 + 10, height - 26, 150, 20), translatable("gui.done")).onClick(button -> {
             for (OptionCategory optionCategory : this.categories) {
@@ -205,7 +209,7 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
             if (REIRuntimeImpl.getSearchField() != null) {
                 ScreenOverlayImpl.getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
             }
-            Minecraft.getInstance().setScreen(this.parent);
+            Minecraft.getInstance().setScreenAndShow(this.parent);
         }));
     }
     
@@ -235,7 +239,7 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
         if (searching) {
             setSearching(false);
         } else {
-            this.minecraft.setScreen(this.parent);
+            this.minecraft.setScreenAndShow(this.parent);
         }
     }
     
@@ -245,54 +249,54 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     }
     
     @Override
-    public boolean charTyped(char character, int modifiers) {
-        if (menu != null && menu.charTyped(character, modifiers))
+    public boolean charTyped(CharacterEvent event) {
+        if (menu != null && menu.charTyped(event))
             return true;
         for (GuiEventListener listener : children())
-            if (listener.charTyped(character, modifiers))
+            if (listener.charTyped(event))
                 return true;
-        return super.charTyped(character, modifiers);
+        return super.charTyped(event);
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (menu != null && menu.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (menu != null && menu.mouseDragged(event, deltaX, deltaY))
             return true;
         for (GuiEventListener entry : children())
-            if (entry.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+            if (entry.mouseDragged(event, deltaX, deltaY))
                 return true;
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(event, deltaX, deltaY);
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (menu != null) {
-            if (!menu.mouseClicked(mouseX, mouseY, button))
+            if (!menu.mouseClicked(event, doubleClick))
                 closeMenu();
             return true;
         }
         
         if (this.focusedKeycodeOption != null && this.partialKeycode != null) {
             if (this.partialKeycode.isUnknown()) {
-                this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(button));
+                this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(event.button()));
             } else if (this.partialKeycode.getType() == InputConstants.Type.KEYSYM) {
                 Modifier modifier = this.partialKeycode.getModifier();
                 int code = this.partialKeycode.getKeyCode().getValue();
-                if (Minecraft.ON_OSX ? code == 343 || code == 347 : code == 341 || code == 345) {
+                if (Util.getPlatform() == Util.OS.OSX ? code == 343 || code == 347 : code == 341 || code == 345) {
                     this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), true, modifier.hasShift()));
-                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(button));
+                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(event.button()));
                     return true;
                 }
                 
                 if (code == 344 || code == 340) {
                     this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), modifier.hasControl(), true));
-                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(button));
+                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(event.button()));
                     return true;
                 }
                 
                 if (code == 342 || code == 346) {
                     this.partialKeycode.setModifier(Modifier.of(true, modifier.hasControl(), modifier.hasShift()));
-                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(button));
+                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(event.button()));
                     return true;
                 }
             }
@@ -300,7 +304,7 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
             return true;
         }
         
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
     
     @Override
@@ -323,8 +327,8 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (menu != null && menu.mouseReleased(mouseX, mouseY, button))
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (menu != null && menu.mouseReleased(event))
             return true;
         if (this.focusedKeycodeOption != null && this.partialKeycode != null && !this.partialKeycode.isUnknown()) {
             this.set(this.focusedKeycodeOption, this.partialKeycode);
@@ -332,9 +336,9 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
             return true;
         }
         for (GuiEventListener entry : children())
-            if (entry.mouseReleased(mouseX, mouseY, button))
+            if (entry.mouseReleased(event))
                 return true;
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
     
     @Override
@@ -348,45 +352,45 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (this.focusedKeycodeOption != null) {
-            if (keyCode != 256) {
+            if (event.key() != 256) {
                 if (this.partialKeycode.isUnknown()) {
-                    this.partialKeycode.setKeyCode(InputConstants.getKey(keyCode, scanCode));
+                    this.partialKeycode.setKeyCode(InputConstants.getKey(event));
                 } else {
                     Modifier modifier = this.partialKeycode.getModifier();
                     if (this.partialKeycode.getType() == InputConstants.Type.KEYSYM) {
                         int code = this.partialKeycode.getKeyCode().getValue();
-                        if (Minecraft.ON_OSX ? code == 343 || code == 347 : code == 341 || code == 345) {
+                        if (Util.getPlatform() == Util.OS.OSX ? code == 343 || code == 347 : code == 341 || code == 345) {
                             this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), true, modifier.hasShift()));
-                            this.partialKeycode.setKeyCode(InputConstants.getKey(keyCode, scanCode));
+                            this.partialKeycode.setKeyCode(InputConstants.getKey(event));
                             return true;
                         }
                         
                         if (code == 344 || code == 340) {
                             this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), modifier.hasControl(), true));
-                            this.partialKeycode.setKeyCode(InputConstants.getKey(keyCode, scanCode));
+                            this.partialKeycode.setKeyCode(InputConstants.getKey(event));
                             return true;
                         }
                         
                         if (code == 342 || code == 346) {
                             this.partialKeycode.setModifier(Modifier.of(true, modifier.hasControl(), modifier.hasShift()));
-                            this.partialKeycode.setKeyCode(InputConstants.getKey(keyCode, scanCode));
+                            this.partialKeycode.setKeyCode(InputConstants.getKey(event));
                             return true;
                         }
                     }
                     
-                    if (Minecraft.ON_OSX ? keyCode == 343 || keyCode == 347 : keyCode == 341 || keyCode == 345) {
+                    if (event.hasControlDown()) {
                         this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), true, modifier.hasShift()));
                         return true;
                     }
                     
-                    if (keyCode == 344 || keyCode == 340) {
+                    if (event.hasShiftDown()) {
                         this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), modifier.hasControl(), true));
                         return true;
                     }
                     
-                    if (keyCode == 342 || keyCode == 346) {
+                    if (event.hasAltDown()) {
                         this.partialKeycode.setModifier(Modifier.of(true, modifier.hasControl(), modifier.hasShift()));
                         return true;
                     }
@@ -399,18 +403,18 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
             return true;
         }
         
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
     
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    public boolean keyReleased(KeyEvent event) {
         if (this.focusedKeycodeOption != null && this.partialKeycode != null) {
             this.set(this.focusedKeycodeOption, this.partialKeycode);
             this.focusKeycode(null);
             return true;
         }
         
-        return super.keyReleased(keyCode, scanCode, modifiers);
+        return super.keyReleased(event);
     }
     
     @Override
@@ -419,7 +423,7 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
             this.widgets.remove(this.menuWidget);
         }
         this.menu = menu;
-        this.widgets.add(this.menuWidget = Widgets.withTranslate(menu, 0, 0, 300));
+        this.widgets.add(this.menuWidget = menu);
     }
     
     @Override
@@ -464,7 +468,7 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     
     public void setSearching(boolean searching) {
         this.searching = searching;
-        this.init(this.minecraft, this.width, this.height);
+        this.init(this.width, this.height);
     }
     
     public boolean isSearching() {

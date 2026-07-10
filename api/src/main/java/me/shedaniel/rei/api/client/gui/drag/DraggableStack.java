@@ -27,7 +27,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 
 public interface DraggableStack extends DraggableComponent<EntryStack<?>> {
     static DraggableStack from(DraggableComponent<EntryStack<?>> component) {

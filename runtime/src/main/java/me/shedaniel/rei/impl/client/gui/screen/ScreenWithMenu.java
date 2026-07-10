@@ -24,12 +24,13 @@
 package me.shedaniel.rei.impl.client.gui.screen;
 
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-public class ScreenWithMenu extends Screen {
+public class ScreenWithMenu extends REIScreen {
     @Nullable
     private Menu menu;
     
@@ -41,10 +42,7 @@ public class ScreenWithMenu extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         super.render(graphics, mouseX, mouseY, delta);
         if (this.menu != null) {
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 400);
             this.menu.render(graphics, mouseX, mouseY, delta);
-            graphics.pose().popPose();
         }
     }
     
@@ -57,20 +55,20 @@ public class ScreenWithMenu extends Screen {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (this.menu != null) {
-            if (!this.menu.mouseClicked(mouseX, mouseY, button))
+            if (!this.menu.mouseClicked(event, doubleClick))
                 this.menu = null;
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (this.menu != null && this.menu.mouseReleased(mouseX, mouseY, button))
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (this.menu != null && this.menu.mouseReleased(event))
             return true;
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
     
     @Override
@@ -81,9 +79,9 @@ public class ScreenWithMenu extends Screen {
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (this.menu != null && this.menu.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (this.menu != null && this.menu.mouseDragged(event, deltaX, deltaY))
             return true;
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(event, deltaX, deltaY);
     }
 }

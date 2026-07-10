@@ -37,13 +37,13 @@ import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 public class DisplaySerializerRegistryImpl implements DisplaySerializerRegistry {
-    private final BiMap<ResourceLocation, DisplaySerializer<?>> serializers = HashBiMap.create();
+    private final BiMap<Identifier, DisplaySerializer<?>> serializers = HashBiMap.create();
     
     @Override
     public ReloadStage getStage() {
@@ -56,20 +56,20 @@ public class DisplaySerializerRegistryImpl implements DisplaySerializerRegistry 
     }
     
     @Override
-    public <D extends Display> void register(ResourceLocation id, DisplaySerializer<D> serializer) {
+    public <D extends Display> void register(Identifier id, DisplaySerializer<D> serializer) {
         InternalLogger.getInstance().debug("Added display serializer [%s] %s", id, serializer);
         this.serializers.put(id, serializer);
     }
     
     @Override
     @Nullable
-    public DisplaySerializer<?> get(ResourceLocation id) {
+    public DisplaySerializer<?> get(Identifier id) {
         return this.serializers.get(id);
     }
     
     @Override
     @Nullable
-    public ResourceLocation getId(DisplaySerializer<?> serializer) {
+    public Identifier getId(DisplaySerializer<?> serializer) {
         return this.serializers.inverse().get(serializer);
     }
     
@@ -95,7 +95,7 @@ public class DisplaySerializerRegistryImpl implements DisplaySerializerRegistry 
     }
     
     private Codec<DisplaySerializer<?>> serializerCodec() {
-        return ResourceLocation.CODEC.flatXmap(id -> {
+        return Identifier.CODEC.flatXmap(id -> {
             return Optional.ofNullable(this.get(id))
                     .map(DataResult::success)
                     .orElseGet(() -> DataResult.error(() -> "Unknown display serializer id: " + id));
@@ -112,7 +112,7 @@ public class DisplaySerializerRegistryImpl implements DisplaySerializerRegistry 
         return new StreamCodec<>() {
             @Override
             public DisplaySerializer<?> decode(ByteBuf object) {
-                ResourceLocation id = new FriendlyByteBuf(object).readResourceLocation();
+                Identifier id = new FriendlyByteBuf(object).readIdentifier();
                 DisplaySerializer<?> serializer = get(id);
                 if (serializer == null) {
                     throw new NullPointerException("Unknown display serializer id: " + id);
@@ -124,7 +124,7 @@ public class DisplaySerializerRegistryImpl implements DisplaySerializerRegistry 
             @Override
             public void encode(ByteBuf buf, DisplaySerializer<?> serializer) {
                 if (isRegistered(serializer)) {
-                    new FriendlyByteBuf(buf).writeResourceLocation(getId(serializer));
+                    new FriendlyByteBuf(buf).writeIdentifier(getId(serializer));
                 } else {
                     throw new IllegalArgumentException("Unregistered display serializer: " + serializer);
                 }

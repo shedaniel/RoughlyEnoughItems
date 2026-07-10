@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -47,10 +47,10 @@ public class VanillaWrappedWidget extends Widget {
         if (element instanceof Widget widget) {
             widget.render(graphics, mouseX, mouseY, delta);
         } else {
-            graphics.pose().pushPose();
+            graphics.pose().pushMatrix();
             if (element instanceof Renderable widget)
-                widget.render(graphics, mouseX, mouseY, delta);
-            graphics.pose().popPose();
+                widget.extractRenderState(graphics, mouseX, mouseY, delta);
+            graphics.pose().popMatrix();
         }
     }
     

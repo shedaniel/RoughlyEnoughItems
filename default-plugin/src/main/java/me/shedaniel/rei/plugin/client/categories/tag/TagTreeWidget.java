@@ -28,8 +28,10 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.Holder;
 
 import java.util.ArrayList;
@@ -91,7 +93,7 @@ public class TagTreeWidget<S, T> extends WidgetWithBounds {
                     rootWidget.getBounds().getMaxY() + 6, rootWidget.getBounds().getMaxY() + 16, 0xFFFFFFFF);
             childWidget.getBounds().setLocation(getBounds().getCenterX() - childrenTotalWidth / 2 + x,
                     this.rootWidget.getBounds().getMaxY() + 16);
-            if (this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose().last().pose(), childWidget.getBounds()))) {
+            if (this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose(), childWidget.getBounds()))) {
                 childWidget.render(graphics, mouseX, mouseY, delta);
             }
             x += childWidget.getBounds().width + 6;
@@ -104,22 +106,22 @@ public class TagTreeWidget<S, T> extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        return super.mouseClicked(event, doubleClick);
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         for (GuiEventListener element : children())
-            if (element.mouseReleased(mouseX, mouseY, button))
+            if (element.mouseReleased(event))
                 return true;
         return false;
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         for (GuiEventListener element : children())
-            if (element.keyPressed(keyCode, scanCode, modifiers))
+            if (element.keyPressed(event))
                 return true;
         return false;
     }

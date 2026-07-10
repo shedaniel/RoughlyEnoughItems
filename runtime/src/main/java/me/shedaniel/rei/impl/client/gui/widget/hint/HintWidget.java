@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.hint;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -37,8 +36,9 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
@@ -116,23 +116,19 @@ public class HintWidget extends WidgetWithBounds {
         this.scroll.setTarget(ScrollingContainer.handleBounceBack(scroll.target(), this.contentHeight - (this.bounds.height - 8 - 9) - 9, delta, .08));
         this.scroll.update(delta);
         
-        graphics.pose().pushPose();
         int background = 0xf0100010;
         int color1 = 0x505000ff;
         int color2 = color1;
         int x = this.bounds.x, y = this.bounds.y, width = this.bounds.width, height = this.bounds.height;
-        graphics.fillGradient(x, y - 1, x + width, y, 400, background, background);
-        graphics.fillGradient(x, y + height, x + width, y + height + 1, 400, background, background);
-        graphics.fillGradient(x, y, x + width, y + height, 400, background, background);
-        graphics.fillGradient(x - 1, y, x, y + height, 400, background, background);
-        graphics.fillGradient(x + width, y, x + width + 1, y + height, 400, background, background);
-        graphics.fillGradient(x, y + 1, x + 1, y + height - 1, 400, color1, color2);
-        graphics.fillGradient(x + width - 1, y + 1, x + width, y + height - 1, 400, color1, color2);
-        graphics.fillGradient(x, y, x + width, y + 1, 400, color1, color1);
-        graphics.fillGradient(x, y + height - 1, x + width, y + height, 400, color2, color2);
-        graphics.pose().popPose();
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 450);
+        graphics.fillGradient(x, y - 1, x + width, y, background, background);
+        graphics.fillGradient(x, y + height, x + width, y + height + 1, background, background);
+        graphics.fillGradient(x, y, x + width, y + height, background, background);
+        graphics.fillGradient(x - 1, y, x, y + height, background, background);
+        graphics.fillGradient(x + width, y, x + width + 1, y + height, background, background);
+        graphics.fillGradient(x, y + 1, x + 1, y + height - 1, color1, color2);
+        graphics.fillGradient(x + width - 1, y + 1, x + width, y + height - 1, color1, color2);
+        graphics.fillGradient(x, y, x + width, y + 1, color1, color1);
+        graphics.fillGradient(x, y + height - 1, x + width, y + height, color2, color2);
         int lineY = y + 4;
         
         try (CloseableScissors scissors = Widget.scissor(graphics, new Rectangle(x + 4, y + 4, width - 8, height - 8 - 9 - 2))) {
@@ -155,8 +151,6 @@ public class HintWidget extends WidgetWithBounds {
         }
         graphics.drawString(font, okay, this.okayBounds.x, this.okayBounds.y, 0xFF999999);
         
-        graphics.pose().popPose();
-        
         if (this.bounds.contains(mouseX, mouseY)) {
             ScreenOverlayImpl.getInstance().clearTooltips();
         }
@@ -168,14 +162,14 @@ public class HintWidget extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.okayBounds.contains(mouseX, mouseY)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (this.okayBounds.contains(event.x(), event.y())) {
             this.parent.removeHint(this);
             Widgets.produceClickSound();
             return true;
         }
         
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
     
     @Override

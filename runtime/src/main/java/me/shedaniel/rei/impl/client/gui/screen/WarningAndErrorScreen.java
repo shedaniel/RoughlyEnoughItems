@@ -28,20 +28,21 @@ import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.widget.DynamicErrorFreeEntryListWidget;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.Tuple;
+import me.shedaniel.rei.api.common.util.Pair;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.net.URI;
@@ -52,16 +53,16 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class WarningAndErrorScreen extends Screen {
+public class WarningAndErrorScreen extends REIScreen {
     private AbstractWidget buttonExit;
     private StringEntryListWidget listWidget;
     private String action;
     private Screen parent;
-    private List<Tuple<String, String>> warnings;
-    private List<Tuple<String, String>> errors;
+    private List<Pair<String, String>> warnings;
+    private List<Pair<String, String>> errors;
     private Consumer<Screen> onContinue;
     
-    public WarningAndErrorScreen(String action, List<Tuple<String, String>> warnings, List<Tuple<String, String>> errors, Consumer<Screen> onContinue) {
+    public WarningAndErrorScreen(String action, List<Pair<String, String>> warnings, List<Pair<String, String>> errors, Consumer<Screen> onContinue) {
         super(Component.empty());
         this.action = action;
         this.warnings = warnings;
@@ -98,7 +99,7 @@ public class WarningAndErrorScreen extends Screen {
         listWidget.creditsAddEntry(new EmptyItem());
         if (!warnings.isEmpty())
             listWidget.creditsAddEntry(new TextItem(Component.literal("Warnings:").withStyle(ChatFormatting.GOLD).getVisualOrderText()));
-        for (Tuple<String, String> pair : warnings) {
+        for (Pair<String, String> pair : warnings) {
             addText(Component.literal(pair.getA()));
             if (pair.getB() != null)
                 addLink(Component.literal(pair.getB()), pair.getB());
@@ -111,7 +112,7 @@ public class WarningAndErrorScreen extends Screen {
         }
         if (!errors.isEmpty())
             listWidget.creditsAddEntry(new TextItem(Component.literal("Errors:").withStyle(ChatFormatting.RED).getVisualOrderText()));
-        for (Tuple<String, String> pair : errors) {
+        for (Pair<String, String> pair : errors) {
             addText(Component.literal(pair.getA()));
             if (pair.getB() != null)
                 addLink(Component.literal(pair.getB()), pair.getB());
@@ -122,7 +123,7 @@ public class WarningAndErrorScreen extends Screen {
         for (StringItem child : listWidget.children()) {
             listWidget.max = Math.max(listWidget.max, child.getWidth());
         }
-        addRenderableWidget(buttonExit = new Button(width / 2 - 100, height - 26, 200, 20,
+        addRenderableWidget(buttonExit = new Button.Plain(width / 2 - 100, height - 26, 200, 20,
                 Component.literal(errors.isEmpty() ? "Continue" : "Exit"),
                 button -> onContinue.accept(parent), Supplier::get) {});
     }
@@ -137,11 +138,11 @@ public class WarningAndErrorScreen extends Screen {
         super.render(graphics, int_1, int_2, float_1);
         this.listWidget.render(graphics, int_1, int_2, float_1);
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-            graphics.drawCenteredString(this.font, "Warnings during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
+            graphics.drawCenteredString(this.font, "Warnings during Roughly Enough Items' " + action, this.width / 2, 16, 0xFFFFFFFF);
         } else {
-            graphics.drawCenteredString(this.font, "Errors during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
+            graphics.drawCenteredString(this.font, "Errors during Roughly Enough Items' " + action, this.width / 2, 16, 0xFFFFFFFF);
         }
-        this.buttonExit.render(graphics, int_1, int_2, float_1);
+        this.buttonExit.extractRenderState(graphics, int_1, int_2, float_1);
     }
     
     private static class StringEntryListWidget extends DynamicErrorFreeEntryListWidget<StringItem> {
@@ -265,7 +266,7 @@ public class WarningAndErrorScreen extends Screen {
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
-                graphics.renderTooltip(font, Component.literal("Click to open link."), mouseX, mouseY);
+                graphics.setTooltipForNextFrame(font, Component.literal("Click to open link."), mouseX, mouseY);
                 graphics.drawString(Minecraft.getInstance().font, characterVisitor -> {
                     return text.accept((charIndex, style, codePoint) -> characterVisitor.accept(charIndex, style.applyFormat(ChatFormatting.UNDERLINE), codePoint));
                 }, x + 5, y, 0xff1fc3ff);
@@ -285,8 +286,8 @@ public class WarningAndErrorScreen extends Screen {
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (contains && button == 0) {
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+            if (contains && event.button() == 0) {
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 try {
                     Util.getPlatform().openUri(new URI(link));

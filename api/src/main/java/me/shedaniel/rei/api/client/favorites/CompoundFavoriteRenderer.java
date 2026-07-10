@@ -30,8 +30,8 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.util.*;
 
 import java.util.List;
 import java.util.function.IntFunction;
@@ -90,13 +90,13 @@ public class CompoundFavoriteRenderer implements Renderer {
     public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
         updateAnimator(delta);
         graphics.enableScissor(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY());
-        graphics.pose().pushPose();
-        graphics.pose().translate(0, this.offset.floatValue() * -bounds.getHeight(), 0);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(0, this.offset.floatValue() * -bounds.getHeight());
         for (int i = 0; i < count; i++) {
             renderers.apply(i).render(graphics, bounds, mouseX, mouseY, delta);
-            graphics.pose().translate(0, bounds.height, 0);
+            graphics.pose().translate(0, bounds.height);
         }
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
         graphics.disableScissor();
     }
     

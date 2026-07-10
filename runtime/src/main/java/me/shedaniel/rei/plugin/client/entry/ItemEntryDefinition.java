@@ -24,8 +24,6 @@
 package me.shedaniel.rei.plugin.client.entry;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.Codec;
 import dev.architectury.hooks.item.ItemStackHooks;
 import dev.architectury.utils.Env;
@@ -33,7 +31,6 @@ import dev.architectury.utils.EnvExecutor;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
@@ -50,10 +47,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
@@ -63,16 +57,14 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
-import org.joml.Matrix4fStack;
+import org.joml.Matrix3x2f;
 
 import java.util.List;
 import java.util.Optional;
@@ -111,7 +103,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     
     @Override
     @Nullable
-    public ResourceLocation getIdentifier(EntryStack<ItemStack> entry, ItemStack value) {
+    public Identifier getIdentifier(EntryStack<ItemStack> entry, ItemStack value) {
         return BuiltInRegistries.ITEM.getKey(value.getItem());
     }
     
@@ -212,7 +204,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     
     @Override
     public Stream<? extends TagKey<?>> getTagsFor(EntryStack<ItemStack> entry, ItemStack value) {
-        Stream<? extends TagKey<?>> tags = value.getTags();
+        Stream<? extends TagKey<?>> tags = value.typeHolder().tags();
         if (value.getItem() instanceof BlockItem blockItem) {
             tags = Stream.concat(tags, blockItem.getBlock().builtInRegistryHolder().tags());
         }
@@ -243,109 +235,23 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @Environment(EnvType.CLIENT)
-    public class ItemEntryRenderer implements BatchedEntryRenderer<ItemStack, ItemStackRenderState> {
+    public class ItemEntryRenderer implements EntryRenderer<ItemStack> {
         private static final float SCALE = 20.0F;
         public static final int ITEM_LIGHT = 0xf000f0;
-        
-        @Override
-        public ItemStackRenderState getExtraData(EntryStack<ItemStack> entry) {
-            Minecraft minecraft = Minecraft.getInstance();
-            ItemStackRenderState renderState = new ItemStackRenderState();
-            minecraft.getItemModelResolver().updateForTopItem(renderState, entry.getValue(), ItemDisplayContext.GUI, minecraft.level, minecraft.player, 0);
-            return renderState;
-        }
         
         @Override
         public void render(EntryStack<ItemStack> entry, GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
             if (!entry.isEmpty()) {
                 ItemStack value = entry.getValue();
-                ItemStackRenderState renderState = getExtraData(entry);
-                setupGL(entry, renderState);
-                graphics.pose().pushPose();
-                graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY(), 0);
-                graphics.pose().mulPose(new Matrix4f().scaling(1.0F, -1.0F, 1.0F));
-                graphics.pose().scale(bounds.getWidth(), bounds.getHeight(), (bounds.getWidth() + bounds.getHeight()) / 2.0F);
-                MultiBufferSource.BufferSource immediate = graphics.bufferSource;
-                renderState.render(graphics.pose(), immediate, ITEM_LIGHT, OverlayTexture.NO_OVERLAY);
-                immediate.endBatch();
-                graphics.pose().popPose();
-                
-                Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
-                modelViewStack.pushMatrix();
-                modelViewStack.mul(graphics.pose().last().pose());
-                modelViewStack.translate(bounds.x, bounds.y, 0);
-                modelViewStack.scale(bounds.width / 16f, (bounds.getWidth() + bounds.getHeight()) / 2f / 16f, 1.0F);
-                graphics.drawSpecial(source -> {
-                    if (source instanceof MultiBufferSource.BufferSource multiBufferSource) {
-                        renderOverlay(new GuiGraphics(Minecraft.getInstance(), multiBufferSource), entry, bounds);
-                    }
-                });
-                modelViewStack.popMatrix();
-                endGL(entry, renderState);
-            }
-        }
-        
-        @Override
-        public int getBatchIdentifier(EntryStack<ItemStack> entry, Rectangle bounds, ItemStackRenderState renderState) {
-            return 1738923 + (renderState.usesBlockLight() ? 1 : 0);
-        }
-        
-        @Override
-        public void startBatch(EntryStack<ItemStack> entry, ItemStackRenderState renderState, GuiGraphics graphics, float delta) {
-            setupGL(entry, renderState);
-        }
-        
-        public void setupGL(EntryStack<ItemStack> entry, ItemStackRenderState renderState) {
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            boolean sideLit = renderState.usesBlockLight();
-            if (!sideLit) Lighting.setupForFlatItems();
-        }
-        
-        @Override
-        public void renderBase(EntryStack<ItemStack> entry, ItemStackRenderState renderState, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
-            if (!entry.isEmpty()) {
-                ItemStack value = entry.getValue();
-                graphics.pose().pushPose();
-                graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY(), 0);
-                graphics.pose().scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, (bounds.getWidth() + bounds.getHeight()) / 2f);
-                renderState.render(graphics.pose(), immediate, ITEM_LIGHT, OverlayTexture.NO_OVERLAY);
-                graphics.pose().popPose();
-            }
-        }
-        
-        @Override
-        public void afterBase(EntryStack<ItemStack> entry, ItemStackRenderState renderState, GuiGraphics graphics, float delta) {
-            endGL(entry, renderState);
-        }
-        
-        @Override
-        public void renderOverlay(EntryStack<ItemStack> entry, ItemStackRenderState renderState, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
-            Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
-            modelViewStack.pushMatrix();
-            modelViewStack.mul(graphics.pose().last().pose());
-            modelViewStack.translate(bounds.x, bounds.y, 0);
-            modelViewStack.scale(bounds.width / 16f, (bounds.getWidth() + bounds.getHeight()) / 2f / 16f, 1.0F);
-            graphics.drawSpecial(source -> {
-                if (source instanceof MultiBufferSource.BufferSource multiBufferSource) {
-                    renderOverlay(new GuiGraphics(Minecraft.getInstance(), multiBufferSource), entry, bounds);
+                graphics.pose().pushMatrix();
+                graphics.pose().translate(bounds.x, bounds.y);
+                graphics.pose().scale(bounds.getWidth() / 16f, bounds.getHeight() / 16f);
+                graphics.renderItem(value, 0, 0);
+                if (!value.isEmpty()) {
+                    graphics.renderItemDecorations(Minecraft.getInstance().font, value, 0, 0);
                 }
-            });
-            modelViewStack.popMatrix();
-        }
-        
-        public void renderOverlay(GuiGraphics graphics, EntryStack<ItemStack> entry, Rectangle bounds) {
-            if (!entry.isEmpty()) {
-                graphics.renderItemDecorations(Minecraft.getInstance().font, entry.getValue(), 0, 0, null);
+                graphics.pose().popMatrix();
             }
-        }
-        
-        @Override
-        public void endBatch(EntryStack<ItemStack> entry, ItemStackRenderState renderState, GuiGraphics graphics, float delta) {
-        }
-        
-        public void endGL(EntryStack<ItemStack> entry, ItemStackRenderState renderState) {
-            boolean sideLit = renderState.usesBlockLight();
-            if (!sideLit) Lighting.setupFor3DItems();
         }
         
         @Override

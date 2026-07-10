@@ -29,7 +29,7 @@ import me.shedaniel.rei.api.common.plugins.REICommonPlugin;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -51,7 +51,7 @@ public interface DisplaySerializerRegistry extends Reloadable<REICommonPlugin> {
      * @param serializer the serializer of the display
      * @param <D>        the type of the display
      */
-    <D extends Display> void register(ResourceLocation id, DisplaySerializer<D> serializer);
+    <D extends Display> void register(Identifier id, DisplaySerializer<D> serializer);
     
     /**
      * Returns the display serializer for the given id.
@@ -60,7 +60,7 @@ public interface DisplaySerializerRegistry extends Reloadable<REICommonPlugin> {
      * @return the display serializer
      */
     @Nullable
-    DisplaySerializer<?> get(ResourceLocation id);
+    DisplaySerializer<?> get(Identifier id);
     
     /**
      * Returns the id of the display serializer.
@@ -69,7 +69,7 @@ public interface DisplaySerializerRegistry extends Reloadable<REICommonPlugin> {
      * @return the id of the display serializer
      */
     @Nullable
-    ResourceLocation getId(DisplaySerializer<?> serializer);
+    Identifier getId(DisplaySerializer<?> serializer);
     
     /**
      * Returns whether the display serializer is registered.

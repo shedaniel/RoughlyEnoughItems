@@ -32,12 +32,12 @@ import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Collections;
 import java.util.List;
@@ -69,8 +69,8 @@ public class ReferenceTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        if (this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose().last().pose(), getBounds()))) {
-            graphics.innerBlit(RenderType::guiTextured, ResourceLocation.withDefaultNamespace("textures/gui/sprites/advancements/task_frame_unobtained.png"),
+        if (this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose(), getBounds()))) {
+            graphics.innerBlit(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace("textures/gui/sprites/advancements/task_frame_unobtained.png"),
                     bounds.x - 1, bounds.x - 1 + 26, bounds.y - 1, bounds.y - 1 + 26,
                     0, 1, 0, 1, -1);
             this.slot.getBounds().setLocation(bounds.getCenterX() - this.slot.getBounds().getWidth() / 2, bounds.y + (bounds.height - this.slot.getBounds().getHeight()) / 2 + 1);

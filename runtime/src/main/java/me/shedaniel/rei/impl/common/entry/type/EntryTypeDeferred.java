@@ -26,24 +26,24 @@ package me.shedaniel.rei.impl.common.entry.type;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.ref.WeakReference;
 
 @ApiStatus.Internal
 public class EntryTypeDeferred<T> implements EntryType<T> {
-    private final ResourceLocation id;
+    private final Identifier id;
     private final int hashCode;
     private WeakReference<EntryDefinition<T>> reference;
     
-    public EntryTypeDeferred(ResourceLocation id) {
+    public EntryTypeDeferred(Identifier id) {
         this.id = id;
         this.hashCode = id.hashCode();
     }
     
     @Override
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
     

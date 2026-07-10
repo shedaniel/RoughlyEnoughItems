@@ -37,15 +37,16 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -56,9 +57,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class TimeFavoriteEntry extends FavoriteEntry {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "time");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath("roughlyenoughitems", "time");
     public static final String TRANSLATION_KEY = "favorite.section.time";
-    private static final ResourceLocation CHEST_GUI_TEXTURE = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    private static final Identifier CHEST_GUI_TEXTURE = Identifier.fromNamespaceAndPath("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final String KEY = "mode";
     @Nullable
     private final Time time;
@@ -119,7 +120,7 @@ public class TimeFavoriteEntry extends FavoriteEntry {
     
     private Time nextTime() {
         ClientLevel level = Minecraft.getInstance().level;
-        long dayTime = level.getDayTime();
+        long dayTime = level.getGameTime() % 24000L;
         if (dayTime <= 1000) {
             return Time.MORN;
         } else if (dayTime <= 6000) {
@@ -140,16 +141,16 @@ public class TimeFavoriteEntry extends FavoriteEntry {
             public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 int color = bounds.contains(mouseX, mouseY) ? 0xFFEEEEEE : 0xFFAAAAAA;
                 if (bounds.width > 4 && bounds.height > 4) {
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY(), 0);
-                    graphics.pose().scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f, 1);
+                    graphics.pose().pushMatrix();
+                    graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY());
+                    graphics.pose().scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f);
                     renderTimeIcon(graphics, time, 0, 0, color);
-                    graphics.pose().popPose();
+                    graphics.pose().popMatrix();
                 }
             }
             
             private void renderTimeIcon(GuiGraphics graphics, Time time, int centerX, int centerY, int color) {
-                graphics.blit(RenderType::guiTextured, CHEST_GUI_TEXTURE, centerX - 7, centerY - 7, time.ordinal() * 14 + 42, 14, 14, 14, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, CHEST_GUI_TEXTURE, centerX - 7, centerY - 7, time.ordinal() * 14 + 42, 14, 14, 14, 256, 256);
             }
             
             @Override
@@ -173,8 +174,8 @@ public class TimeFavoriteEntry extends FavoriteEntry {
     }
     
     @Override
-    public boolean doAction(int button) {
-        if (button == 0) {
+    public boolean doAction(MouseButtonEvent event) {
+        if (event.button() == 0) {
             Time time = this.time;
             if (time == null) {
                 time = nextTime();
@@ -208,7 +209,7 @@ public class TimeFavoriteEntry extends FavoriteEntry {
     }
     
     @Override
-    public ResourceLocation getType() {
+    public Identifier getType() {
         return ID;
     }
     
@@ -295,11 +296,11 @@ public class TimeFavoriteEntry extends FavoriteEntry {
             if (selected && containsMouse) {
                 REIRuntime.getInstance().queueTooltip(Tooltip.create(Component.translatable("text.rei.time_button.tooltip.entry", text)));
             }
-            graphics.drawString(font, text, x + 2, y + 2, selected ? 16777215 : 8947848, false);
+            graphics.drawString(font, text, x + 2, y + 2, selected ? 0xFFFFFFFF : 0xFF888888, false);
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
             Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getTimeCommand().replaceAll("\\{time}", time.getPart().toLowerCase(Locale.ROOT)), "/"));
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             closeMenu();

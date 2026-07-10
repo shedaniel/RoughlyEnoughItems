@@ -65,7 +65,7 @@ public class ExclusionZonesImpl implements ExclusionZones {
     
     @Override
     public InteractionResult isInZone(double mouseX, double mouseY) {
-        Screen screen = Minecraft.getInstance().screen;
+        Screen screen = Minecraft.getInstance().gui.screen();
         Class<? extends Screen> screenClass = screen.getClass();
         
         synchronized (list) {
@@ -95,13 +95,13 @@ public class ExclusionZonesImpl implements ExclusionZones {
     }
     
     private long currentHashCode(DisplayPanelLocation location) {
-        return areasHashCode(getExclusionZones(Minecraft.getInstance().screen, false));
+        return areasHashCode(getExclusionZones(Minecraft.getInstance().gui.screen(), false));
     }
     
     @Override
     @Deprecated
     public List<Rectangle> getExclusionZones(Class<?> currentScreenClass, boolean sort) {
-        return getExclusionZones(currentScreenClass, Minecraft.getInstance().screen, sort);
+        return getExclusionZones(currentScreenClass, Minecraft.getInstance().gui.screen(), sort);
     }
     
     @Override

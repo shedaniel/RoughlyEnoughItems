@@ -40,12 +40,14 @@ import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import me.shedaniel.rei.impl.common.entry.type.FilteringLogic;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
@@ -58,7 +60,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class FilteringRulesScreen extends Screen {
+public class FilteringRulesScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScreen {
     private final FilteringScreen filteringScreen;
     private final List<FilteringRule<?>> rules;
     private RulesList rulesList;
@@ -75,20 +77,18 @@ public class FilteringRulesScreen extends Screen {
         super.init();
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
-            addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
-                minecraft.setScreen(parent);
+            addRenderableWidget(new Button.Plain(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+                minecraft.setScreenAndShow(parent);
                 this.parent = null;
-            }, Supplier::get) {
-            });
+            }, Supplier::get) {});
         }
         {
             Component addText = Component.literal(" + ");
-            addRenderableWidget(new Button(width - 4 - 20, 4, 20, 20, addText, button -> {
+            addRenderableWidget(new Button.Plain(width - 4 - 20, 4, 20, 20, addText, button -> {
                 FilteringAddRuleScreen screen = new FilteringAddRuleScreen(rules);
                 screen.parent = this;
-                minecraft.setScreen(screen);
-            }, Supplier::get) {
-            });
+                minecraft.setScreenAndShow(screen);
+            }, Supplier::get) {});
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height));
         for (int i = rules.size() - 1; i >= 0; i--) {
@@ -112,7 +112,7 @@ public class FilteringRulesScreen extends Screen {
     
     @Override
     public void onClose() {
-        this.minecraft.setScreen(parent);
+        this.minecraft.setScreenAndShow(parent);
     }
     
     public static class RulesList extends UpdatedListWidget<RuleEntry> {
@@ -133,10 +133,10 @@ public class FilteringRulesScreen extends Screen {
         }
         
         @Override
-        public boolean mouseClicked(double double_1, double double_2, int int_1) {
-            if (super.mouseClicked(double_1, double_2, int_1))
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+            if (super.mouseClicked(event, doubleClick))
                 return true;
-            RuleEntry item = getItemAtPosition(double_1, double_2);
+            RuleEntry item = getItemAtPosition(event.x(), event.y());
             if (item != null) {
                 client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 selectItem(item);
@@ -183,23 +183,21 @@ public class FilteringRulesScreen extends Screen {
         public DefaultRuleEntry(FilteringRule<?> rule, List<FilteringRule<?>> rules, Function<Screen, Screen> screenFunction) {
             super(rule);
             this.screenFunction = Objects.requireNonNullElseGet(screenFunction == null ? ((FilteringRuleType<FilteringRule<?>>) rule.getType()).createEntryScreen(rule) : screenFunction, () -> placeholderScreen(rule));
-            configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
-                Minecraft.getInstance().setScreen(this.screenFunction.apply(Minecraft.getInstance().screen));
+            configureButton = new Button.Plain(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
+                Minecraft.getInstance().setScreenAndShow(this.screenFunction.apply(Minecraft.getInstance().gui.screen()));
             }, Supplier::get) {
                 @Override
-                public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-                    super.renderWidget(graphics, mouseX, mouseY, delta);
-                    graphics.blit(RenderType::guiTextured, InternalTextures.CHEST_GUI_TEXTURE, getX() + 3, getY() + 3, 0, 0, 14, 14, 256, 256);
+                public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+                    graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, getX() + 3, getY() + 3, 0, 0, 14, 14, 256, 256);
                 }
             };
             {
                 Component deleteText = Component.translatable("config.roughlyenoughitems.filteringRulesScreen.delete");
-                deleteButton = new Button(0, 0, Minecraft.getInstance().font.width(deleteText) + 10, 20, deleteText, button -> {
-                    final Screen screen = Minecraft.getInstance().screen;
+                deleteButton = new Button.Plain(0, 0, Minecraft.getInstance().font.width(deleteText) + 10, 20, deleteText, button -> {
+                    final Screen screen = Minecraft.getInstance().gui.screen();
                     rules.remove(rule);
-                    screen.init(Minecraft.getInstance(), screen.width, screen.height);
-                }, Supplier::get) {
-                };
+                    screen.init(screen.width, screen.height);
+                }, Supplier::get) {};
             }
             configureButton.active = this.screenFunction != null;
             deleteButton.active = !rule.getType().isSingular();
@@ -213,9 +211,9 @@ public class FilteringRulesScreen extends Screen {
                 int i = client.font.width(title);
                 if (i > entryWidth - 28) {
                     FormattedText titleTrimmed = FormattedText.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 0xFFFFFFFF);
                 } else {
-                    graphics.drawString(client.font, title.getVisualOrderText(), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, title.getVisualOrderText(), x + 2, y + 1, 0xFFFFFFFF);
                 }
             }
             {
@@ -223,17 +221,17 @@ public class FilteringRulesScreen extends Screen {
                 int i = client.font.width(subtitle);
                 if (i > entryWidth - 28) {
                     FormattedText subtitleTrimmed = FormattedText.composite(client.font.substrByWidth(subtitle, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 0xFF808080);
                 } else {
-                    graphics.drawString(client.font, subtitle.getVisualOrderText(), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, subtitle.getVisualOrderText(), x + 2, y + 12, 0xFF808080);
                 }
             }
             configureButton.setX(x + entryWidth - 25);
             configureButton.setY(y + 1);
-            configureButton.render(graphics, mouseX, mouseY, delta);
+            configureButton.extractRenderState(graphics, mouseX, mouseY, delta);
             deleteButton.setX(x + entryWidth - 27 - deleteButton.getWidth());
             deleteButton.setY(y + 1);
-            deleteButton.render(graphics, mouseX, mouseY, delta);
+            deleteButton.extractRenderState(graphics, mouseX, mouseY, delta);
         }
         
         @Override

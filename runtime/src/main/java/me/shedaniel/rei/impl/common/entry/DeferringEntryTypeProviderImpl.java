@@ -34,23 +34,23 @@ import me.shedaniel.rei.impl.common.entry.type.EntryTypeDeferred;
 import me.shedaniel.rei.impl.common.entry.type.types.EmptyEntryDefinition;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Unit;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-public enum DeferringEntryTypeProviderImpl implements Function<ResourceLocation, EntryType<?>> {
+public enum DeferringEntryTypeProviderImpl implements Function<Identifier, EntryType<?>> {
     INSTANCE;
-    ResourceLocation RENDERING_ID = ResourceLocation.withDefaultNamespace("rendering");
-    private Map<ResourceLocation, EntryType<?>> typeCache = new ConcurrentHashMap<>();
+    Identifier RENDERING_ID = Identifier.withDefaultNamespace("rendering");
+    private Map<Identifier, EntryType<?>> typeCache = new ConcurrentHashMap<>();
     private EntryType<Unit> empty;
     @Environment(EnvType.CLIENT)
     private EntryType<Renderer> render;
     
     @Override
-    public EntryType<?> apply(ResourceLocation id) {
+    public EntryType<?> apply(Identifier id) {
         if (id.equals(BuiltinEntryTypes.EMPTY_ID)) {
             return typeCache.computeIfAbsent(id, this::emptyType);
         } else if (id.equals(RENDERING_ID) && Platform.getEnvironment() == Env.CLIENT) {
@@ -59,12 +59,12 @@ public enum DeferringEntryTypeProviderImpl implements Function<ResourceLocation,
         return typeCache.computeIfAbsent(id, EntryTypeDeferred::new);
     }
     
-    public EntryType<Unit> emptyType(ResourceLocation id) {
+    public EntryType<Unit> emptyType(Identifier id) {
         if (empty == null) {
             int hashCode = id.hashCode();
             empty = new EntryType<>() {
                 @Override
-                public ResourceLocation getId() {
+                public Identifier getId() {
                     return id;
                 }
                 
@@ -83,13 +83,13 @@ public enum DeferringEntryTypeProviderImpl implements Function<ResourceLocation,
     }
     
     @Environment(EnvType.CLIENT)
-    public EntryType<Renderer> renderingType(ResourceLocation id) {
+    public EntryType<Renderer> renderingType(Identifier id) {
         @Environment(EnvType.CLIENT)
         class RenderType implements EntryType<Renderer> {
             private final int hashCode = id.hashCode();
             
             @Override
-            public ResourceLocation getId() {
+            public Identifier getId() {
                 return id;
             }
             

@@ -38,7 +38,8 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.entries.SubMenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
@@ -75,8 +76,8 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     
     public Menu(Rectangle menuStart, Collection<FavoriteMenuEntry> entries, boolean sort) {
         buildEntries(entries, sort);
-        int fullWidth = Minecraft.getInstance().screen.width;
-        int fullHeight = Minecraft.getInstance().screen.height;
+        int fullWidth = Minecraft.getInstance().gui.screen().width;
+        int fullHeight = Minecraft.getInstance().gui.screen().height;
         boolean facingRight = true;
         this.facingDownwards = fullHeight - menuStart.getMaxY() > menuStart.y;
         int y = facingDownwards ? menuStart.getMaxY() : menuStart.y - (scrolling.getMaxScrollHeight() + 2);
@@ -128,7 +129,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     }
     
     public int getInnerHeight(int y) {
-        return Math.min(scrolling.getMaxScrollHeight(), minecraft.screen.height - 20 - y);
+        return Math.min(scrolling.getMaxScrollHeight(), minecraft.gui.screen().height - 20 - y);
     }
     
     public int getMaxEntryWidth() {
@@ -176,17 +177,17 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (scrolling.updateDraggingState(mouseX, mouseY, button))
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (scrolling.updateDraggingState(event.x(), event.y(), event.button()))
             return true;
-        return super.mouseClicked(mouseX, mouseY, button) || getInnerBounds().contains(mouseX, mouseY);
+        return super.mouseClicked(event, doubleClick) || getInnerBounds().contains(event.x(), event.y());
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (scrolling.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (scrolling.mouseDragged(event.x(), event.y(), event.button(), deltaX, deltaY))
             return true;
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(event, deltaX, deltaY);
     }
     
     @Override

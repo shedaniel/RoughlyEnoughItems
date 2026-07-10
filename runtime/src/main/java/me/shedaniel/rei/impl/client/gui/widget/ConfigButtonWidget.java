@@ -46,7 +46,7 @@ import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.modules.entries.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
@@ -61,14 +61,14 @@ public class ConfigButtonWidget {
         MenuAccess access = overlay.menuAccess();
         Button configButton = Widgets.createButton(bounds, Component.empty())
                 .onClick(button -> {
-                    if (Screen.hasShiftDown() || Screen.hasControlDown()) {
+                    if (Minecraft.getInstance().hasShiftDown() || Minecraft.getInstance().hasControlDown()) {
                         ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());
                         return;
                     }
                     ConfigManager.getInstance().openConfigScreen(REIRuntime.getInstance().getPreviousScreen());
                 })
                 .onRender((matrices, button) -> {
-                    if (!ClientHelper.getInstance().isCheating() || Minecraft.getInstance().screen instanceof DisplayScreen) {
+                    if (!ClientHelper.getInstance().isCheating() || Minecraft.getInstance().gui.screen() instanceof DisplayScreen) {
                         button.removeTint();
                     } else if (!ClientHelperImpl.getInstance().hasOperatorPermission()) {
                         if (Minecraft.getInstance().player.hasInfiniteMaterials()) {
@@ -87,10 +87,7 @@ public class ConfigButtonWidget {
                 .focusable(false)
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y));
         Widget overlayWidget = Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 1);
-            graphics.blit(RenderType::guiTextured, InternalTextures.CHEST_GUI_TEXTURE, bounds.x + 3, bounds.y + 3, 0, 0, 14, 14, 256, 256);
-            graphics.pose().popPose();
+            graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, bounds.x + 3, bounds.y + 3, 0, 0, 14, 14, 256, 256);
         });
         return Widgets.concat(configButton, overlayWidget);
     }
@@ -136,10 +133,10 @@ public class ConfigButtonWidget {
                                 config::doesDisableRecipeBook,
                                 disableRecipeBook -> {
                                     config.setDisableRecipeBook(disableRecipeBook);
-                                    Screen screen = Minecraft.getInstance().screen;
+                                    Screen screen = Minecraft.getInstance().gui.screen();
                                     
                                     if (screen != null) {
-                                        screen.init(Minecraft.getInstance(), screen.width, screen.height);
+                                        screen.init(screen.width, screen.height);
                                     }
                                 }
                         ),
@@ -147,10 +144,10 @@ public class ConfigButtonWidget {
                                 config::isLeftSideMobEffects,
                                 disableRecipeBook -> {
                                     config.setLeftSideMobEffects(disableRecipeBook);
-                                    Screen screen = Minecraft.getInstance().screen;
+                                    Screen screen = Minecraft.getInstance().gui.screen();
                                     
                                     if (screen != null) {
-                                        screen.init(Minecraft.getInstance(), screen.width, screen.height);
+                                        screen.init(screen.width, screen.height);
                                     }
                                 }
                         ),

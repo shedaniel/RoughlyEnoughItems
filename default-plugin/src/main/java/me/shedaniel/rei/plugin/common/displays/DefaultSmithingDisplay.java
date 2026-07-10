@@ -40,7 +40,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ProvidesTrimMaterial;
@@ -67,7 +67,7 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
                     EntryIngredient.codec().listOf().fieldOf("inputs").forGetter(DefaultSmithingDisplay::getInputEntries),
                     EntryIngredient.codec().listOf().fieldOf("outputs").forGetter(DefaultSmithingDisplay::getOutputEntries),
                     SmithingRecipeType.CODEC.optionalFieldOf("type").forGetter(d -> d.type),
-                    ResourceLocation.CODEC.optionalFieldOf("location").forGetter(DefaultSmithingDisplay::getDisplayLocation)
+                    Identifier.CODEC.optionalFieldOf("location").forGetter(DefaultSmithingDisplay::getDisplayLocation)
             ).apply(instance, DefaultSmithingDisplay::new)),
             StreamCodec.composite(
                     EntryIngredient.streamCodec().apply(ByteBufCodecs.list()),
@@ -76,7 +76,7 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
                     DefaultSmithingDisplay::getOutputEntries,
                     ByteBufCodecs.optional(SmithingRecipeType.STREAM_CODEC),
                     d -> d.type,
-                    ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC),
+                    ByteBufCodecs.optional(Identifier.STREAM_CODEC),
                     DefaultSmithingDisplay::getDisplayLocation,
                     DefaultSmithingDisplay::new
             ));
@@ -91,9 +91,9 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
                         EntryIngredients.ofIngredient(recipe.value().baseIngredient()),
                         recipe.value().additionIngredient().map(EntryIngredients::ofIngredient).orElse(EntryIngredient.empty())
                 ),
-                List.of(EntryIngredients.ofSlotDisplay(recipe.value().result.display())),
+                List.of(EntryIngredients.ofSlotDisplay(recipe.value().display().getFirst().result())),
                 Optional.of(SmithingRecipeType.TRANSFORM),
-                Optional.of(recipe.id().location())
+                Optional.of(recipe.id().identifier())
         );
     }
     
@@ -112,17 +112,17 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
                     recipe.value().templateIngredient().map(EntryIngredients::ofIngredient).orElse(EntryIngredient.empty()),
                     baseIngredient,
                     EntryIngredients.ofItemHolder(additionStack)
-            ), List.of(baseIngredient), Optional.of(SmithingRecipeType.TRIM), Optional.of(recipe.id().location()), recipe.value().pattern));
+            ), List.of(baseIngredient), Optional.of(SmithingRecipeType.TRIM), Optional.of(recipe.id().identifier()), recipe.value().pattern));
         }
         return displays;
     }
     
-    public DefaultSmithingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location) {
+    public DefaultSmithingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<Identifier> location) {
         this(inputs, outputs, Optional.empty(), location);
     }
     
     @ApiStatus.Experimental
-    public DefaultSmithingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<SmithingRecipeType> type, Optional<ResourceLocation> location) {
+    public DefaultSmithingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<SmithingRecipeType> type, Optional<Identifier> location) {
         super(inputs, outputs, location);
         this.type = type;
     }
@@ -150,7 +150,7 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
         ItemStack baseItem = base.castValue();
         ItemStack additionItem = addition.castValue();
         if (trimPattern == null) return EntryIngredient.empty();
-        Holder<TrimMaterial> trimMaterial = TrimMaterials.getFromIngredient(registryAccess, additionItem)
+        Holder<TrimMaterial> trimMaterial = getMaterialFromIngredient(registryAccess, additionItem.typeHolder())
                 .orElse(null);
         if (trimMaterial == null) return EntryIngredient.empty();
         ArmorTrim armorTrim = new ArmorTrim(trimMaterial, trimPattern);
@@ -162,8 +162,8 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
     }
     
     private static Optional<Holder<TrimMaterial>> getMaterialFromIngredient(HolderLookup.Provider provider, Holder<Item> item) {
-        ProvidesTrimMaterial providesTrimMaterial = new ItemStack(item).get(DataComponents.PROVIDES_TRIM_MATERIAL);
-        return providesTrimMaterial != null ? providesTrimMaterial.unwrap(provider) : Optional.empty();
+        Holder<TrimMaterial> material = new ItemStack(item).get(DataComponents.PROVIDES_TRIM_MATERIAL);
+        return Optional.ofNullable(material);
     }
     
     public static class Trimming extends DefaultSmithingDisplay implements SmithingDisplay.Trimming {
@@ -172,7 +172,7 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
                         EntryIngredient.codec().listOf().fieldOf("inputs").forGetter(DefaultSmithingDisplay.Trimming::getInputEntries),
                         EntryIngredient.codec().listOf().fieldOf("outputs").forGetter(DefaultSmithingDisplay.Trimming::getOutputEntries),
                         SmithingRecipeType.CODEC.optionalFieldOf("smithing_type").forGetter(d -> d.type),
-                        ResourceLocation.CODEC.optionalFieldOf("location").forGetter(DefaultSmithingDisplay.Trimming::getDisplayLocation),
+                        Identifier.CODEC.optionalFieldOf("location").forGetter(DefaultSmithingDisplay.Trimming::getDisplayLocation),
                         TrimPattern.CODEC.fieldOf("pattern").forGetter(DefaultSmithingDisplay.Trimming::pattern)
                 ).apply(instance, DefaultSmithingDisplay.Trimming::new)),
                 StreamCodec.composite(
@@ -182,7 +182,7 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
                         DefaultSmithingDisplay.Trimming::getOutputEntries,
                         ByteBufCodecs.optional(SmithingRecipeType.STREAM_CODEC),
                         d -> d.type,
-                        ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC),
+                        ByteBufCodecs.optional(Identifier.STREAM_CODEC),
                         DefaultSmithingDisplay.Trimming::getDisplayLocation,
                         TrimPattern.STREAM_CODEC,
                         DefaultSmithingDisplay.Trimming::pattern,
@@ -191,7 +191,7 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
         
         private final Holder<TrimPattern> pattern;
         
-        public Trimming(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<SmithingRecipeType> type, Optional<ResourceLocation> location, Holder<TrimPattern> pattern) {
+        public Trimming(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<SmithingRecipeType> type, Optional<Identifier> location, Holder<TrimPattern> pattern) {
             super(inputs, outputs, type, location);
             this.pattern = pattern;
         }

@@ -31,9 +31,9 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -213,20 +213,20 @@ public class TabContainerWidget {
                 .onClick(button -> rightAction.run())
                 .tooltipLine(Component.translatable("text.rei.next_page")));
         
-        widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
+        widgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             Rectangle tabLeftBounds = tabLeft.getBounds();
             Rectangle tabRightBounds = tabRight.getBounds();
             if (isCompactTabButtons) {
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, 0.5, 0);
-                graphics.blit(RenderType::guiTextured, InternalTextures.ARROW_LEFT_SMALL_TEXTURE, tabLeftBounds.x + 2, tabLeftBounds.y + 2, 0, 0, 6, 6, 6, 6);
-                graphics.blit(RenderType::guiTextured, InternalTextures.ARROW_RIGHT_SMALL_TEXTURE, tabRightBounds.x + 2, tabRightBounds.y + 2, 0, 0, 6, 6, 6, 6);
-                graphics.pose().popPose();
+                graphics.pose().pushMatrix();
+                graphics.pose().translate(0, 0.5f);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.ARROW_LEFT_SMALL_TEXTURE, tabLeftBounds.x + 2, tabLeftBounds.y + 2, 0, 0, 6, 6, 6, 6);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.ARROW_RIGHT_SMALL_TEXTURE, tabRightBounds.x + 2, tabRightBounds.y + 2, 0, 0, 6, 6, 6, 6);
+                graphics.pose().popMatrix();
             } else {
-                graphics.blit(RenderType::guiTextured, InternalTextures.ARROW_LEFT_TEXTURE, tabLeftBounds.x + 4, tabLeftBounds.y + 4, 0, 0, 8, 8, 8, 8);
-                graphics.blit(RenderType::guiTextured, InternalTextures.ARROW_RIGHT_TEXTURE, tabRightBounds.x + 4, tabRightBounds.y + 4, 0, 0, 8, 8, 8, 8);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.ARROW_LEFT_TEXTURE, tabLeftBounds.x + 4, tabLeftBounds.y + 4, 0, 0, 8, 8, 8, 8);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.ARROW_RIGHT_TEXTURE, tabRightBounds.x + 4, tabRightBounds.y + 4, 0, 0, 8, 8, 8, 8);
             }
-        }), 0, 0, 1));
+        }));
         return widgets;
     }
     

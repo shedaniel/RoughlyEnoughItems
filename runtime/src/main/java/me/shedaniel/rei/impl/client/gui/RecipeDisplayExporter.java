@@ -34,11 +34,11 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.impl.client.gui.toast.ExportRecipeIdentifierToast;
 import me.shedaniel.rei.impl.display.DisplaySpec;
-import net.minecraft.Util;
+import net.minecraft.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
@@ -62,7 +62,7 @@ public final class RecipeDisplayExporter {
     }
     
     private static File getExportFilename(DisplaySpec display, File directory) {
-        Collection<ResourceLocation> locations = display.provideInternalDisplayIds();
+        Collection<Identifier> locations = display.provideInternalDisplayIds();
         String string = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date());
         if (!locations.isEmpty()) {
             string = locations.iterator().next().toString().replace('/', '_').replace(':', '_');

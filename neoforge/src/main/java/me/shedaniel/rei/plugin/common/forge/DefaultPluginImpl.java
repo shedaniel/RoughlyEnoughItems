@@ -25,7 +25,6 @@ package me.shedaniel.rei.plugin.common.forge;
 
 import com.google.common.base.Predicates;
 import dev.architectury.event.CompoundEventResult;
-import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.DefaultPlugin;
@@ -50,7 +49,7 @@ public class DefaultPluginImpl extends DefaultPlugin {
                     return CompoundEventResult.interruptTrue(IntStream.range(0, handler.getTanks())
                             .mapToObj(handler::getFluidInTank)
                             .filter(Predicates.not(FluidStack::isEmpty))
-                            .map(FluidStackHooksForge::fromForge)
+                            .map(neoforge -> dev.architectury.fluid.FluidStack.create(neoforge.getFluid(), neoforge.getAmount()))
                             .map(EntryStacks::of));
                 }
             }

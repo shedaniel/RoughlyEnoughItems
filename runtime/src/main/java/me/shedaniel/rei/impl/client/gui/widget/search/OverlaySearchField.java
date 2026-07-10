@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.widget.search;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.datafixers.util.Pair;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Color;
@@ -49,7 +48,10 @@ import me.shedaniel.rei.impl.client.search.argument.type.ArgumentTypesRegistry;
 import me.shedaniel.rei.impl.client.search.argument.type.TextArgumentType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -57,7 +59,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.Tuple;
+import me.shedaniel.rei.api.common.util.Pair;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.glfw.GLFW;
 
@@ -77,7 +79,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
     public boolean isMain = true;
-    protected Tuple<Long, Point> lastClickedDetails = null;
+    protected Pair<Long, Point> lastClickedDetails = null;
     private final List<String> history = Lists.newArrayListWithCapacity(100);
     private final NumberAnimator<Double> progress = ValueAnimator.ofDouble();
     
@@ -149,7 +151,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     }
     
     private void drawHint(GuiGraphics graphics, int mouseX, int mouseY) {
-        boolean mouseDown = GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT) != 0;
+        boolean mouseDown = GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) != 0;
         boolean clicking = false;
         if (mouseDown != previouslyClicking) {
             previouslyClicking = mouseDown;
@@ -194,27 +196,26 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         int background = 0xf0100010;
         int color1 = color.getColor();
         int color2 = color.darker(2).getColor();
-        if (!top) graphics.fillGradient(x, y - 1, x + width, y, 400, background, background);
+        if (!top) graphics.fillGradient(x, y - 1, x + width, y, background, background);
         if (top)
-            graphics.fillGradient(x, y + height, x + width, y + height + 1, 400, background, background);
-        graphics.fillGradient(x, y, x + width, y + height, 400, background, background);
-        graphics.fillGradient(x - 1, y, x, y + height, 400, background, background);
-        graphics.fillGradient(x + width, y, x + width + 1, y + height, 400, background, background);
-        graphics.fillGradient(x, y + 1, x + 1, y + height - 1, 400, color1, color2);
-        graphics.fillGradient(x + width - 1, y + 1, x + width, y + height - 1, 400, color1, color2);
-        if (!top) graphics.fillGradient(x, y, x + width, y + 1, 400, color1, color1);
-        if (top) graphics.fillGradient(x, y + height - 1, x + width, y + height, 400, color2, color2);
+            graphics.fillGradient(x, y + height, x + width, y + height + 1, background, background);
+        graphics.fillGradient(x, y, x + width, y + height, background, background);
+        graphics.fillGradient(x - 1, y, x, y + height, background, background);
+        graphics.fillGradient(x + width, y, x + width + 1, y + height, background, background);
+        graphics.fillGradient(x, y + 1, x + 1, y + height - 1, color1, color2);
+        graphics.fillGradient(x + width - 1, y + 1, x + width, y + height - 1, color1, color2);
+        if (!top) graphics.fillGradient(x, y, x + width, y + 1, color1, color1);
+        if (top) graphics.fillGradient(x, y + height - 1, x + width, y + height, color2, color2);
         
         if (hasProgress) {
             int progressWidth = (int) Math.round(width * this.progress.doubleValue());
-            graphics.fillGradient(x + 1, y + height - 3, x + progressWidth - 1, y + height - 1, 400, 0xffffffff, 0xffffffff);
+            graphics.fillGradient(x + 1, y + height - 3, x + progressWidth - 1, y + height - 1, 0xffffffff, 0xffffffff);
         }
         
-        graphics.pose().pushPose();
-        graphics.pose().translate(0.0D, 0.0D, 450.0D);
         for (int i = 0; i < sequences.size(); i++) {
             Pair<HintProvider, FormattedCharSequence> pair = sequences.get(i);
-            int lineWidth = graphics.drawString(font, pair.getSecond(), x + 3, y + 3 + font.lineHeight * i, -1);
+            graphics.drawString(font, pair.getSecond(), x + 3, y + 3 + font.lineHeight * i, -1);
+            int lineWidth = font.width(pair.getSecond());
             if (new Rectangle(x + 3, y + 3 + font.lineHeight * i, lineWidth, font.lineHeight).contains(mouseX, mouseY)) {
                 Tooltip tooltip = pair.getFirst().provideTooltip(new Point(mouseX, mouseY));
                 if (tooltip != null) {
@@ -240,8 +241,6 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                 button.action().accept(bounds);
             }
         }
-        
-        graphics.pose().popPose();
     }
     
     @Override
@@ -279,33 +278,33 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean contains = containsMouse(mouseX, mouseY);
-        if (isVisible() && contains && button == 1)
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        boolean contains = containsMouse(event.x(), event.y());
+        if (isVisible() && contains && event.button() == 1)
             setText("");
-        if (contains && button == 0 && isMain && ConfigObject.getInstance().isInventoryHighlightingAllowed())
+        if (contains && event.button() == 0 && isMain && ConfigObject.getInstance().isInventoryHighlightingAllowed())
             if (lastClickedDetails == null)
-                lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(mouseX, mouseY));
-            else if (System.currentTimeMillis() - lastClickedDetails.getA() > 1500)
+                lastClickedDetails = new Pair<>(System.currentTimeMillis(), new Point(event.x(), event.y()));
+            else if (System.currentTimeMillis() - lastClickedDetails.getFirst() > 1500)
                 lastClickedDetails = null;
-            else if (getManhattanDistance(lastClickedDetails.getB(), new Point(mouseX, mouseY)) <= 25) {
+            else if (getManhattanDistance(lastClickedDetails.getSecond(), new Point(event.x(), event.y())) <= 25) {
                 lastClickedDetails = null;
                 isHighlighting = !isHighlighting;
                 minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             } else {
-                lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(mouseX, mouseY));
+                lastClickedDetails = new Pair<>(System.currentTimeMillis(), new Point(event.x(), event.y()));
             }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (this.isVisible() && this.isFocused() && isMain)
-            if (keyCode == 257 || keyCode == 335) {
+            if (event.key() == 257 || event.key() == 335) {
                 addToHistory(getText());
                 setFocused(false);
                 return true;
-            } else if (keyCode == 265) {
+            } else if (event.key() == 265) {
                 int i = history.indexOf(getText()) - 1;
                 if (i < -1 && getText().isEmpty())
                     i = history.size() - 1;
@@ -317,34 +316,34 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                     setText(history.get(i));
                     return true;
                 }
-            } else if (keyCode == 264) {
+            } else if (event.key() == 264) {
                 int i = history.indexOf(getText()) + 1;
                 if (i > 0) {
                     setText(i < history.size() ? history.get(i) : "");
                     return true;
                 }
             }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
     
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    public boolean keyReleased(KeyEvent event) {
         if (this.isVisible() && this.isFocused() && isMain && keybindFocusKey != -1) {
             keybindFocusTime = -1;
             keybindFocusKey = -1;
             return true;
         }
-        return super.keyReleased(keyCode, scanCode, modifiers);
+        return super.keyReleased(event);
     }
     
     @Override
-    public boolean charTyped(char character, int modifiers) {
-        if (isMain && System.currentTimeMillis() - keybindFocusTime < 1000 && keybindFocusKey != -1 && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), keybindFocusKey)) {
+    public boolean charTyped(CharacterEvent event) {
+        if (isMain && System.currentTimeMillis() - keybindFocusTime < 1000 && keybindFocusKey != -1 && InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), keybindFocusKey)) {
             keybindFocusTime = -1;
             keybindFocusKey = -1;
             return true;
         }
-        return super.charTyped(character, modifiers);
+        return super.charTyped(event);
     }
     
     @Override
