@@ -52,6 +52,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin, DisplayRegistryImpl.ClientDisplaysHolder> implements DisplayRegistry, DisplayConsumerImpl, DisplayGeneratorsRegistryImpl {
     public static final Object SYNCED = new Object();
@@ -192,6 +193,7 @@ public class DisplayRegistryImpl extends AbstractDisplayRegistry<REIClientPlugin
     }
     
     public void addRecipes(List<RecipeDisplayEntry> entries) {
+        removeFallbackRecipes(entries.stream().map(RecipeDisplayEntry::id).collect(Collectors.toSet()));
         Stopwatch stopwatch = Stopwatch.createStarted();
         int lastSize = size();
         if (!fillers().isEmpty()) {
