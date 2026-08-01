@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.search;
 
+import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import dev.architectury.platform.Platform;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -49,6 +50,7 @@ public class AsyncSearchManager {
     private final Supplier<Predicate<HashedEntryStackWrapper>> additionalPredicateSupplier;
     private final UnaryOperator<HashedEntryStackWrapper> transformer;
     private volatile Map.Entry<List<HashedEntryStackWrapper>, SearchFilter> last;
+    private volatile Predicate<HashedEntryStackWrapper> additionalPredicate = Predicates.alwaysTrue();
     public volatile ExecutorTuple executor;
     public volatile SearchFilter filter;
     
@@ -74,12 +76,16 @@ public class AsyncSearchManager {
     }
     
     public void updateFilter(String filter) {
-        if (this.filter == null || !this.filter.getFilter().equals(filter)) {
+        Predicate<HashedEntryStackWrapper> nextAdditionalPredicate = additionalPredicateSupplier.get();
+        boolean shouldRefresh = this.filter == null || !this.filter.getFilter().equals(filter) || this.additionalPredicate != nextAdditionalPredicate;
+        if (shouldRefresh) {
             if (this.executor != null) {
                 this.executor.future().cancel(Platform.isFabric());
             }
             this.executor = null;
             this.filter = SearchProvider.getInstance().createFilter(filter);
+            this.additionalPredicate = nextAdditionalPredicate;
+            markDirty();
         }
     }
     
@@ -119,7 +125,7 @@ public class AsyncSearchManager {
         if (isDirty()) {
             Map.Entry<List<HashedEntryStackWrapper>, SearchFilter> last;
             last = this.last;
-            return get(this.filter, this.additionalPredicateSupplier.get(), this.transformer,
+            return get(this.filter, this.additionalPredicate, this.transformer,
                     this.stacksProvider.apply(filter), last, this, executor, steps)
                     .thenApply(entry -> {
                         this.last = entry;

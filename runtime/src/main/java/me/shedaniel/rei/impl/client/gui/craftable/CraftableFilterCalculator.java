@@ -26,23 +26,16 @@ package me.shedaniel.rei.impl.client.gui.craftable;
 import com.google.common.base.Suppliers;
 import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
-import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
-import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerMeta;
-import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
-import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
 import me.shedaniel.rei.impl.client.registry.display.DisplayCache;
 import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
-import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -94,69 +87,12 @@ public class CraftableFilterCalculator implements Predicate<HashedEntryStackWrap
     }
     
     private boolean checkCraftable(Display display) {
-        @Nullable Long2LongMap ingredients = chooseHandler(display);
-        if (ingredients == null) {
-            return false;
-        }
-        
-        List<EntryIngredient> requiredEntries = display.getRequiredEntries();
-        if (requiredEntries.isEmpty()) {
-            return false;
-        }
-        
-        int slotsCraftable = 0;
-        boolean containsNonEmpty = false;
-        
-        for (EntryIngredient slot : requiredEntries) {
-            if (slot.isEmpty()) {
-                slotsCraftable++;
-                continue;
-            }
-            for (EntryStack<?> slotPossible : slot) {
-                if (slotPossible.getType() != VanillaEntryTypes.ITEM) continue;
-                ItemStack stack = slotPossible.castValue();
-                long hashFuzzy = EntryStacks.hashFuzzy(slotPossible);
-                long availableAmount = ingredients.get(hashFuzzy);
-                if (availableAmount >= stack.getCount()) {
-                    ingredients.put(hashFuzzy, availableAmount - stack.getCount());
-                    containsNonEmpty = true;
-                    slotsCraftable++;
-                    break;
-                }
-            }
-        }
-        
-        return slotsCraftable == requiredEntries.size() && containsNonEmpty;
+        return AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null).successful;
     }
-    
-    @Nullable
-    public Long2LongMap chooseHandler(Display display) {
-        TransferHandler.Context transferContext = TransferHandler.Context.create(false, false, REIRuntime.getInstance().getPreviousContainerScreen(), display);
-        for (TransferHandler handler : TransferHandlerRegistry.getInstance()) {
-            TransferHandler.ApplicabilityResult result = handler.checkApplicable(transferContext);
-            if (result.isSuccessful()) {
-                if (handler instanceof TransferHandlerMeta) {
-                    return extractIngredients(((TransferHandlerMeta) handler).getAvailableIngredients(transferContext));
-                } else {
-                    return CraftableFilter.INSTANCE.getInvStacks();
-                }
-            }
-        }
-        
-        return null;
-    }
-    
-    private static Long2LongMap extractIngredients(Iterable<ItemStack> ingredients) {
-        EntryDefinition<ItemStack> definition = VanillaEntryTypes.ITEM.getDefinition();
-        
-        Long2LongMap map = new Long2LongOpenHashMap();
-        for (ItemStack stack : ingredients) {
-            if (!stack.isEmpty()) {
-                long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
-                long newCount = map.getOrDefault(hash, 0) + Math.max(0, stack.getCount());
-                map.put(hash, newCount);
-            }
-        }
-        return map;
+
+    static Long2LongMap copyIngredients(Long2LongMap ingredients) {
+        Long2LongMap copy = new Long2LongOpenHashMap();
+        ingredients.forEach((hash, amount) -> copy.put(hash, amount));
+        return copy;
     }
 }
