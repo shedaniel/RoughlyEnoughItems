@@ -123,7 +123,8 @@ public class SubMenuEntry extends AbstractMenuEntry {
         } else {
             this.childMenu = null;
         }
-        graphics.drawString(font, text, getX() + 2, getY() + 2, isSelected() ? 0xFFFFFFFF : 0xFF888888, false);
+        int color = isSelected() ? 0xFFFFFFFF : 0xFF888888;
+        graphics.drawString(font, text, getX() + 2, getY() + 2, color, false);
         if (!entries.isEmpty()) {
             graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, getX() + getWidth() - 15, getY() - 2, 0, 28, 18, 18, 256, 256);
         }

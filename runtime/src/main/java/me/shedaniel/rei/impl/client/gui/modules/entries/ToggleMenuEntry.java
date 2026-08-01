@@ -114,7 +114,8 @@ public class ToggleMenuEntry extends AbstractMenuEntry {
                 ScreenOverlayImpl.getInstance().renderTooltip(graphics, tooltip);
             }
         }
-        graphics.drawString(font, text, getX() + 2, getY() + 2, isSelected() && active.getAsBoolean() ? 0xFFFFFFFF : 0xFF888888, false);
+        int color = isSelected() && active.getAsBoolean() ? 0xFFFFFFFF : 0xFF888888;
+        graphics.drawString(font, text, getX() + 2, getY() + 2, color, false);
         if (supplier.getAsBoolean()) {
             graphics.drawString(font, "✔", getX() + getWidth() - 2 - font.width("✔"), getY() + 2, isSelected() && active.getAsBoolean() ? 0xFFFFFFFF : 0xFF888888, false);
         }

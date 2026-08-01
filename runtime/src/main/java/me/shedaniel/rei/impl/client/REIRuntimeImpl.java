@@ -280,6 +280,10 @@ public class REIRuntimeImpl implements REIRuntime {
             return EventResult.pass();
         });
         ClientTickEvent.CLIENT_POST.register(minecraft -> {
+            Screen currentScreen = minecraft.gui.screen();
+            if (currentScreen == null || !(currentScreen instanceof AbstractContainerScreen<?>) && !currentScreen.getClass().getName().contains(".rei.")) {
+                previousContainerScreen = null;
+            }
             if (isOverlayVisible() && REIRuntime.getInstance().getOverlay().isPresent()) {
                 ScreenOverlayImpl.getInstance().tick();
             }
