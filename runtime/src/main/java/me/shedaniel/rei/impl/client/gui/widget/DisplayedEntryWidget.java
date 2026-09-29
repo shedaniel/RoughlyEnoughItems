@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -73,9 +74,9 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
                 if (entry.getValueType() == ItemStack.class) {
                     boolean all;
                     if (ConfigObject.getInstance().getItemCheatingMode() == ItemCheatingMode.REI_LIKE) {
-                        all = event.button() == 1 || event.hasShiftDown();
+                        all = event.button() == InputConstants.MOUSE_BUTTON_RIGHT || event.hasShiftDown();
                     } else {
-                        all = event.button() != 1 || event.hasShiftDown();
+                        all = event.button() != InputConstants.MOUSE_BUTTON_RIGHT || event.hasShiftDown();
                     }
                     entry.<ItemStack>castValue().setCount(!all ? 1 : entry.<ItemStack>castValue().getMaxStackSize());
                 }

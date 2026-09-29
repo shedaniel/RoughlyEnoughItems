@@ -37,7 +37,12 @@ public abstract class REIScreen extends Screen {
     }
 
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        extractBackground(graphics, mouseX, mouseY, delta);
+        super.extractBackground(graphics, mouseX, mouseY, delta);
+    }
+
+    @Override
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        renderBackground(GuiGraphics.of(graphics), mouseX, mouseY, delta);
     }
 
     public void renderTransparentBackground(GuiGraphics graphics) {

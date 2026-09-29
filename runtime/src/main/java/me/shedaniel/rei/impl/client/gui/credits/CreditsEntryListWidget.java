@@ -23,6 +23,8 @@
 
 package me.shedaniel.rei.impl.client.gui.credits;
 
+import com.mojang.blaze3d.Blaze3D;
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.ChatFormatting;
@@ -178,10 +180,10 @@ public class CreditsEntryListWidget extends UpdatedListWidget<CreditsEntryListWi
         
         @Override
         public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-            if (contains && event.button() == 0) {
+            if (contains && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 try {
-                    Util.getPlatform().openUri(new URI(link));
+                    Blaze3D.openUri(new URI(link));
                     return true;
                 } catch (URISyntaxException e) {
                     e.printStackTrace();

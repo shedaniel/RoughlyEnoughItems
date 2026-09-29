@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.error;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.rei.impl.client.gui.error.ErrorsEntryListWidget.TextEntry;
 import net.minecraft.client.Minecraft;
 import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
@@ -55,7 +56,7 @@ public class ErrorsScreen extends me.shedaniel.rei.impl.client.gui.screen.REIScr
     
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (event.key() == 256) {
+        if (event.key() == InputConstants.KEY_ESCAPE) {
             Minecraft.getInstance().setScreenAndShow(parent);
             return true;
         }

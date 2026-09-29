@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.DataResult;
 import dev.architectury.event.Event;
@@ -147,13 +148,9 @@ public class RoughlyEnoughItemsCoreClient {
             if (client.level != null) {
                 return SlotDisplayContext.fromLevel(client.level);
             }
-            ContextMap.Builder builder = new ContextMap.Builder()
-                    .withParameter(SlotDisplayContext.REGISTRIES, Internals.getRegistryAccess());
-            ClientPacketListener connection = client.getConnection();
-            if (connection != null) {
-                builder.withParameter(SlotDisplayContext.FUEL_VALUES, connection.fuelValues());
-            }
-            return builder.create(SlotDisplayContext.CONTEXT);
+            return ContextMap.builder()
+                    .set(SlotDisplayContext.REGISTRIES, Internals.getRegistryAccess())
+                    .buildAndValidate(SlotDisplayContext.CONTEXT);
         }, "slotDisplayContext");
         EmptyEntryDefinition.EmptyRenderer emptyEntryRenderer = new EmptyEntryDefinition.EmptyRenderer();
         ClientInternals.attachInstance((Supplier<EntryRenderer<?>>) () -> emptyEntryRenderer, "emptyEntryRenderer");
@@ -414,7 +411,7 @@ public class RoughlyEnoughItemsCoreClient {
                 return EventResult.pass();
             resetFocused(screen);
             if (getOverlay().mouseClicked(event, doubleClick)) {
-                if (event.button() == 0) {
+                if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                     screen.setDragging(true);
                 }
                 resetFocused(screen);
@@ -471,7 +468,7 @@ public class RoughlyEnoughItemsCoreClient {
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             if (screen instanceof AbstractContainerScreen && ConfigObject.getInstance().doesDisableRecipeBook() && ConfigObject.getInstance().doesFixTabCloseContainer()) {
-                if (event.key() == 258 && minecraftClient.options.keyInventory.matches(event)) {
+                if (event.key() == InputConstants.KEY_TAB && minecraftClient.options.keyInventory.matches(event)) {
                     minecraftClient.player.closeContainer();
                     return EventResult.interruptFalse();
                 }

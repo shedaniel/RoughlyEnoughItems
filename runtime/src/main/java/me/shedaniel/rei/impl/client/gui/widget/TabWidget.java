@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Point;
@@ -85,7 +86,7 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        return event.button() == 0 && containsMouse(event.x(), event.y()) && onClick != null && onClick.test(this);
+        return event.button() == InputConstants.MOUSE_BUTTON_LEFT && containsMouse(event.x(), event.y()) && onClick != null && onClick.test(this);
     }
     
     public void setRenderer(DisplayCategory<?> category, Renderer renderer, Component categoryName, boolean selected) {

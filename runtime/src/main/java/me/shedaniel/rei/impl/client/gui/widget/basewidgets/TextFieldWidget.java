@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.clothconfig2.api.TickableWidget;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
@@ -297,7 +298,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
                 return true;
             } else {
                 switch (event.key()) {
-                    case 259:
+                    case InputConstants.KEY_BACKSPACE:
                         if (this.editable) {
                             this.selecting = false;
                             this.erase(-1);
@@ -305,14 +306,14 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
                         }
                         
                         return true;
-                    case 260:
-                    case 264:
-                    case 265:
-                    case 266:
-                    case 267:
+                    case InputConstants.KEY_INSERT:
+                    case InputConstants.KEY_DOWN:
+                    case InputConstants.KEY_UP:
+                    case InputConstants.KEY_PAGEUP:
+                    case InputConstants.KEY_PAGEDOWN:
                     default:
-                        return event.key() != 256;
-                    case 261:
+                        return event.key() != InputConstants.KEY_ESCAPE;
+                    case InputConstants.KEY_DELETE:
                         if (this.editable) {
                             this.selecting = false;
                             this.erase(1);
@@ -320,7 +321,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
                         }
                         
                         return true;
-                    case 262:
+                    case InputConstants.KEY_RIGHT:
                         if (event.hasControlDown()) {
                             this.moveCursorTo(this.getWordPosition(1));
                         } else {
@@ -328,7 +329,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
                         }
                         
                         return true;
-                    case 263:
+                    case InputConstants.KEY_LEFT:
                         if (event.hasControlDown()) {
                             this.moveCursorTo(this.getWordPosition(-1));
                         } else {
@@ -336,10 +337,10 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
                         }
                         
                         return true;
-                    case 268:
+                    case InputConstants.KEY_HOME:
                         this.moveCursorToStart();
                         return true;
-                    case 269:
+                    case InputConstants.KEY_END:
                         this.moveCursorToEnd();
                         return true;
                 }
@@ -385,7 +386,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
                 this.setFocused(hovered);
             }
             
-            if (this.focused && hovered && event.button() == 0) {
+            if (this.focused && hovered && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 int int_2 = Mth.floor(event.x()) - this.bounds.x;
                 if (this.hasBorder) {
                     int_2 -= 4;
@@ -551,9 +552,20 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
         if (focused && !this.focused)
             this.frame = 0;
         this.focused = focused;
+        if (this.editable) {
+            Minecraft.getInstance().onTextInputFocusChange(this, focused);
+        }
+    }
+    
+    @Override
+    public boolean capturesInput() {
+        return this.visible && this.editable && this.focused;
     }
     
     public void setIsEditable(boolean isEditable) {
+        if (this.focused) {
+            Minecraft.getInstance().onTextInputFocusChange(this, isEditable);
+        }
         this.editable = isEditable;
     }
     

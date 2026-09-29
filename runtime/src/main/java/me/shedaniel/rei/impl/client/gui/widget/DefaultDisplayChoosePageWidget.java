@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
 import me.shedaniel.math.Point;
@@ -180,7 +181,7 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
     
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (event.key() == 335 || event.key() == 257) {
+        if (event.key() == InputConstants.KEY_NUMPADENTER || event.key() == InputConstants.KEY_RETURN) {
             callback.accept(Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, maxPage - 1));
             ScreenOverlayImpl.getInstance().choosePageWidget = null;
             return true;

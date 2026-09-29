@@ -1,5 +1,4 @@
 accessWidener v1     official
-accessible    class  net/minecraft/world/item/alchemy/PotionBrewing$Mix
 accessible    field  net/minecraft/client/gui/components/ImageButton                           sprites                 Lnet/minecraft/client/gui/components/WidgetSprites;
 accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        hoveredSlot             Lnet/minecraft/world/inventory/Slot;
 accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        imageHeight             I
@@ -12,9 +11,6 @@ accessible    field  net/minecraft/client/gui/screens/recipebook/RecipeBookCompo
 accessible    field  net/minecraft/client/gui/screens/recipebook/RecipeBookComponent           tabButtons              Ljava/util/List;
 accessible    field  net/minecraft/client/StringSplitter                                       widthProvider           Lnet/minecraft/client/StringSplitter$WidthProvider;
 accessible    field  net/minecraft/nbt/CompoundTag                                             tags                    Ljava/util/Map;
-accessible field net/minecraft/world/item/alchemy/PotionBrewing containers Ljava/util/List;
-accessible field net/minecraft/world/item/alchemy/PotionBrewing containerMixes Ljava/util/List;
-accessible field net/minecraft/world/item/alchemy/PotionBrewing potionMixes Ljava/util/List;
 accessible    method net/minecraft/client/gui/screens/Screen                                   init                    ()V
 accessible    method net/minecraft/client/gui/screens/Screen                                   insertText              (Ljava/lang/String;Z)V
 extendable    method net/minecraft/client/gui/screens/Screen                                   init                    (II)V
@@ -27,8 +23,8 @@ accessible field net/minecraft/client/gui/GuiGraphicsExtractor mouseX I
 accessible field net/minecraft/client/gui/GuiGraphicsExtractor mouseY I
 accessible field net/minecraft/client/gui/GuiGraphicsExtractor scissorStack Lnet/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack;
 mutable field net/minecraft/client/gui/GuiGraphicsExtractor scissorStack Lnet/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack;
-accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerBlit (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lcom/mojang/blaze3d/textures/GpuTextureView;Lcom/mojang/blaze3d/textures/GpuSampler;IIIIFFFFI)V
-accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerBlit (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIIIFFFFI)V
+accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerBlit (Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Lcom/mojang/renderpearl/api/textures/GpuTextureView;Lcom/mojang/renderpearl/api/textures/GpuSampler;IIIIFFFFI)V
+accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerBlit (Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIIIFFFFI)V
 accessible class net/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack
 accessible method net/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack <init> (Lnet/minecraft/client/gui/navigation/ScreenRectangle;)V
 accessible field net/minecraft/tags/TagEntry tag Z
@@ -43,3 +39,7 @@ accessible field net/minecraft/world/item/crafting/Ingredient values Lnet/minecr
 accessible field net/minecraft/client/gui/screens/inventory/AbstractRecipeBookScreen recipeBookComponent Lnet/minecraft/client/gui/screens/recipebook/RecipeBookComponent;
 accessible method net/minecraft/client/gui/screens/Screen defaultHandleGameClickEvent (Lnet/minecraft/network/chat/ClickEvent;Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/gui/screens/Screen;)V
 accessible class net/minecraft/client/StringSplitter$WidthLimitedCharSink
+accessible field net/minecraft/world/level/levelgen/blockpredicates/MatchingBlocksPredicate blocks Lnet/minecraft/core/HolderSet;
+accessible field net/minecraft/world/level/levelgen/blockpredicates/MatchingBlockTagPredicate tag Lnet/minecraft/tags/TagKey;
+accessible field net/minecraft/world/level/levelgen/blockpredicates/StateTestingPredicate offset Lnet/minecraft/core/Vec3i;
+accessible field net/minecraft/world/level/levelgen/blockpredicates/CombiningPredicate predicates Ljava/util/List;

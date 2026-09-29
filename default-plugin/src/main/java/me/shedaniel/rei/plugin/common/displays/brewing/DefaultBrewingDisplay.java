@@ -33,11 +33,19 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.predicates.PotionsPredicate;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.PotionIngredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -74,6 +82,25 @@ public class DefaultBrewingDisplay implements Display {
     
     public DefaultBrewingDisplay(BrewingRecipe recipe) {
         this(recipe.input(), recipe.ingredient(), recipe.output());
+    }
+    
+    public DefaultBrewingDisplay(RecipeHolder<net.minecraft.world.item.crafting.BrewingRecipe> holder) {
+        this(toEntryIngredient(holder.value().getInput()), toEntryIngredient(holder.value().getReagent()), EntryIngredients.of(holder.value().getOutput().create()));
+    }
+    
+    private static EntryIngredient toEntryIngredient(PotionIngredient ingredient) {
+        EntryIngredient items = EntryIngredients.ofIngredient(ingredient.ingredient());
+        Optional<HolderSet<Potion>> potions = ingredient.potions().flatMap(PotionsPredicate::potions);
+        if (potions.isEmpty()) return items;
+        EntryIngredient.Builder builder = EntryIngredient.builder();
+        for (EntryStack<?> stack : items) {
+            for (Holder<Potion> potion : potions.get()) {
+                EntryStack<?> copied = stack.copy();
+                copied.<ItemStack>castValue().set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
+                builder.add(copied);
+            }
+        }
+        return builder.build();
     }
     
     public DefaultBrewingDisplay(Ingredient input, Ingredient reactant, ItemStack output) {

@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
@@ -366,7 +367,7 @@ public class FilteringScreen extends me.shedaniel.rei.impl.client.gui.screen.REI
                 return true;
             } else if (showButton.mouseClicked(event, doubleClick)) {
                 return true;
-            } else if (event.button() == 0) {
+            } else if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 if (!Minecraft.getInstance().hasShiftDown()) {
                     this.points.clear();
                 }
@@ -379,7 +380,7 @@ public class FilteringScreen extends me.shedaniel.rei.impl.client.gui.screen.REI
     
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (event.button() == 0 && !points.isEmpty()) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && !points.isEmpty()) {
             PointPair pair = this.points.get(points.size() - 1);
             if (pair.secondPoint() == null) {
                 this.points.set(points.size() - 1, new PointPair(pair.firstPoint(), new Point(event.x(), event.y() + scrolling.scrollAmount())));
@@ -407,7 +408,7 @@ public class FilteringScreen extends me.shedaniel.rei.impl.client.gui.screen.REI
             this.points.add(new PointPair(new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2), new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2)));
             return true;
         }
-        if (event.key() == 256 && this.shouldCloseOnEsc()) {
+        if (event.key() == InputConstants.KEY_ESCAPE && this.shouldCloseOnEsc()) {
             this.backButton.onPress(event);
             return true;
         }

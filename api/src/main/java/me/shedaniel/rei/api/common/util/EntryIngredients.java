@@ -224,7 +224,7 @@ public final class EntryIngredients {
             case SlotDisplay.Empty $ -> EntryIngredient.empty();
             case SlotDisplay.ItemSlotDisplay s -> ofItemHolder(s.item());
             case SlotDisplay.ItemStackSlotDisplay s -> of(s.stack());
-            case SlotDisplay.TagSlotDisplay s -> ofItemTag(s.tag());
+            case SlotDisplay.TagSlotDisplay s -> ofItemsHolderSet(s.tag());
             case SlotDisplay.Composite s -> {
                 EntryIngredient.Builder builder = EntryIngredient.builder();
                 for (SlotDisplay slotDisplay : s.contents()) {

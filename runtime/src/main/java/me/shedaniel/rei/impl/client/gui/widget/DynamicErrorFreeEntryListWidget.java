@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
@@ -361,7 +362,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                     this.setDragging(true);
                     return true;
                 }
-            } else if (event.button() == 0) {
+            } else if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 this.clickedHeader((int) (event.x() - (double) (this.left + this.width / 2 - this.getItemWidth() / 2)), (int) (event.y() - (double) this.top) + (int) this.getScroll() - 4);
                 return true;
             }
@@ -383,7 +384,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
         if (super.mouseDragged(event, deltaX, deltaY)) {
             return true;
-        } else if (event.button() == 0 && this.scrolling) {
+        } else if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && this.scrolling) {
             if (event.y() < (double) this.top) {
                 this.capYPosition(0.0F);
             } else if (event.y() > (double) this.bottom) {
@@ -418,10 +419,10 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     public boolean keyPressed(KeyEvent event) {
         if (super.keyPressed(event)) {
             return true;
-        } else if (event.key() == 264) {
+        } else if (event.key() == InputConstants.KEY_DOWN) {
             this.moveSelection(1);
             return true;
-        } else if (event.key() == 265) {
+        } else if (event.key() == InputConstants.KEY_UP) {
             this.moveSelection(-1);
             return true;
         } else {

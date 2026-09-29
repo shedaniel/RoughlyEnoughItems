@@ -43,13 +43,13 @@ public class PlatformAdapterImpl implements PlatformAdapter {
     public List<PackResources> gatherClientDataPacks() {
         List<PackResources> packs = new ArrayList<>();
         // Vanilla data pack (the recipe JSONs under data/minecraft/recipe/).
-        packs.add(ServerPacksSource.createVanillaPackSource());
+        packs.add(ServerPacksSource.createVanillaPackSource().fullResources());
         // Every mod's built-in data pack. Fabric only exposes mod CLIENT resources through a public
         // constant, so construct a SERVER_DATA creator explicitly to enumerate modded recipes.
         // ModResourcePackCreator is Fabric-internal API; if it ever changes, fall back to vanilla
         // recipes only rather than breaking the whole local-recipes feature.
         try {
-            new ModResourcePackCreator(PackType.SERVER_DATA).loadPacks(pack -> packs.add(pack.open()));
+            new ModResourcePackCreator(PackType.SERVER_DATA).loadPacks(pack -> pack.open().forEach(packs::add));
         } catch (Throwable throwable) {
             InternalLogger.getInstance().error("[Local Recipes] Failed to gather mod data packs; modded recipes will be missing from the local fallback", throwable);
         }

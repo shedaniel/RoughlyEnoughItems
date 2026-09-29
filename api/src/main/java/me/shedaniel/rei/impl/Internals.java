@@ -58,9 +58,9 @@ public final class Internals {
     private static Function<String, CategoryIdentifier<?>> categoryIdentifier = (object) -> throwNotSetup();
     private static Supplier<InternalLogger> logger = Internals::throwNotSetup;
     private static Supplier<RegistryAccess> registryAccess = Internals::throwNotSetup;
-    private static Supplier<ContextMap> slotDisplayContext = () -> new ContextMap.Builder()
-            .withParameter(SlotDisplayContext.REGISTRIES, getRegistryAccess())
-            .create(SlotDisplayContext.CONTEXT);
+    private static Supplier<ContextMap> slotDisplayContext = () -> ContextMap.builder()
+            .set(SlotDisplayContext.REGISTRIES, getRegistryAccess())
+            .buildAndValidate(SlotDisplayContext.CONTEXT);
 
     private static <T> T throwNotSetup() {
         throw new AssertionError("REI Internals have not been initialized!");

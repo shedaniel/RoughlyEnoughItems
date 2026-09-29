@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.screen;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
@@ -179,7 +180,7 @@ public class UncertainDisplayViewingScreen extends REIScreen {
     
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (event.key() == 256 || this.minecraft.options.keyInventory.matches(event)) {
+        if (event.key() == InputConstants.KEY_ESCAPE || this.minecraft.options.keyInventory.matches(event)) {
             Minecraft.getInstance().setScreenAndShow(parent);
             if (parent instanceof AbstractContainerScreen) {
                 REIRuntime.getInstance().getOverlay().get().queueReloadOverlay();

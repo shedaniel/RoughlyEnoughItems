@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;

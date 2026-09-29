@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
 import me.shedaniel.math.Point;
@@ -387,18 +388,18 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
                 if (listener != REIRuntimeImpl.getSearchField() && listener.keyPressed(event))
                     return true;
         }
-        if (ConfigObject.getInstance().getHideKeybind().matchesKey(event.key(), event.scancode())) {
+        if (ConfigObject.getInstance().getHideKeybind().matchesKey(event.key(), event.keycode())) {
             REIRuntime.getInstance().toggleOverlayVisible();
             return true;
         }
         EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().gui.screen(), PointHelper.ofMouse());
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
-            if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(event.key(), event.scancode())) {
+            if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(event.key(), event.keycode())) {
                 return ViewSearchBuilder.builder().addRecipesFor(stack).open();
-            } else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(event.key(), event.scancode())) {
+            } else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(event.key(), event.keycode())) {
                 return ViewSearchBuilder.builder().addUsagesFor(stack).open();
-            } else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(event.key(), event.scancode())) {
+            } else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(event.key(), event.keycode())) {
                 FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack);
                 ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                 return true;
@@ -406,7 +407,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         }
         if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
-        if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesKey(event.key(), event.scancode())) {
+        if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesKey(event.key(), event.keycode())) {
             REIRuntimeImpl.getSearchField().setFocused(true);
             setFocused(REIRuntimeImpl.getSearchField());
             REIRuntimeImpl.getSearchField().keybindFocusTime = System.currentTimeMillis();
@@ -467,7 +468,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (!hasSpace()) return false;
         if (visible && configButton.mouseClicked(event, doubleClick)) {
             this.setFocused(configButton);
-            if (event.button() == 0)
+            if (event.button() == InputConstants.MOUSE_BUTTON_LEFT)
                 this.setDragging(true);
             return true;
         }
@@ -492,14 +493,14 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             Widget menuWidget = menuHolder.widget();
             if (menuWidget != null && menuWidget.mouseClicked(event, doubleClick)) {
                 this.setFocused(menuWidget);
-                if (event.button() == 0)
+                if (event.button() == InputConstants.MOUSE_BUTTON_LEFT)
                     this.setDragging(true);
                 REIRuntimeImpl.getSearchField().setFocused(false);
                 return true;
             }
             if (hintsWidget.mouseClicked(event, doubleClick)) {
                 this.setFocused(hintsWidget);
-                if (event.button() == 0)
+                if (event.button() == InputConstants.MOUSE_BUTTON_LEFT)
                     this.setDragging(true);
                 REIRuntimeImpl.getSearchField().setFocused(false);
                 return true;
@@ -515,18 +516,18 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (!visible) {
             return false;
         }
+        if (draggingStack != null) {
+            draggingStack.mouseClicked(event, doubleClick);
+        }
         for (GuiEventListener element : widgets) {
             if (element != configButton && element != menuHolder.widget() && element != hintsWidget && element != draggingStack && element.mouseClicked(event, doubleClick)) {
                 this.setFocused(element);
-                if (event.button() == 0)
+                if (event.button() == InputConstants.MOUSE_BUTTON_LEFT)
                     this.setDragging(true);
                 if (!(element instanceof OverlaySearchField))
                     REIRuntimeImpl.getSearchField().setFocused(false);
                 return true;
             }
-        }
-        if (draggingStack != null) {
-            draggingStack.mouseClicked(event, doubleClick);
         }
         if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesMouse(event.button())) {
             REIRuntimeImpl.getSearchField().setFocused(true);
@@ -546,7 +547,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (choosePageWidget != null) {
             return choosePageWidget.mouseDragged(event, deltaX, deltaY);
         }
-        return (this.getFocused() != null && this.isDragging() && event.button() == 0) && this.getFocused().mouseDragged(event, deltaX, deltaY);
+        return (this.getFocused() != null && this.isDragging() && event.button() == InputConstants.MOUSE_BUTTON_LEFT) && this.getFocused().mouseDragged(event, deltaX, deltaY);
     }
     
     @Override

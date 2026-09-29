@@ -133,6 +133,9 @@ public class DefaultPlugin implements BuiltinPlugin, REICommonPlugin {
         registry.beginRecipeFiller(SmithingTrimRecipe.class)
                 .filterType(RecipeType.SMITHING)
                 .fillMultiple(DefaultSmithingDisplay::fromTrimming);
+        registry.beginRecipeFiller(BrewingRecipe.class)
+                .filterType(RecipeType.BREWING)
+                .fill(DefaultBrewingDisplay::new);
         
         for (CraftingRecipeFiller<?> filler : CRAFTING_RECIPE_FILLERS) {
             filler.registerDisplays(registry);

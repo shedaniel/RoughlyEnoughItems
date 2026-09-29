@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.history;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.base.Suppliers;
 import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -243,7 +244,7 @@ public class DisplayEntry extends WidgetWithBounds {
                 }
             }
             
-            if (event.button() == 0 && plusButton.containsMouse(event.x() + xOffset, event.y())) {
+            if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && plusButton.containsMouse(event.x() + xOffset, event.y())) {
                 AutoCraftingEvaluator.evaluateAutoCrafting(true, event.hasShiftDown(), display, display::provideInternalDisplayIds);
                 Widgets.produceClickSound();
                 return true;

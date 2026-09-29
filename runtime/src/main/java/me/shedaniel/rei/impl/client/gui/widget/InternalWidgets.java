@@ -110,14 +110,14 @@ public final class InternalWidgets {
             
             @Override
             public boolean keyPressed(KeyEvent event) {
-                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(event.key(), event.scancode()) && containsMouse(PointHelper.ofMouse())) {
+                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(event.key(), event.keycode()) && containsMouse(PointHelper.ofMouse())) {
                     minecraft.keyboardHandler.setClipboard(displaySupplier.get().getDisplayLocation().get().toString());
                     if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
                         CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getDisplayLocation().get().toString()));
                     }
                     return true;
                 } else if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse())) {
-                    if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(event.key(), event.scancode())) {
+                    if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(event.key(), event.keycode())) {
                         FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
                         
                         if (favoritesListWidget != null) {

@@ -32,7 +32,7 @@ import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REICommonPlugin;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 import me.shedaniel.rei.impl.init.PluginDetector;
-import me.shedaniel.rei.plugin.client.forge.DefaultClientPluginImpl;
+import me.shedaniel.rei.plugin.client.DefaultClientPlugin;
 import me.shedaniel.rei.plugin.client.runtime.DefaultClientRuntimePlugin;
 import me.shedaniel.rei.plugin.client.runtime.HideIngredientsFromTagsPlugin;
 import me.shedaniel.rei.plugin.common.forge.DefaultPluginImpl;
@@ -138,7 +138,7 @@ public class PluginDetectorImpl implements PluginDetector {
     public Supplier<Runnable> detectClientPlugins() {
         return () -> () -> {
             if (FMLEnvironment.getDist() == Dist.CLIENT) {
-                PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientPluginImpl()));
+                PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientPlugin()));
                 PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientRuntimePlugin()));
                 PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new HideIngredientsFromTagsPlugin()));
 

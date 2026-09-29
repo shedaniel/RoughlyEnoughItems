@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[1,)"
 issueTrackerURL = "https://github.com/shedaniel/RoughlyEnoughItems/issues"
-logoFile = "icon.png"
+iconFile = "icon.png"
 authors = "shedaniel"
 license = "MIT"
 
@@ -16,29 +16,29 @@ To allow players to view items and recipes.
 [[dependencies.roughlyenoughitems]]
 modId = "architectury"
 type = "required"
-versionRange = "[21.0,)"
+versionRange = "[22.0,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.roughlyenoughitems]]
 modId = "cloth_config"
 type = "required"
-versionRange = "[26.2,)"
+versionRange = "[26.3,)"
 ordering = "NONE"
 side = "BOTH"
 
-# Architectury 21.x is built for Minecraft 26.2, so NeoForge hard-requires it.
+# Architectury 22.x is built for Minecraft 26.3, so NeoForge hard-requires it.
 [[dependencies.roughlyenoughitems]]
 modId = "minecraft"
 type = "required"
-versionRange = "[26.2,)"
+versionRange = "[26.3,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.roughlyenoughitems]]
 modId = "neoforge"
 type = "required"
-versionRange = "[26.2,)"
+versionRange = "[26.3,)"
 ordering = "NONE"
 side = "BOTH"
 

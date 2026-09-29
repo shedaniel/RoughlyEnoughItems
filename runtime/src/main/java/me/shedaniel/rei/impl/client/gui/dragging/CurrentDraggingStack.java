@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.dragging;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.*;
@@ -147,7 +148,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() != 0) {
+        if (event.button() != InputConstants.MOUSE_BUTTON_LEFT) {
             return false;
         }
         drop();
@@ -160,7 +161,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (event.button() != 0) {
+        if (event.button() != InputConstants.MOUSE_BUTTON_LEFT) {
             return false;
         }
         drop();
@@ -169,7 +170,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double mouseX2, double mouseY2) {
-        return event.button() == 0 && entry != null && entry.dragging;
+        return event.button() == InputConstants.MOUSE_BUTTON_LEFT && entry != null && entry.dragging;
     }
     
     public boolean drop() {

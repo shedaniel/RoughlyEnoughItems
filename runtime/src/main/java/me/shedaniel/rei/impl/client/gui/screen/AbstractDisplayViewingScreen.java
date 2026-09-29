@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.screen;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.collect.Lists;
 import dev.architectury.fluid.FluidStack;
 import dev.architectury.utils.value.IntValue;
@@ -448,7 +449,7 @@ public abstract class AbstractDisplayViewingScreen extends REIScreen implements 
     }
     
     private boolean handleFocuses(int button) {
-        if (button == 0) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT) {
             setDragging(true);
         }
         handleFocuses();
@@ -468,7 +469,7 @@ public abstract class AbstractDisplayViewingScreen extends REIScreen implements 
         Optional<GuiEventListener> hovered = this.getChildAt(event.x(), event.y());
         if (hovered.isPresent() && hovered.get().mouseClicked(event, doubleClick)) {
             this.setFocused(hovered.get());
-            if (event.button() == 0) {
+            if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 this.setDragging(true);
             }
             
@@ -498,7 +499,7 @@ public abstract class AbstractDisplayViewingScreen extends REIScreen implements 
     public boolean keyPressed(KeyEvent event) {
         if (super.keyPressed(event) || (getOverlay().keyPressed(event) && handleFocuses()))
             return true;
-        if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(event.key(), event.scancode())) {
+        if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(event.key(), event.keycode())) {
             if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
                 minecraft.setScreenAndShow(REIRuntimeImpl.getInstance().getLastDisplayScreen());
             } else {

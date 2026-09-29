@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.plugin.client.favorites;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import me.shedaniel.math.Rectangle;
@@ -151,7 +152,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
     
     @Override
     public boolean doAction(MouseButtonEvent event) {
-        if (event.button() == 0) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             if (weather != null) {
                 Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)), "/"));
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));

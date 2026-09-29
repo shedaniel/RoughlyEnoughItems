@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingRectangle;
@@ -154,7 +155,7 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
     
     @Override
     protected boolean doAction(MouseButtonEvent event) {
-        if (collapsedStack != null && event.button() == 0 && event.hasAltDown()) {
+        if (collapsedStack != null && event.button() == InputConstants.MOUSE_BUTTON_LEFT && event.hasAltDown()) {
             parent.updatedCount++;
             collapsedStack.setExpanded(!collapsedStack.isExpanded());
             parent.updateStacks();

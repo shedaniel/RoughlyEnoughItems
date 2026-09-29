@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueProvider;
 import me.shedaniel.math.Color;
@@ -254,7 +255,7 @@ public class ButtonWidget extends Button {
     
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (containsMouse(event.x(), event.y()) && isEnabled() && event.button() == 0) {
+        if (containsMouse(event.x(), event.y()) && isEnabled() && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             onClick();
             return true;
@@ -265,7 +266,7 @@ public class ButtonWidget extends Button {
     @Override
     public boolean keyPressed(KeyEvent event) {
         if (this.isEnabled() && focused) {
-            if (event.key() != 257 && event.key() != 32 && event.key() != 335) {
+            if (event.key() != InputConstants.KEY_RETURN && event.key() != InputConstants.KEY_SPACE && event.key() != InputConstants.KEY_NUMPADENTER) {
                 return false;
             } else {
                 minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));

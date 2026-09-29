@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -123,7 +124,7 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (super.mouseClicked(event, doubleClick)) return true;
         if (containsMouse(event.x(), event.y())) {
-            if (event.button() == 0) {
+            if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 dragging = true;
             }
             
@@ -135,7 +136,7 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (dragging && event.button() == 0) {
+        if (dragging && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             dragging = false;
             return true;
         }
@@ -145,7 +146,7 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        if (dragging && event.button() == 0) {
+        if (dragging && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             double newXTranslate = translate.target().x;
             double newYTranslate = translate.target().y;
             newXTranslate += deltaX * scale.doubleValue();

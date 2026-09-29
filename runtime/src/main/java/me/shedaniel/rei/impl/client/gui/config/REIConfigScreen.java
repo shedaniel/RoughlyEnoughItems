@@ -279,22 +279,22 @@ public class REIConfigScreen extends me.shedaniel.rei.impl.client.gui.screen.REI
         if (this.focusedKeycodeOption != null && this.partialKeycode != null) {
             if (this.partialKeycode.isUnknown()) {
                 this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(event.button()));
-            } else if (this.partialKeycode.getType() == InputConstants.Type.KEYSYM) {
+            } else if (this.partialKeycode.getType() == InputConstants.Type.KEYBOARD) {
                 Modifier modifier = this.partialKeycode.getModifier();
                 int code = this.partialKeycode.getKeyCode().getValue();
-                if (Util.getPlatform() == Util.OS.OSX ? code == 343 || code == 347 : code == 341 || code == 345) {
+                if (Util.getPlatform() == Util.OS.OSX ? code == InputConstants.KEY_LGUI || code == InputConstants.KEY_RGUI : code == InputConstants.KEY_LCONTROL || code == InputConstants.KEY_RCONTROL) {
                     this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), true, modifier.hasShift()));
                     this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(event.button()));
                     return true;
                 }
                 
-                if (code == 344 || code == 340) {
+                if (code == InputConstants.KEY_RSHIFT || code == InputConstants.KEY_LSHIFT) {
                     this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), modifier.hasControl(), true));
                     this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(event.button()));
                     return true;
                 }
                 
-                if (code == 342 || code == 346) {
+                if (code == InputConstants.KEY_LALT || code == InputConstants.KEY_RALT) {
                     this.partialKeycode.setModifier(Modifier.of(true, modifier.hasControl(), modifier.hasShift()));
                     this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(event.button()));
                     return true;
@@ -354,26 +354,26 @@ public class REIConfigScreen extends me.shedaniel.rei.impl.client.gui.screen.REI
     @Override
     public boolean keyPressed(KeyEvent event) {
         if (this.focusedKeycodeOption != null) {
-            if (event.key() != 256) {
+            if (event.key() != InputConstants.KEY_ESCAPE) {
                 if (this.partialKeycode.isUnknown()) {
                     this.partialKeycode.setKeyCode(InputConstants.getKey(event));
                 } else {
                     Modifier modifier = this.partialKeycode.getModifier();
-                    if (this.partialKeycode.getType() == InputConstants.Type.KEYSYM) {
+                    if (this.partialKeycode.getType() == InputConstants.Type.KEYBOARD) {
                         int code = this.partialKeycode.getKeyCode().getValue();
-                        if (Util.getPlatform() == Util.OS.OSX ? code == 343 || code == 347 : code == 341 || code == 345) {
+                        if (Util.getPlatform() == Util.OS.OSX ? code == InputConstants.KEY_LGUI || code == InputConstants.KEY_RGUI : code == InputConstants.KEY_LCONTROL || code == InputConstants.KEY_RCONTROL) {
                             this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), true, modifier.hasShift()));
                             this.partialKeycode.setKeyCode(InputConstants.getKey(event));
                             return true;
                         }
                         
-                        if (code == 344 || code == 340) {
+                        if (code == InputConstants.KEY_RSHIFT || code == InputConstants.KEY_LSHIFT) {
                             this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), modifier.hasControl(), true));
                             this.partialKeycode.setKeyCode(InputConstants.getKey(event));
                             return true;
                         }
                         
-                        if (code == 342 || code == 346) {
+                        if (code == InputConstants.KEY_LALT || code == InputConstants.KEY_RALT) {
                             this.partialKeycode.setModifier(Modifier.of(true, modifier.hasControl(), modifier.hasShift()));
                             this.partialKeycode.setKeyCode(InputConstants.getKey(event));
                             return true;

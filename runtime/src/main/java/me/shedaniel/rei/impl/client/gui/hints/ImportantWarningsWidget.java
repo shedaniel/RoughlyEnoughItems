@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.hints;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -118,7 +119,7 @@ public class ImportantWarningsWidget extends WidgetWithBounds {
     
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (this.visible && event.button() == 0 && buttonBounds.contains(event.x(), event.y())) {
+        if (this.visible && event.button() == InputConstants.MOUSE_BUTTON_LEFT && buttonBounds.contains(event.x(), event.y())) {
             dirty = false;
             this.visible = false;
             Widgets.produceClickSound();

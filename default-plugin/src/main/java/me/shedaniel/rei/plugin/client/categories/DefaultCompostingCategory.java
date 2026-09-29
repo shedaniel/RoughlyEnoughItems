@@ -47,7 +47,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.Compostable;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,6 +90,21 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
         };
     }
     
+    public static float getCompostChance(Item item) {
+        Compostable compostable = item.components().get(DataComponents.COMPOSTABLE);
+        if (compostable == null) return 0;
+        return switch (compostable.layers()) {
+            case ResolvableInt.Constant constant -> constant.value() > 0 ? 1 : 0;
+            case ResolvableInt.Reference reference -> {
+                if (reference.key().equals(ContextIntProviders.COMPOSTABLE_LOW)) yield 0.3f;
+                if (reference.key().equals(ContextIntProviders.COMPOSTABLE_LOW_MEDIUM)) yield 0.5f;
+                if (reference.key().equals(ContextIntProviders.COMPOSTABLE_MEDIUM)) yield 0.65f;
+                if (reference.key().equals(ContextIntProviders.COMPOSTABLE_MEDIUM_HIGH)) yield 0.85f;
+                yield 1;
+            }
+        };
+    }
+    
     @Override
     public List<Widget> setupDisplay(DefaultCompostingDisplay display, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
@@ -98,7 +117,7 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
                 EntryIngredient entryIngredient = stacks.size() > i ? stacks.get(i) : EntryIngredient.empty();
                 if (!entryIngredient.isEmpty() && entryIngredient.get(0).getType() == VanillaEntryTypes.ITEM) {
                     ItemStack firstStack = entryIngredient.get(0).castValue();
-                    float chance = ComposterBlock.COMPOSTABLES.getFloat(firstStack.getItem());
+                    float chance = getCompostChance(firstStack.getItem());
                     if (chance > 0.0f) {
                         entryIngredient = entryIngredient.map(stack -> stack.copy().tooltip(Component.translatable("text.rei.composting.chance", Mth.clamp(Mth.floor(chance * 100), 0, 100)).withStyle(ChatFormatting.YELLOW)));
                     }

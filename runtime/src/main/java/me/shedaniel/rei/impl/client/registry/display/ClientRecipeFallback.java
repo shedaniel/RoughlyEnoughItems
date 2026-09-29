@@ -31,10 +31,13 @@ import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import me.shedaniel.rei.impl.init.PlatformAdapter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
@@ -52,6 +55,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 /**
  * Synthesizes recipe displays from the client's own data packs when connected to a
@@ -268,11 +272,11 @@ public final class ClientRecipeFallback {
             // Parse the recipes directly. This produces a RecipeManager holding the same
             // RecipeDisplayEntry objects (with self-consistent RecipeDisplayIds) that a dedicated
             // server would send through the recipe book.
-            RecipeManager recipeManager = new RecipeManager(registryAccess);
-            recipeManager.reload(new PreparableReloadListener.SharedState(dataManager), Runnable::run,
-                    CompletableFuture::completedFuture, Runnable::run).join();
-            // reload() only parses recipes; the recipe-display index is built separately by
-            // finalizeRecipeLoading, exactly as the server does before sending the recipe book.
+            RegistryAccess.Frozen recipeRegistries = RegistryDataLoader.load(dataManager, registryAccess.listRegistries().toList(),
+                    RegistryDataLoader.RELOADABLE_REGISTRIES.stream().filter(data -> data.key() == Registries.RECIPE).toList(), Runnable::run).join();
+            RecipeManager recipeManager = new RecipeManager(HolderLookup.Provider.create(Stream.concat(registryAccess.listRegistries(), recipeRegistries.listRegistries())));
+            // The recipe-display index is built separately by finalizeRecipeLoading, exactly as
+            // the server does before sending the recipe book.
             recipeManager.finalizeRecipeLoading(enabledFeatures);
 
             recipeManager.getRecipes().forEach(holder ->

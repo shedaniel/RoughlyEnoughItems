@@ -23,17 +23,16 @@
 
 package me.shedaniel.rei.plugin.common.forge;
 
-import com.google.common.base.Predicates;
 import dev.architectury.event.CompoundEventResult;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.DefaultPlugin;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 public class DefaultPluginImpl extends DefaultPlugin {
@@ -42,16 +41,13 @@ public class DefaultPluginImpl extends DefaultPlugin {
         super.registerFluidSupport(support);
         support.register(stack -> {
             ItemStack itemStack = stack.getValue();
-            Optional<IFluidHandlerItem> handlerOptional = FluidUtil.getFluidHandler(itemStack);
-            if (handlerOptional.isPresent()) {
-                IFluidHandlerItem handler = handlerOptional.orElse(null);
-                if (handler.getTanks() > 0) {
-                    return CompoundEventResult.interruptTrue(IntStream.range(0, handler.getTanks())
-                            .mapToObj(handler::getFluidInTank)
-                            .filter(Predicates.not(FluidStack::isEmpty))
-                            .map(neoforge -> dev.architectury.fluid.FluidStack.create(neoforge.getFluid(), neoforge.getAmount()))
-                            .map(EntryStacks::of));
-                }
+            ResourceHandler<FluidResource> handler = ItemAccess.forStack(itemStack).getCapability(Capabilities.Fluid.ITEM);
+            if (handler != null && handler.size() > 0) {
+                return CompoundEventResult.interruptTrue(IntStream.range(0, handler.size())
+                        .filter(i -> handler.getAmountAsInt(i) > 0)
+                        .mapToObj(i -> handler.getResource(i).toStack(handler.getAmountAsInt(i)))
+                        .map(neoforge -> dev.architectury.fluid.FluidStack.create(neoforge.getFluid(), neoforge.getAmount()))
+                        .map(EntryStacks::of));
             }
             
             return CompoundEventResult.pass();

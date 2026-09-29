@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.screen;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.collect.Lists;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -218,7 +219,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         for (GuiEventListener entry : children())
             if (entry.mouseClicked(event, doubleClick)) {
                 setFocused(entry);
-                if (event.button() == 0)
+                if (event.button() == InputConstants.MOUSE_BUTTON_LEFT)
                     setDragging(true);
                 return true;
             }
@@ -339,7 +340,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
     
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(event.key(), event.scancode())) {
+        if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(event.key(), event.keycode())) {
             if (categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex++;
                 if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
@@ -348,7 +349,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 return true;
             }
             return false;
-        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesKey(event.key(), event.scancode())) {
+        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesKey(event.key(), event.keycode())) {
             if (categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex--;
                 if (selectedRecipeIndex < 0)

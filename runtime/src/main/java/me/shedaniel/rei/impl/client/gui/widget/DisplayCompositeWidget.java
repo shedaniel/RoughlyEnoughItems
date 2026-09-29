@@ -85,7 +85,7 @@ public class DisplayCompositeWidget extends DelegateWidgetWithBounds implements 
         }
         
         if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(mouse())) {
-            if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(event.key(), event.scancode())) {
+            if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(event.key(), event.keycode())) {
                 FavoriteEntry favoriteEntry = FavoriteEntryType.registry().get(FavoriteEntryType.DISPLAY)
                         .fromArgs(display.provideInternalDisplay())
                         .result()

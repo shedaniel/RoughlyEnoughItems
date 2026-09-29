@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.credits;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.collect.Lists;
 import dev.architectury.platform.Platform;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TextCreditsItem;
@@ -61,7 +62,7 @@ public class CreditsScreen extends me.shedaniel.rei.impl.client.gui.screen.REISc
     
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (event.key() == 256 && this.shouldCloseOnEsc()) {
+        if (event.key() == InputConstants.KEY_ESCAPE && this.shouldCloseOnEsc()) {
             openPrevious();
             return true;
         }

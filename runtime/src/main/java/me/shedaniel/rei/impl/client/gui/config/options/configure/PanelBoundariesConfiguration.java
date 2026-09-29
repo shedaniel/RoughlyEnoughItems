@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.config.options.configure;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingRectangle;
@@ -108,11 +109,11 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
                 @Override
                 public boolean keyPressed(KeyEvent event) {
                     if (horizontalUsePercentage) return super.keyPressed(event);
-                    boolean leftArrow = event.key() == 263;
+                    boolean leftArrow = event.key() == InputConstants.KEY_LEFT;
                     double newValue;
                     if (leftArrow) {
                         newValue = Mth.clamp((valueToLimit(value, 50) - 1) / 50.0, 0, 1);
-                    } else if (event.key() == 262) {
+                    } else if (event.key() == InputConstants.KEY_RIGHT) {
                         newValue = Mth.clamp((valueToLimit(value, 50) + 1) / 50.0, 0, 1);
                     } else {
                         return super.keyPressed(event);
@@ -170,11 +171,11 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
                 @Override
                 public boolean keyPressed(KeyEvent event) {
                     if (verticalUsePercentage) return super.keyPressed(event);
-                    boolean leftArrow = event.key() == 263;
+                    boolean leftArrow = event.key() == InputConstants.KEY_LEFT;
                     double newValue;
                     if (leftArrow) {
                         newValue = Mth.clamp((valueToLimit(value, 1000) - 1) / 1000.0, 0, 1);
-                    } else if (event.key() == 262) {
+                    } else if (event.key() == InputConstants.KEY_RIGHT) {
                         newValue = Mth.clamp((valueToLimit(value, 1000) + 1) / 1000.0, 0, 1);
                     } else {
                         return super.keyPressed(event);

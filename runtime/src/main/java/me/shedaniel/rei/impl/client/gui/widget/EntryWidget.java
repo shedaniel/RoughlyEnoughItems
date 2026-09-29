@@ -623,7 +623,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 
                 if (handler != null) {
                     AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
-                    TransferHandler.Context context = TransferHandler.Context.create(true, Minecraft.getInstance().hasShiftDown() || event.button() == 1, containerScreen, display);
+                    TransferHandler.Context context = TransferHandler.Context.create(true, Minecraft.getInstance().hasShiftDown() || event.button() == InputConstants.MOUSE_BUTTON_RIGHT, containerScreen, display);
                     TransferHandler.ApplicabilityResult applicabilityResult = handler.checkApplicable(context);
                     if (!applicabilityResult.isApplicable()) return false;
                     TransferHandler.Result transferResult;
@@ -648,9 +648,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             }
         }
         
-        if ((ConfigObject.getInstance().getRecipeKeybind().getType() != InputConstants.Type.MOUSE && event.button() == 0) || ConfigObject.getInstance().getRecipeKeybind().matchesMouse(event.button()))
+        if ((ConfigObject.getInstance().getRecipeKeybind().getType() != InputConstants.Type.MOUSE && event.button() == InputConstants.MOUSE_BUTTON_LEFT) || ConfigObject.getInstance().getRecipeKeybind().matchesMouse(event.button()))
             return ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).open();
-        else if ((ConfigObject.getInstance().getUsageKeybind().getType() != InputConstants.Type.MOUSE && event.button() == 1) || ConfigObject.getInstance().getUsageKeybind().matchesMouse(event.button()))
+        else if ((ConfigObject.getInstance().getUsageKeybind().getType() != InputConstants.Type.MOUSE && event.button() == InputConstants.MOUSE_BUTTON_RIGHT) || ConfigObject.getInstance().getUsageKeybind().matchesMouse(event.button()))
             return ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).open();
         
         return false;
@@ -690,7 +690,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         if (!interactable) return false;
         
         if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && !getCurrentEntry().isEmpty()) {
-            if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(event.key(), event.scancode())) {
+            if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(event.key(), event.keycode())) {
                 FavoriteEntry favoriteEntry = asFavoriteEntry();
                 if (favoriteEntry != null) {
                     if (reverseFavoritesAction()) {
@@ -702,9 +702,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 }
             }
         }
-        if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(event.key(), event.scancode()))
+        if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(event.key(), event.keycode()))
             return ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).open();
-        else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(event.key(), event.scancode()))
+        else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(event.key(), event.keycode()))
             return ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).open();
         return false;
     }

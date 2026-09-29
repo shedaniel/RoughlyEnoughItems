@@ -68,7 +68,7 @@ public class ScreenOverlayImplForge extends ScreenOverlayImpl {
         if (!itemStack.isEmpty()) {
             font = ClientHooks.getTooltipFont(itemStack, font);
         }
-        graphics.tooltip(font, components, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, tooltip.getTooltipStyle());
+        graphics.tooltip(font, components, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, tooltip.getTooltipStyle(), false);
         graphics.pose().popMatrix();
     }
 }

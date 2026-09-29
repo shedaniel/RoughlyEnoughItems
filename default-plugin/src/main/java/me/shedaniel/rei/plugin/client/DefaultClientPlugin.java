@@ -24,7 +24,6 @@
 package me.shedaniel.rei.plugin.client;
 
 import com.google.common.collect.*;
-import com.google.gson.internal.LinkedTreeMap;
 import dev.architectury.event.EventResult;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
@@ -85,19 +84,22 @@ import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.component.BlockTransformer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.BlockTransformers;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.display.FurnaceRecipeDisplay;
 import net.minecraft.world.item.crafting.display.RecipeDisplayId;
@@ -111,9 +113,16 @@ import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.enchantment.Repairable;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.blockpredicates.AllOfPredicate;
+import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
+import net.minecraft.world.level.levelgen.blockpredicates.MatchingBlockTagPredicate;
+import net.minecraft.world.level.levelgen.blockpredicates.MatchingBlocksPredicate;
+import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
+import net.minecraft.world.level.levelgen.feature.stateproviders.CopyPropertiesProvider;
+import net.minecraft.world.level.levelgen.feature.stateproviders.RuleBasedStateProvider;
+import net.minecraft.world.level.levelgen.feature.stateproviders.SimpleStateProvider;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import org.apache.commons.lang3.tuple.Pair;
@@ -268,15 +277,16 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         
         Set<Item> axes = Sets.newHashSet(), hoes = Sets.newHashSet(), shovels = Sets.newHashSet();
         EntryRegistry.getInstance().getEntryStacks().filter(stack -> stack.getValueType() == ItemStack.class).map(stack -> ((ItemStack) stack.getValue()).getItem()).forEach(item -> {
-            if (item instanceof AxeItem && axes.add(item)) {
+            Holder<BlockTransformer> transformer = item.components().get(DataComponents.BLOCK_TRANSFORMER);
+            if (transformer != null && transformer.is(BlockTransformers.AXE) && axes.add(item)) {
                 registry.addWorkstations(STRIPPING, EntryStacks.of(item));
                 registry.addWorkstations(WAX_SCRAPING, EntryStacks.of(item));
                 registry.addWorkstations(OXIDATION_SCRAPING, EntryStacks.of(item));
             }
-            if (item instanceof HoeItem && hoes.add(item)) {
+            if (transformer != null && transformer.is(BlockTransformers.HOE) && hoes.add(item)) {
                 registry.addWorkstations(TILLING, EntryStacks.of(item));
             }
-            if (item instanceof ShovelItem && shovels.add(item)) {
+            if (transformer != null && transformer.is(BlockTransformers.SHOVEL) && shovels.add(item)) {
                 registry.addWorkstations(PATHING, EntryStacks.of(item));
             }
         });
@@ -371,19 +381,16 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
 //        for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
 //            registry.add(new DefaultFuelDisplay(Collections.singletonList(EntryIngredients.of(entry.getKey())), Collections.emptyList(), entry.getValue()));
 //        }
-        if (ComposterBlock.COMPOSTABLES.isEmpty()) {
-            ComposterBlock.bootStrap();
-        }
-        Iterator<List<EntryIngredient>> iterator = Iterators.partition(ComposterBlock.COMPOSTABLES.object2FloatEntrySet().stream().sorted(Map.Entry.comparingByValue()).map(entry -> EntryIngredients.of(entry.getKey())).iterator(), 35);
+        Iterator<List<EntryIngredient>> iterator = Iterators.partition(BuiltInRegistries.ITEM.stream().filter(item -> DefaultCompostingCategory.getCompostChance(item) > 0).sorted(Comparator.comparing(DefaultCompostingCategory::getCompostChance)).map(EntryIngredients::of).iterator(), 35);
         while (iterator.hasNext()) {
             List<EntryIngredient> entries = iterator.next();
             registry.add(new DefaultCompostingDisplay(entries, Collections.singletonList(EntryIngredients.of(new ItemStack(Items.BONE_MEAL)))));
         }
-        DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> BuiltInRegistries.BLOCK.getKey(b.getKey()))).forEach(set -> {
+        getTransformedBlocks(BlockTransformers.AXE).entrySet().stream().sorted(Comparator.comparing(b -> BuiltInRegistries.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultStrippingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
         });
-        DummyShovelItem.getPathBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> BuiltInRegistries.BLOCK.getKey(b.getKey()))).forEach(set -> {
-            registry.add(new DefaultPathingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue().getBlock())));
+        getTransformedBlocks(BlockTransformers.SHOVEL).entrySet().stream().sorted(Comparator.comparing(b -> BuiltInRegistries.BLOCK.getKey(b.getKey()))).forEach(set -> {
+            registry.add(new DefaultPathingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
         });
         registry.add(new DefaultBeaconBaseDisplay(Collections.singletonList(EntryIngredients.ofItemTag(BlockTags.BEACON_BASE_BLOCKS)), Collections.emptyList()));
         registry.add(new DefaultBeaconPaymentDisplay(Collections.singletonList(EntryIngredients.ofItemTag(ItemTags.BEACON_PAYMENT_ITEMS)), Collections.emptyList()));
@@ -399,48 +406,6 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         WeatheringCopper.PREVIOUS_BY_BLOCK.get().entrySet().stream().sorted(Comparator.comparing(b -> BuiltInRegistries.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultOxidationScrapingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
         });
-        if (Platform.isFabric()) {
-            Set<Holder<Potion>> potions = Collections.newSetFromMap(new LinkedTreeMap<>(Comparator.comparing(Holder::getRegisteredName), false));
-            PotionBrewing brewing = Minecraft.getInstance().level.potionBrewing();
-            for (Ingredient container : brewing.containers) {
-                for (PotionBrewing.Mix<Potion> mix : brewing.potionMixes) {
-                    Holder<Potion> from = mix.from();
-                    Ingredient ingredient = mix.ingredient();
-                    Holder<Potion> to = mix.to();
-                    EntryIngredient base = EntryIngredients.ofIngredient(container)
-                            .map(stack -> {
-                                EntryStack<?> copied = stack.copy();
-                                copied.<ItemStack>castValue().set(DataComponents.POTION_CONTENTS, new PotionContents(from));
-                                return copied;
-                            });
-                    EntryIngredient output = EntryIngredients.ofIngredient(container)
-                            .map(stack -> {
-                                EntryStack<?> copied = stack.copy();
-                                copied.<ItemStack>castValue().set(DataComponents.POTION_CONTENTS, new PotionContents(to));
-                                return copied;
-                            });
-                    registerBrewingRecipe(base, EntryIngredients.ofIngredient(ingredient), output);
-                    potions.add(from);
-                    potions.add(to);
-                }
-            }
-            for (Holder<Potion> potion : potions) {
-                for (PotionBrewing.Mix<Item> mix : brewing.containerMixes) {
-                    Holder<Item> from = mix.from();
-                    Ingredient ingredient = mix.ingredient();
-                    Holder<Item> to = mix.to();
-                    ItemStack baseStack = new ItemStack(from);
-                    baseStack.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
-                    EntryIngredient base = EntryIngredients.of(baseStack);
-                    ItemStack output = new ItemStack(to);
-                    output.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
-                    registerBrewingRecipe(base, EntryIngredients.ofIngredient(ingredient), EntryIngredients.of(output));
-                }
-            }
-        } else {
-            registerForgePotions(registry, this);
-        }
-        
         for (Item item : BuiltInRegistries.ITEM) {
             ItemStack stack = item.getDefaultInstance();
             if (!stack.isDamageableItem()) continue;
@@ -499,10 +464,6 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         for (Registry<?> reg : BuiltInRegistries.REGISTRY) {
             reg.getTags().forEach(tagPair -> tagPair.unwrap().ifLeft(registry::add));
         }
-    }
-    
-    protected void registerForgePotions(DisplayRegistry registry, BuiltinClientPlugin clientPlugin) {
-        
     }
     
     @Override
@@ -565,23 +526,54 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         return -100;
     }
     
-    public static class DummyShovelItem extends ShovelItem {
-        public DummyShovelItem(ToolMaterial material, float damage, float speed, Properties properties) {
-            super(material, damage, speed, properties);
-        }
-        
-        public static Map<Block, BlockState> getPathBlocksMap() {
-            return FLATTENABLES;
-        }
+    private static Map<Block, Block> getTransformedBlocks(ResourceKey<BlockTransformer> key) {
+        Map<Block, Block> blocks = new LinkedHashMap<>();
+        BasicDisplay.registryAccess().lookupOrThrow(Registries.BLOCK_TRANSFORMER).get(key).ifPresent(holder -> {
+            for (BlockTransformer.BlockTransformData data : holder.value().transforms()) {
+                if (data.particle() != BlockTransformer.TransformParticle.NONE || !(data.blockStateProvider().value() instanceof RuleBasedStateProvider provider)) continue;
+                for (RuleBasedStateProvider.Rule rule : provider.rules()) {
+                    Block result = getResultBlock(rule.then().value());
+                    if (result == null) continue;
+                    for (Block block : getMatchedBlocks(rule.ifTrue())) {
+                        blocks.put(block, result);
+                    }
+                }
+            }
+        });
+        return blocks;
     }
     
-    public static class DummyAxeItem extends AxeItem {
-        public DummyAxeItem(ToolMaterial material, float damage, float speed, Properties properties) {
-            super(material, damage, speed, properties);
+    private static Block getResultBlock(BlockStateProvider provider) {
+        return switch (provider) {
+            case SimpleStateProvider simple -> simple.state().getBlock();
+            case CopyPropertiesProvider copy -> getResultBlock(copy.source().value());
+            default -> null;
+        };
+    }
+    
+    private static List<Block> getMatchedBlocks(BlockPredicate predicate) {
+        List<Block> blocks = new ArrayList<>();
+        switch (predicate) {
+            case MatchingBlocksPredicate matching when matching.offset.equals(Vec3i.ZERO) -> {
+                for (Holder<Block> block : matching.blocks) {
+                    blocks.add(block.value());
+                }
+            }
+            case MatchingBlockTagPredicate matching when matching.offset.equals(Vec3i.ZERO) ->
+                    BasicDisplay.registryAccess().lookupOrThrow(Registries.BLOCK).get(matching.tag).ifPresent(set -> {
+                        for (Holder<Block> block : set) {
+                            blocks.add(block.value());
+                        }
+                    });
+            case AllOfPredicate allOf -> {
+                for (BlockPredicate child : allOf.predicates) {
+                    blocks.addAll(getMatchedBlocks(child));
+                    if (!blocks.isEmpty()) break;
+                }
+            }
+            default -> {
+            }
         }
-        
-        public static Map<Block, Block> getStrippedBlocksMap() {
-            return STRIPPABLES;
-        }
+        return blocks;
     }
 }

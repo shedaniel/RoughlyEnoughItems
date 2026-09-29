@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueProvider;
@@ -268,7 +269,7 @@ public final class LabelWidget extends Label {
     
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() == 0 && isClickable() && containsMouse(event.x(), event.y())) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && isClickable() && containsMouse(event.x(), event.y())) {
             Widgets.produceClickSound();
             if (onClick != null)
                 onClick.accept(this);
@@ -281,7 +282,7 @@ public final class LabelWidget extends Label {
     public boolean keyPressed(KeyEvent event) {
         if (!isClickable() || !isFocusable() || !focused)
             return false;
-        if (event.key() != 257 && event.key() != 32 && event.key() != 335)
+        if (event.key() != InputConstants.KEY_RETURN && event.key() != InputConstants.KEY_SPACE && event.key() != InputConstants.KEY_NUMPADENTER)
             return false;
         Widgets.produceClickSound();
         if (onClick != null)

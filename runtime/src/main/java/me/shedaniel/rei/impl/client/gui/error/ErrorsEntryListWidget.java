@@ -23,6 +23,8 @@
 
 package me.shedaniel.rei.impl.client.gui.error;
 
+import com.mojang.blaze3d.Blaze3D;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.NativeImage;
 import me.shedaniel.clothconfig2.gui.widget.DynamicEntryListWidget;
 import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
@@ -345,7 +347,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         
         @Override
         public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-            if (event.button() == 0) {
+            if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 Style style = this.getTextAt(event.x(), event.y());
                 if (style != null && style.getClickEvent() != null) {
 
@@ -487,10 +489,10 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         
         @Override
         public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-            if (contains && event.button() == 0) {
+            if (contains && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 try {
-                    Util.getPlatform().openUri(new URI(link));
+                    Blaze3D.openUri(new URI(link));
                     return true;
                 } catch (URISyntaxException e) {
                     e.printStackTrace();

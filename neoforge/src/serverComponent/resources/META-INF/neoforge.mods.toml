@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[41,)"
 issueTrackerURL = "https://github.com/shedaniel/RoughlyEnoughItems/issues"
-logoFile = "icon.png"
+iconFile = "icon.png"
 authors = "shedaniel"
 license = "MIT"
 

@@ -61,8 +61,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import me.shedaniel.rei.api.common.util.Pair;
 import org.jetbrains.annotations.ApiStatus;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 
+import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.Objects;
 import java.util.OptionalDouble;
@@ -151,7 +152,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     }
     
     private void drawHint(GuiGraphics graphics, int mouseX, int mouseY) {
-        boolean mouseDown = GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) != 0;
+        boolean mouseDown = (SDLMouse.SDL_GetMouseState((FloatBuffer) null, (FloatBuffer) null) & SDLMouse.SDL_BUTTON_LMASK) != 0;
         boolean clicking = false;
         if (mouseDown != previouslyClicking) {
             previouslyClicking = mouseDown;
@@ -280,9 +281,9 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         boolean contains = containsMouse(event.x(), event.y());
-        if (isVisible() && contains && event.button() == 1)
+        if (isVisible() && contains && event.button() == InputConstants.MOUSE_BUTTON_RIGHT)
             setText("");
-        if (contains && event.button() == 0 && isMain && ConfigObject.getInstance().isInventoryHighlightingAllowed())
+        if (contains && event.button() == InputConstants.MOUSE_BUTTON_LEFT && isMain && ConfigObject.getInstance().isInventoryHighlightingAllowed())
             if (lastClickedDetails == null)
                 lastClickedDetails = new Pair<>(System.currentTimeMillis(), new Point(event.x(), event.y()));
             else if (System.currentTimeMillis() - lastClickedDetails.getFirst() > 1500)
@@ -300,11 +301,11 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     @Override
     public boolean keyPressed(KeyEvent event) {
         if (this.isVisible() && this.isFocused() && isMain)
-            if (event.key() == 257 || event.key() == 335) {
+            if (event.key() == InputConstants.KEY_RETURN || event.key() == InputConstants.KEY_NUMPADENTER) {
                 addToHistory(getText());
                 setFocused(false);
                 return true;
-            } else if (event.key() == 265) {
+            } else if (event.key() == InputConstants.KEY_UP) {
                 int i = history.indexOf(getText()) - 1;
                 if (i < -1 && getText().isEmpty())
                     i = history.size() - 1;
@@ -316,7 +317,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                     setText(history.get(i));
                     return true;
                 }
-            } else if (event.key() == 264) {
+            } else if (event.key() == InputConstants.KEY_DOWN) {
                 int i = history.indexOf(getText()) + 1;
                 if (i > 0) {
                     setText(i < history.size() ? history.get(i) : "");
@@ -338,7 +339,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public boolean charTyped(CharacterEvent event) {
-        if (isMain && System.currentTimeMillis() - keybindFocusTime < 1000 && keybindFocusKey != -1 && InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), keybindFocusKey)) {
+        if (isMain && System.currentTimeMillis() - keybindFocusTime < 1000 && keybindFocusKey != -1 && InputConstants.isKeyDown(keybindFocusKey)) {
             keybindFocusTime = -1;
             keybindFocusKey = -1;
             return true;

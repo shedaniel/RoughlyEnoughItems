@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -63,7 +64,7 @@ public abstract class DraggableWidget extends WidgetWithBounds {
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double mouseX2, double mouseY2) {
         Point mouse = PointHelper.ofMouse();
-        if (event.button() == 0) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             if (!dragged) {
                 if (getGrabBounds().contains(mouse)) {
                     startPoint = new Point(midPoint.x, midPoint.y);
@@ -88,7 +89,7 @@ public abstract class DraggableWidget extends WidgetWithBounds {
     
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (event.button() == 0)
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT)
             if (dragged) {
                 dragged = false;
                 onMouseReleaseMidPoint(getMidPoint());

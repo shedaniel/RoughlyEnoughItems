@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.screen.collapsible.selection;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
@@ -346,7 +347,7 @@ public class CustomCollapsibleEntrySelectionScreen extends me.shedaniel.rei.impl
                 return true;
             } else if (removeButton.mouseClicked(event, doubleClick)) {
                 return true;
-            } else if (event.button() == 0) {
+            } else if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                 if (!event.hasShiftDown()) {
                     this.points.clear();
                 }
@@ -360,7 +361,7 @@ public class CustomCollapsibleEntrySelectionScreen extends me.shedaniel.rei.impl
     
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (event.button() == 0 && !points.isEmpty()) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && !points.isEmpty()) {
             PointPair pair = this.points.get(points.size() - 1);
             if (pair.secondPoint() == null) {
                 this.points.set(points.size() - 1, new PointPair(pair.firstPoint(), new Point(event.x(), event.y() + scrolling.scrollAmount())));
