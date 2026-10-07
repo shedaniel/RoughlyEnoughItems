@@ -31,7 +31,11 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 public interface PlatformAdapter {
-    ServiceLoader<PlatformAdapter> LOADER = ServiceLoader.load(PlatformAdapter.class);
+    ServiceLoader<PlatformAdapter> LOADER = 
+        ServiceLoader.load(
+            PlatformAdapter.class,
+            PlatformAdapter.class.getClassLoader()
+        );
 
     static PlatformAdapter get() {
         return LOADER.findFirst().orElseThrow();
