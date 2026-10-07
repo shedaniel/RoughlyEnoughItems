@@ -185,7 +185,7 @@ public final class ClientRecipeFallback {
             ensureLoaded();
             return;
         }
-        registry.addFallbackRecipes(entries, serverProvidedIds);
+        registry.addFallbackRecipes(entries, Set.of());
     }
 
     @Nullable
