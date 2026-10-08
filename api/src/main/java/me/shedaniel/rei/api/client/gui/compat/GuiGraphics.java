@@ -100,7 +100,7 @@ public class GuiGraphics extends GuiGraphicsExtractor {
     public void withFreshScissorStack(Runnable runnable) {
         GuiGraphicsExtractor.ScissorStack previous = this.scissorStack;
         try {
-            this.scissorStack = new GuiGraphicsExtractor.ScissorStack(ScreenRectangle.empty());
+            this.scissorStack = new GuiGraphicsExtractor.ScissorStack(new ScreenRectangle(0, 0, this.guiWidth(), this.guiHeight()));
             runnable.run();
         } finally {
             this.scissorStack = previous;
