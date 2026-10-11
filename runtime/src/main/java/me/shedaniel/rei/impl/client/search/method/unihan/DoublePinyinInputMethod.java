@@ -43,7 +43,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 public class DoublePinyinInputMethod extends PinyinInputMethod {
-    private Converter converter = Converters.SOUGOU;
+    // Initialized by read() during the PinyinInputMethod constructor.
+    private Converter converter;
     
     public DoublePinyinInputMethod(UniHanManager manager) {
         super(manager);
