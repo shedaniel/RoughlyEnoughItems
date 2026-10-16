@@ -114,19 +114,26 @@ public class DefaultAnvilDisplay extends BasicDisplay {
     @ApiStatus.Internal
     @Environment(EnvType.CLIENT)
     public static Optional<Pair<ItemStack, Integer>> calculateOutput(ItemStack left, ItemStack right) {
-        try {
-            if (Minecraft.getInstance().player == null) return Optional.empty();
-            AnvilMenu menu = new AnvilMenu(0, new Inventory(Minecraft.getInstance().player, new EntityEquipment()));
-            menu.setItem(0, menu.incrementStateId(), left);
-            menu.setItem(1, menu.incrementStateId(), right);
-            ItemStack output = menu.getSlot(2).getItem().copy();
-            if (!output.isEmpty()) {
-                return Optional.of(Pair.of(output, menu.getCost()));
-            } else {
+        return Client.calculateOutput(left, right);
+    }
+
+    @Environment(EnvType.CLIENT)
+    private static class Client {
+        private static Optional<Pair<ItemStack, Integer>> calculateOutput(ItemStack left, ItemStack right) {
+            try {
+                if (Minecraft.getInstance().player == null) return Optional.empty();
+                AnvilMenu menu = new AnvilMenu(0, new Inventory(Minecraft.getInstance().player, new EntityEquipment()));
+                menu.setItem(0, menu.incrementStateId(), left);
+                menu.setItem(1, menu.incrementStateId(), right);
+                ItemStack output = menu.getSlot(2).getItem().copy();
+                if (!output.isEmpty()) {
+                    return Optional.of(Pair.of(output, menu.getCost()));
+                } else {
+                    return Optional.empty();
+                }
+            } catch (Throwable ignored) {
                 return Optional.empty();
             }
-        } catch (Throwable ignored) {
-            return Optional.empty();
         }
     }
 }

@@ -211,19 +211,6 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         return tags;
     }
     
-    @Environment(EnvType.CLIENT)
-    private List<Component> tryGetItemStackToolTip(EntryStack<ItemStack> entry, ItemStack value, TooltipContext context) {
-        if (!SEARCH_BLACKLISTED.contains(value.getItem()))
-            try {
-                return value.getTooltipLines(context.vanillaContext(), Minecraft.getInstance().player, context.getFlag());
-            } catch (Throwable e) {
-                if (context.isSearch()) throw e;
-                e.printStackTrace();
-                SEARCH_BLACKLISTED.add(value.getItem());
-            }
-        return Lists.newArrayList(asFormattedText(entry, value, context));
-    }
-    
     @Override
     public void fillCrashReport(CrashReport report, CrashReportCategory category, EntryStack<ItemStack> entry) {
         EntryDefinition.super.fillCrashReport(report, category, entry);
@@ -238,6 +225,18 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     public class ItemEntryRenderer implements EntryRenderer<ItemStack> {
         private static final float SCALE = 20.0F;
         public static final int ITEM_LIGHT = 0xf000f0;
+        
+        private List<Component> tryGetItemStackToolTip(EntryStack<ItemStack> entry, ItemStack value, TooltipContext context) {
+            if (!SEARCH_BLACKLISTED.contains(value.getItem()))
+                try {
+                    return value.getTooltipLines(context.vanillaContext(), Minecraft.getInstance().player, context.getFlag());
+                } catch (Throwable e) {
+                    if (context.isSearch()) throw e;
+                    e.printStackTrace();
+                    SEARCH_BLACKLISTED.add(value.getItem());
+                }
+            return Lists.newArrayList(asFormattedText(entry, value, context));
+        }
         
         @Override
         public void render(EntryStack<ItemStack> entry, GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
