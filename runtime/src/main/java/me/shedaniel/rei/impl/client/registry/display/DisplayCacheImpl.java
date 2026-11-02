@@ -43,14 +43,16 @@ public class DisplayCacheImpl implements DisplayCache {
     private final boolean cache;
     private Set<Display> displaysCached = new ReferenceOpenHashSet<>();
     private Set<Display> displaysNotCached = Collections.synchronizedSet(new ReferenceOpenHashSet<>());
-    private SetMultimap<EntryStack<?>, Display> displaysByInput;
-    private SetMultimap<EntryStack<?>, Display> displaysByOutput;
+    private volatile SetMultimap<EntryStack<?>, Display> displaysByInput;
+    private volatile SetMultimap<EntryStack<?>, Display> displaysByOutput;
     private boolean preprocessed = false;
     
     public DisplayCacheImpl(boolean init) {
         this.cache = init && ConfigObject.getInstance().doesCacheDisplayLookup();
-        this.displaysByInput = createSetMultimap();
-        this.displaysByOutput = createSetMultimap();
+        if (this.cache) {
+            this.displaysByInput = createSetMultimap();
+            this.displaysByOutput = createSetMultimap();
+        }
     }
     
     @Override
@@ -142,12 +144,26 @@ public class DisplayCacheImpl implements DisplayCache {
     
     @Override
     public Set<Display> getDisplaysByInput(EntryStack<?> stack) {
-        return this.displaysByInput.get(stack);
+        SetMultimap<EntryStack<?>, Display> index = this.displaysByInput;
+        if (index == null) index = this.inputIndex();
+        return index.get(stack);
     }
     
     @Override
     public Set<Display> getDisplaysByOutput(EntryStack<?> stack) {
-        return this.displaysByOutput.get(stack);
+        SetMultimap<EntryStack<?>, Display> index = this.displaysByOutput;
+        if (index == null) index = this.outputIndex();
+        return index.get(stack);
+    }
+
+    private synchronized SetMultimap<EntryStack<?>, Display> inputIndex() {
+        if (this.displaysByInput == null) this.displaysByInput = createSetMultimap();
+        return this.displaysByInput;
+    }
+
+    private synchronized SetMultimap<EntryStack<?>, Display> outputIndex() {
+        if (this.displaysByOutput == null) this.displaysByOutput = createSetMultimap();
+        return this.displaysByOutput;
     }
     
     private void process(Display display) {

@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.common.entry.type.collapsed;
 
+import it.unimi.dsi.fastutil.longs.LongSet;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
@@ -31,6 +32,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.collapsible.CollapsibleConfigManager;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
+import me.shedaniel.rei.optimization.GroupHashes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
@@ -155,15 +157,16 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
     }
     
     private static class ListMatcher implements Matcher {
-        private final Set<HashedEntryStackWrapper> stacks;
+        private final LongSet stacks;
         
         public ListMatcher(List<? extends HashedEntryStackWrapper> stacks) {
-            this.stacks = new HashSet<>(stacks);
+            this.stacks = GroupHashes.create(stacks);
         }
         
         @Override
         public boolean matches(EntryStack<?> stack, long hashExact) {
-            return this.stacks.contains(new HashedEntryStackWrapper(stack, hashExact));
+            Objects.requireNonNull(stack);
+            return this.stacks.contains(hashExact);
         }
     }
 }
