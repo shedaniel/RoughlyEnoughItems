@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.search.argument;
 
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -34,6 +33,7 @@ import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
+import me.shedaniel.rei.optimization.WarmupMaps;
 import me.shedaniel.rei.impl.client.util.ThreadCreator;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
@@ -131,7 +131,7 @@ public class ArgumentCache {
     
     private static Long2ObjectMap<Object> cacheStacks(ArgumentType<?, ?> argumentType, Long2ObjectMap<Object> cacheMap,
             Collection<HashedEntryStackWrapper> stacks) {
-        Long2ObjectMap<Object> out = new Long2ObjectArrayMap<>(stacks.size() + 1);
+        Long2ObjectMap<Object> out = WarmupMaps.create(stacks.size());
         for (HashedEntryStackWrapper stack : stacks) {
             if (cacheMap.get(stack.hashExact()) == null) {
                 try {

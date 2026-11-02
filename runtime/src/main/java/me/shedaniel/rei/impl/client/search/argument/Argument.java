@@ -25,11 +25,9 @@ package me.shedaniel.rei.impl.client.search.argument;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import me.shedaniel.rei.api.client.gui.config.SearchMode;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
-import me.shedaniel.rei.api.client.search.method.CharacterUnpackingInputMethod;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -41,6 +39,7 @@ import me.shedaniel.rei.impl.client.search.result.ArgumentApplicableResult;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
 import me.shedaniel.rei.impl.common.util.HNEntryStackWrapper;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
+import me.shedaniel.rei.optimization.SearchTerms;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -65,6 +64,7 @@ public class Argument<T, R> {
     private final boolean regular;
     private final int start;
     private final int end;
+    private volatile SearchTerms.Prepared preparedFilters;
     private static final Pattern SPLIT_PATTERN = Pattern.compile("(?:\"([^\"]*)\")|([^\\s]+)");
     
     public Argument(ArgumentType<T, R> argumentType, String text, boolean regular, T filterData, int start, int end, boolean lowercase) {
@@ -77,14 +77,19 @@ public class Argument<T, R> {
     }
     
     public static void resetCache(boolean cache) {
+        String preparedLanguage = null;
         Argument.cache = new ArgumentCache();
         CollapsedEntriesCache.reset();
         List<HashedEntryStackWrapper> stacks = CollectionUtils.map(((EntryRegistryImpl) EntryRegistry.getInstance()).getComplexList(),
                 HNEntryStackWrapper::normalize);
         if (cache) {
+            preparedLanguage = Minecraft.getInstance().options.languageCode;
             Argument.cache.prepareFilter(stacks, ArgumentTypesRegistry.ARGUMENT_TYPE_LIST, ArgumentCache.EXECUTOR_SERVICE);
         }
         CollapsedEntriesCache.getInstance().prepare(stacks);
+        if (cache) {
+            LAST_LANGUAGE.compareAndSet(null, preparedLanguage);
+        }
     }
     
     public static boolean hasCache() {
@@ -170,7 +175,7 @@ public class Argument<T, R> {
     public static boolean matches(EntryStack<?> stack, long hashExact, List<CompoundArgument> compoundArguments, InputMethod<?> inputMethod) {
         if (compoundArguments.isEmpty()) return true;
         String newLanguage = Minecraft.getInstance().options.languageCode;
-        if (!Objects.equals(LAST_LANGUAGE.getAndSet(newLanguage), newLanguage)) {
+        if (!Objects.equals(SearchTerms.getOrUpdateLanguage(LAST_LANGUAGE, newLanguage), newLanguage)) {
             resetCache(false);
         }
         
@@ -193,7 +198,7 @@ public class Argument<T, R> {
         ResultSinkImpl<T> sink = new ResultSinkImpl<>(inputMethod);
         
         for (Argument<?, ?> argument : alternativeArgument) {
-            sink.filters = inputMethod.expendFilter(argument.getText());
+            sink.filters = argument.expandedFilters(inputMethod);
             if (matches(argument.getArgument(), stack, hashExact, argument.filterData, sink) == argument.isRegular()) {
                 return true;
             }
@@ -213,6 +218,20 @@ public class Argument<T, R> {
         argumentType.matches(value == NO_CACHE ? null : (B) value, stack, (T) filterData, sink);
         return sink.matches;
     }
+
+    @SuppressWarnings("unchecked")
+    private <F> Iterable<F> expandedFilters(InputMethod<F> inputMethod) {
+        SearchTerms.Prepared prepared = this.preparedFilters;
+        if (prepared != null && prepared.owner() == inputMethod) {
+            return (Iterable<F>) prepared.values();
+        }
+        if (SearchTerms.stable(inputMethod)) {
+            prepared = new SearchTerms.Prepared(inputMethod, inputMethod.expendFilter(this.text));
+            this.preparedFilters = prepared;
+            return (Iterable<F>) prepared.values();
+        }
+        return inputMethod.expendFilter(this.text);
+    }
     
     private static class ResultSinkImpl<T> implements ArgumentType.ResultSink {
         private final InputMethod<T> inputMethod;
@@ -231,19 +250,7 @@ public class Argument<T, R> {
         @Override
         public boolean testString(String text) {
             if (matches) return true;
-            if (inputMethod instanceof CharacterUnpackingInputMethod im) {
-                for (T filter : filters) {
-                    if (InputMethodMatcher.contains(im, IntList.of(text.codePoints().toArray()), (IntList) filter)) {
-                        return matches = true;
-                    }
-                }
-            } else {
-                for (T filter : filters) {
-                    if (inputMethod.contains(text, filter)) {
-                        return matches = true;
-                    }
-                }
-            }
+            if (SearchTerms.contains(inputMethod, filters, text)) return matches = true;
             return false;
         }
     }

@@ -27,6 +27,7 @@ public class FormattingUtils {
     private FormattingUtils() {}
     
     public static String stripFormatting(String string) {
+        if (string.indexOf('§') < 0) return string;
         StringBuilder builder = new StringBuilder();
         boolean lastSpecial = false;
         for (char c : string.toCharArray()) {

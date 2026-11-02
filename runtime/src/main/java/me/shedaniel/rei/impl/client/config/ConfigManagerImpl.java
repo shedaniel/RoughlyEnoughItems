@@ -74,6 +74,7 @@ public class ConfigManagerImpl implements ConfigManager {
     private boolean craftableOnly = false;
     private final Gson gson = new GsonBuilder().create();
     private ConfigObjectImpl object;
+    private boolean loadListenerRegistered;
     
     public ConfigManagerImpl() {
         AutoConfig.register(ConfigObjectImpl.class, (definition, configClass) -> new JanksonConfigSerializer<>(definition, configClass, buildJankson(Jankson.builder())));
@@ -256,13 +257,19 @@ public class ConfigManagerImpl implements ConfigManager {
                 getConfig().getFilteringRules().add(type.createNew());
             }
         }
+        ensureLoadListener();
+        AutoConfig.getConfigHolder(ConfigObjectImpl.class).save();
+        FavoritesConfigManager.getInstance().saveConfig();
+        InternalLogger.getInstance().debug("Config saved");
+    }
+
+    private synchronized void ensureLoadListener() {
+        if (loadListenerRegistered) return;
         AutoConfig.getConfigHolder(ConfigObjectImpl.class).registerLoadListener((configHolder, configObject) -> {
             object = configObject;
             return InteractionResult.PASS;
         });
-        AutoConfig.getConfigHolder(ConfigObjectImpl.class).save();
-        FavoritesConfigManager.getInstance().saveConfig();
-        InternalLogger.getInstance().debug("Config saved");
+        loadListenerRegistered = true;
     }
     
     @Override
