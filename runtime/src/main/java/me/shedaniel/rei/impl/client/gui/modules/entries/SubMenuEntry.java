@@ -47,6 +47,8 @@ public class SubMenuEntry extends AbstractMenuEntry {
     protected List<FavoriteMenuEntry> entries;
     protected Menu parent;
     protected Menu childMenu;
+    private double lastMouseX;
+    private double lastMouseY;
     
     public SubMenuEntry(Component text) {
         this(text, Collections.emptyList());
@@ -91,8 +93,11 @@ public class SubMenuEntry extends AbstractMenuEntry {
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        this.lastMouseX = mouseX;
+        this.lastMouseY = mouseY;
+        boolean expanded = shouldExpand();
         renderBackground(graphics, getX(), getY(), getWidth(), getEntryHeight());
-        if (isSelected()) {
+        if (expanded) {
             if (!entries.isEmpty()) {
                 Menu menu = getChildMenu();
                 
@@ -123,35 +128,43 @@ public class SubMenuEntry extends AbstractMenuEntry {
         } else {
             this.childMenu = null;
         }
-        graphics.drawString(font, text, getX() + 2, getY() + 2, isSelected() ? 0xFFFFFFFF : 0xFF888888, false);
+        graphics.drawString(font, text, getX() + 2, getY() + 2, expanded ? 0xFFFFFFFF : 0xFF888888, false);
         if (!entries.isEmpty()) {
             graphics.blit(RenderPipelines.GUI_TEXTURED, InternalTextures.CHEST_GUI_TEXTURE, getX() + getWidth() - 15, getY() - 2, 0, 28, 18, 18, 256, 256);
         }
     }
     
     protected void renderBackground(GuiGraphics graphics, int x, int y, int width, int height) {
-        if (isSelected()) {
+        if (shouldExpand()) {
             graphics.fill(x, y, x + width, y + height, -12237499);
         }
+    }
+    
+    // Keep the child menu open while the cursor travels from this entry into it.
+    protected boolean shouldExpand() {
+        if (isSelected()) {
+            return true;
+        }
+        return childMenu != null && childMenu.containsMouse(lastMouseX, lastMouseY);
     }
     
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
         if (super.containsMouse(mouseX, mouseY))
             return true;
-        if (childMenu != null && !childMenu.children().isEmpty() && isSelected())
+        if (childMenu != null && !childMenu.children().isEmpty() && shouldExpand())
             return childMenu.containsMouse(mouseX, mouseY);
         return false;
     }
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
-        return childMenu != null && !childMenu.children().isEmpty() && isSelected() && childMenu.mouseScrolled(mouseX, mouseY, amountX, amountY);
+        return childMenu != null && !childMenu.children().isEmpty() && shouldExpand() && childMenu.mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
     
     @Override
     public List<? extends GuiEventListener> children() {
-        if (childMenu != null && !childMenu.children().isEmpty() && isSelected()) {
+        if (childMenu != null && !childMenu.children().isEmpty() && shouldExpand()) {
             return Collections.singletonList(childMenu);
         }
         return Collections.emptyList();
