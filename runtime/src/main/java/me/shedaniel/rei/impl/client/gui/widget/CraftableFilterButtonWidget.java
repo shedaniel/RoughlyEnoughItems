@@ -55,6 +55,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -64,6 +66,7 @@ import java.util.stream.Collectors;
 
 public class CraftableFilterButtonWidget {
     public static final UUID FILTER_MENU_UUID = UUID.fromString("2839e998-1679-4f9e-a257-37411d16f1e6");
+    private static ItemStack craftingTableIcon;
     
     public static Widget create(ScreenOverlayImpl overlay) {
         Rectangle bounds = getCraftableFilterBounds();
@@ -81,7 +84,18 @@ public class CraftableFilterButtonWidget {
                 })
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y))
                 .tooltipLineSupplier(button -> Component.translatable(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all"));
-        return filterButton;
+        Widget overlayWidget = Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
+            graphics.item(craftingTableIcon(), bounds.x + 2, bounds.y + 2);
+        });
+        return Widgets.concat(filterButton, overlayWidget);
+    }
+    
+    // Lazily created: create() runs during Minecraft's constructor, before item components are bound.
+    private static ItemStack craftingTableIcon() {
+        if (craftingTableIcon == null) {
+            craftingTableIcon = new ItemStack(Blocks.CRAFTING_TABLE);
+        }
+        return craftingTableIcon;
     }
     
     private static Collection<FavoriteMenuEntry> menuEntries(MenuAccess access) {
