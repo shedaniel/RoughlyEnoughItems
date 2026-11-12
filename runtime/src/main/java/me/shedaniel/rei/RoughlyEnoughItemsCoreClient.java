@@ -333,7 +333,7 @@ public class RoughlyEnoughItemsCoreClient {
     
     private void registerEvents() {
         Minecraft client = Minecraft.getInstance();
-        final Identifier recipeButtonTex = Identifier.withDefaultNamespace("textures/gui/recipe_button.png");
+        final Identifier recipeButtonTex = RecipeBookComponent.RECIPE_BUTTON_SPRITES.enabled();
         MutableLong endReload = new MutableLong(-1);
         PRE_UPDATE_RECIPES.register((recipeAccess, registryAccess) -> {
             reloadPlugins(null, ReloadStage.START, registryAccess);
