@@ -83,6 +83,25 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         private static void init(ItemEntryDefinition definition) {
             definition.renderer = definition.new ItemEntryRenderer();
         }
+
+        /**
+         * Holds the tooltip body so that the client-only {@code Minecraft.getInstance().player}
+         * reference stays out of {@link ItemEntryDefinition}'s own bytecode. Dedicated servers
+         * have no client classes at all: a client reference anywhere in this class would fail
+         * class verification on the server, and {@code DefaultRuntimePlugin#registerEntryTypes}
+         * constructs this class on both sides - leaving the entry type registry empty.
+         */
+        private static List<Component> tryGetItemStackToolTip(ItemEntryDefinition definition, EntryStack<ItemStack> entry, ItemStack value, TooltipContext context) {
+            if (!SEARCH_BLACKLISTED.contains(value.getItem()))
+                try {
+                    return value.getTooltipLines(context.vanillaContext(), Minecraft.getInstance().player, context.getFlag());
+                } catch (Throwable e) {
+                    if (context.isSearch()) throw e;
+                    e.printStackTrace();
+                    SEARCH_BLACKLISTED.add(value.getItem());
+                }
+            return Lists.newArrayList(definition.asFormattedText(entry, value, context));
+        }
     }
     
     @Override
@@ -213,15 +232,9 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     
     @Environment(EnvType.CLIENT)
     private List<Component> tryGetItemStackToolTip(EntryStack<ItemStack> entry, ItemStack value, TooltipContext context) {
-        if (!SEARCH_BLACKLISTED.contains(value.getItem()))
-            try {
-                return value.getTooltipLines(context.vanillaContext(), Minecraft.getInstance().player, context.getFlag());
-            } catch (Throwable e) {
-                if (context.isSearch()) throw e;
-                e.printStackTrace();
-                SEARCH_BLACKLISTED.add(value.getItem());
-            }
-        return Lists.newArrayList(asFormattedText(entry, value, context));
+        // The body lives in Client: keep client-only classes out of this class's bytecode,
+        // which is verified on dedicated servers where client classes do not exist.
+        return Client.tryGetItemStackToolTip(this, entry, value, context);
     }
     
     @Override

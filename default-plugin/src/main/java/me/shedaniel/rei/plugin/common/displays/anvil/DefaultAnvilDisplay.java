@@ -35,14 +35,10 @@ import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.*;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.EntityEquipment;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.ApiStatus;
@@ -114,19 +110,9 @@ public class DefaultAnvilDisplay extends BasicDisplay {
     @ApiStatus.Internal
     @Environment(EnvType.CLIENT)
     public static Optional<Pair<ItemStack, Integer>> calculateOutput(ItemStack left, ItemStack right) {
-        try {
-            if (Minecraft.getInstance().player == null) return Optional.empty();
-            AnvilMenu menu = new AnvilMenu(0, new Inventory(Minecraft.getInstance().player, new EntityEquipment()));
-            menu.setItem(0, menu.incrementStateId(), left);
-            menu.setItem(1, menu.incrementStateId(), right);
-            ItemStack output = menu.getSlot(2).getItem().copy();
-            if (!output.isEmpty()) {
-                return Optional.of(Pair.of(output, menu.getCost()));
-            } else {
-                return Optional.empty();
-            }
-        } catch (Throwable ignored) {
-            return Optional.empty();
-        }
+        // The body lives in DefaultAnvilDisplayClient: keep client-only classes out of this
+        // class's bytecode, which is verified on dedicated servers where client classes do
+        // not exist - otherwise the anvil display serializer fails to register server-side.
+        return DefaultAnvilDisplayClient.calculateOutput(left, right);
     }
 }
